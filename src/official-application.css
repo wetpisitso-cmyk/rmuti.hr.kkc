@@ -1,0 +1,51 @@
+
+/* Official A4 application form based on the applicant-supplied reference PDF */
+.official-application{font-family:"Sarabun",sans-serif!important;font-size:14px!important;line-height:1.55!important;color:#151e2e;padding:17mm 16mm!important}
+.official-heading{display:grid;grid-template-columns:minmax(0,1fr) 31mm;gap:10mm;align-items:start}
+.official-title{text-align:center;padding-left:25mm}
+.official-title h1{font-size:18px!important;line-height:1.4;margin:0 0 5px}
+.official-title h2{font-size:15px!important;margin:0 0 4px}
+.official-title p{margin:2px 0;font-size:13px}
+.official-photo-slot{width:31mm;height:40mm;border:1px solid #9da7b7;display:grid;place-items:center;text-align:center;color:#63758e;font-size:11px;overflow:hidden}
+.official-photo-slot img{width:100%;height:100%;object-fit:cover}
+.official-reference{border-bottom:2px solid #102d55;padding:9px 0 13px;margin-bottom:19px}
+.official-reference p{margin:3px 0;font-size:12px}
+.official-intro{text-indent:0;line-height:1.85}
+.official-section{margin-top:22px;break-inside:auto}
+.official-section h3{margin:0 0 9px;font-size:15px;font-weight:700;color:#172f50;break-after:avoid}
+.official-table{width:100%;border-collapse:collapse;border:1px solid #667386;table-layout:fixed}
+.official-table th,.official-table td{border:1px solid #84909f;padding:7px 9px;text-align:left;vertical-align:top;font-size:12px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.official-table thead th{background:#eef2f7;font-weight:700}
+.official-info-table th{width:37%;font-weight:600;background:#f8fafc}
+.official-work-table th:nth-child(1){width:25%}
+.official-work-table th:nth-child(2){width:45%}
+.official-work-table th:nth-child(3),.official-work-table th:nth-child(4){width:15%}
+.official-details{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:3px;line-height:1.65}
+.official-small{font-size:11px;color:#67768b}
+.official-documents ul{list-style:none;padding:0;margin:13px 0}
+.official-documents li{display:flex;gap:10px;align-items:flex-start;padding:3px 0;font-size:13px;break-inside:avoid}
+.official-check{font-weight:700;color:#102d55;min-width:16px}
+.official-signatures{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:28px;break-inside:avoid}
+.official-signatures>div{border:1px solid #d7e0eb;border-radius:8px;padding:15px 12px;min-width:0}
+.official-signatures h4{font-size:13px;margin:0 0 22px;font-weight:700}
+.official-signatures p{font-size:12px;margin:6px 0}
+.official-signature-line{white-space:nowrap}
+.official-declaration{border-top:1px solid #a7b5c6;padding-top:12px;margin-top:28px}
+.official-pending{padding:10px 12px;border:1px solid #e6ab77;background:#fff4ea;font-size:12px}
+.official-footer{font-size:10px!important;color:#637086!important;margin-top:20px!important;line-height:1.65}
+.official-footer div{margin-top:4px}
+@media(max-width:700px){.official-application{padding:18px!important;min-width:0}.official-title{padding-left:0}.official-heading{grid-template-columns:1fr 83px;gap:10px}.official-photo-slot{width:83px;height:105px}.official-signatures{grid-template-columns:1fr}.official-table th,.official-table td{font-size:10px;padding:5px}}
+@media print{
+  @page{size:A4;margin:12mm 13mm}
+  .print-container{width:100%!important;max-width:none!important}
+  .official-application{border:0!important;min-height:0!important;margin:0!important;padding:0!important;font-size:11pt!important;line-height:1.55!important}
+  .official-title h1{font-size:16pt!important}.official-title h2{font-size:13pt!important}
+  .official-heading{grid-template-columns:minmax(0,1fr) 30mm;gap:5mm}
+  .official-photo-slot{width:30mm;height:39mm}
+  .official-section{margin-top:13pt}
+  .official-table th,.official-table td{font-size:9.5pt!important;padding:5pt 6pt!important}
+  .official-signatures{grid-template-columns:1fr 1fr;gap:13pt}
+  .official-section h3{font-size:11pt!important}
+  .official-reference,.official-heading,.official-signatures{break-inside:avoid}
+  .official-application footer.official-footer{display:block!important}
+}
