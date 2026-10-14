@@ -152,6 +152,11 @@ export function StaffLayout() {
     <div className="staff-shell">
       <aside className={open ? "sidebar open" : "sidebar"}>
         <div className="sidebar-heading">
+          <div className="sidebar-campus-badge">
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="ตรามหาวิทยาลัย"
+              onError={(e) => { e.currentTarget.style.display = "none"; }} />
+            <div><strong>RMUTI KKC</strong><small>HUMAN RESOURCES</small></div>
+          </div>
           <span className="eyebrow">HR WORKSPACE</span>
           <h2>จัดการการรับสมัคร</h2>
           <small>

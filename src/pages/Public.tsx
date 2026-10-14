@@ -134,31 +134,24 @@ export function Home() {
               สมัครสมาชิก · กรอกข้อมูล · ติดตามผลได้ในที่เดียว
             </div>
           </div>
-          <div className="hero-panel">
-            <div className="hero-panel-icon">
-              <GraduationCap size={64} strokeWidth={1.3} />
-            </div>
-            <div className="eyebrow">YOUR NEXT CHAPTER</div>
-            <h2>
-              โอกาสใหม่
-              <br />
-              เริ่มต้นที่นี่
-            </h2>
-            <div className="hero-stats">
-              <div>
-                <strong>{numberTH(open.length)}</strong>
-                <small>ตำแหน่งเปิดรับ</small>
-              </div>
-              <div>
-                <strong>
-                  {numberTH(open.reduce((n, j) => n + j.vacancies, 0))}
-                </strong>
-                <small>อัตราที่เปิดรับ</small>
+          <div className="campus-visual">
+            <div className="campus-photo-frame">
+              <img
+                src={`${import.meta.env.BASE_URL}rmuti-building.webp`}
+                alt="อาคารมหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น"
+                loading="eager"
+                decoding="async"
+                onError={(e) => { e.currentTarget.style.display = "none"; }}
+              />
+              <div className="campus-photo-caption">
+                <span className="campus-photo-dot" />
+                <div><strong>RMUTI KHON KAEN</strong><small>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน</small></div>
               </div>
             </div>
-            <span className="hero-panel-bottom">
-              แผนกงานบริหารงานบุคคล <ArrowUp />
-            </span>
+            <div className="campus-floating-stats" aria-label="สถิติการเปิดรับสมัคร">
+              <div><BriefcaseBusiness size={19}/><span><strong>{numberTH(open.length)}</strong><small>ตำแหน่งเปิดรับ</small></span></div>
+              <div><Users size={19}/><span><strong>{numberTH(open.reduce((n, j) => n + j.vacancies, 0))}</strong><small>อัตราที่เปิดรับ</small></span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -286,9 +279,6 @@ export function Home() {
       </div>
     </>
   );
-}
-function ArrowUp() {
-  return <ArrowRight size={18} />;
 }
 export function JobDetail() {
   const { id } = useParams();

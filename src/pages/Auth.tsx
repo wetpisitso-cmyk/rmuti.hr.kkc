@@ -137,9 +137,11 @@ export default function AuthPage({
           <br />
           ได้ผ่านบัญชีของคุณ
         </p>
-        <div className="auth-decoration">
-          <LockKeyhole size={100} strokeWidth={0.8} />
+        <div className="auth-campus-image" aria-hidden="true">
+          <img src={`${import.meta.env.BASE_URL}rmuti-building.webp`} alt=""
+            loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} />
         </div>
+        <div className="auth-security-note"><LockKeyhole size={17} /> ระบบบัญชีสมาชิกสำหรับผู้สมัครและเจ้าหน้าที่</div>
       </aside>
       <section className="auth-box">
         <Link to="/" className="breadcrumb">
