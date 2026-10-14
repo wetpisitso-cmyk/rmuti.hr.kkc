@@ -37,3 +37,32 @@ export function validThaiID(id: string) {
   for (let i = 0; i < 12; i++) sum += Number(id[i]) * (13 - i);
   return (11 - (sum % 11)) % 10 === Number(id[12]);
 }
+
+/** Validate education data before sending it to Supabase.
+ * The application's graduation year uses the Buddhist Era (BE).
+ */
+export type EducationInput = {
+  degree: string;
+  major: string;
+  institution: string;
+  graduation_year?: string | number | null;
+  gpa?: string | number | null;
+};
+export function educationIssue(rows: EducationInput[]): string | null {
+  if (!rows.length) return "กรุณากรอกข้อมูลการศึกษาอย่างน้อยหนึ่งรายการ";
+  for (const [index, ed] of rows.entries()) {
+    const name = "รายการการศึกษาที่ " + (index + 1);
+    if (!ed.degree?.trim() || !ed.major?.trim() || !ed.institution?.trim()) {
+      return "กรุณากรอกวุฒิ สาขาวิชา และสถานศึกษาให้ครบ (" + name + ")";
+    }
+    const year = String(ed.graduation_year ?? "").trim();
+    if (year && (!/^\d{4}$/.test(year) || Number(year) < 2400 || Number(year) > 2800)) {
+      return "กรุณากรอกปีสำเร็จการศึกษาเป็น พ.ศ. ระหว่าง 2400–2800 (" + name + ")";
+    }
+    const gpa = String(ed.gpa ?? "").trim();
+    if (gpa && (!Number.isFinite(Number(gpa)) || Number(gpa) < 0 || Number(gpa) > 4)) {
+      return "กรุณากรอกเกรดเฉลี่ย GPA ระหว่าง 0.00–4.00 (" + name + ")";
+    }
+  }
+  return null;
+}
