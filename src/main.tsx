@@ -5,6 +5,7 @@ import App from "./App";
 import { AuthProvider } from "./hooks/useAuth";
 import { initializeRecovery } from "./lib/supabase";
 import "./styles.css";
+import "./premium-theme.css";
 class ErrorBoundary extends Component<
   { children: ReactNode },
   { failed: boolean }

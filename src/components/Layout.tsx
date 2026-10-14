@@ -62,6 +62,12 @@ export function Layout() {
   return (
     <>
       <header className="header">
+        <div className="university-topbar">
+          <div className="container university-topbar-inner">
+            <span>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน · วิทยาเขตขอนแก่น</span>
+            <span><strong>RMUTI KKC</strong> / HUMAN RESOURCES RECRUITMENT</span>
+          </div>
+        </div>
         <div className="container header-inner">
           <Brand />
           <button

@@ -162,6 +162,22 @@ export function Home() {
           </div>
         </div>
       </div>
+      <div className="home-feature-strip">
+        <div className="container home-feature-grid">
+          <div className="home-feature">
+            <span className="home-feature-icon"><Users size={22} /></span>
+            <div><h3>สมัครสมาชิกและยื่นใบสมัคร</h3><p>กรอกข้อมูลและแนบเอกสารผ่านระบบออนไลน์</p></div>
+          </div>
+          <div className="home-feature">
+            <span className="home-feature-icon"><FileText size={22} /></span>
+            <div><h3>ติดตามสถานะใบสมัคร</h3><p>ตรวจความคืบหน้าและเลขผู้สมัครจากบัญชีของคุณ</p></div>
+          </div>
+          <div className="home-feature">
+            <span className="home-feature-icon"><CalendarDays size={22} /></span>
+            <div><h3>ประกาศและผลคัดเลือก</h3><p>อ่านกำหนดการและผลประกาศจากมหาวิทยาลัย</p></div>
+          </div>
+        </div>
+      </div>
       <div className="container section" id="positions">
         <Title
           eyebrow="OPEN POSITIONS"
