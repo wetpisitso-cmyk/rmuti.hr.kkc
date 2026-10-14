@@ -152,7 +152,32 @@ export default function Review() {
       <State loading={q.isPending} error={q.error}>
         {a && d && (
           <>
-            <section className="panel">
+            <section className="review-overview panel no-print">
+              <div className="review-overview-top">
+                <div>
+                  <span className="eyebrow">APPLICATION REVIEW</span>
+                  <h2>{a.personal_data.prefix}{a.personal_data.first_name} {a.personal_data.last_name}</h2>
+                  <p>{a.application_number || "รอ Admin กำหนดเลขผู้สมัคร"}</p>
+                </div>
+                <div className="review-status-tags">
+                  <Badge status={a.status} />
+                  <Badge status={a.payment_status} payment />
+                </div>
+              </div>
+              <div className="review-metrics">
+                <div><span>เอกสารที่แนบ</span><strong>{d.documents.length}</strong><small>รายการ</small></div>
+                <div><span>ประวัติการศึกษา</span><strong>{d.education.length}</strong><small>รายการ</small></div>
+                <div><span>ประสบการณ์ทำงาน</span><strong>{d.experience.length}</strong><small>รายการ</small></div>
+                <div><span>เลขผู้สมัคร</span><strong>{a.application_number ? "ได้รับแล้ว" : "รอกำหนด"}</strong></div>
+              </div>
+              <nav className="review-jump-links" aria-label="ไปยังส่วนของการตรวจใบสมัคร">
+                <a href="#review-personal">ข้อมูลผู้สมัคร</a>
+                <a href="#review-documents">เอกสารแนบ</a>
+                <a href="#review-decision">ผลการตรวจ</a>
+                <a href="#review-notes">บันทึกเจ้าหน้าที่</a>
+              </nav>
+            </section>
+            <section className="panel" id="review-personal">
               <div className="flex gap-2">
                 <Badge status={a.status} />
                 <Badge status={a.payment_status} payment />
@@ -195,7 +220,7 @@ export default function Review() {
                 <Submit busy={busy}>ยืนยันออกเลขผู้สมัคร</Submit>
               </form>
             )}
-            <section className="panel">
+            <section className="panel" id="review-documents">
               <h2>ตรวจเอกสารแนบ</h2>
               {d.documents.map((doc) => (
                 <div className="document-row" key={doc.id}>
@@ -215,7 +240,7 @@ export default function Review() {
             </section>
             {auth.can("review") &&
               ["submitted", "under_review"].includes(a.status) && (
-                <form className="panel stack" onSubmit={submit}>
+                <form className="panel stack" id="review-decision" onSubmit={submit}>
                   <h2>ผลตรวจคุณสมบัติ</h2>
                   <Select
                     label="สถานะใหม่"
@@ -284,7 +309,7 @@ export default function Review() {
                 </section>
               ))}
             {auth.can("review") && (
-              <section className="panel">
+              <section className="panel" id="review-notes">
                 <h2>บันทึกภายในของเจ้าหน้าที่</h2>
                 <small className="muted">
                   ผู้สมัครไม่สามารถอ่านบันทึกส่วนนี้
