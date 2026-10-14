@@ -9,6 +9,7 @@ import {
   Clock3,
   FileWarning,
   CheckCircle2,
+  Trash2,
 } from "lucide-react";
 import { useCatalog } from "../../hooks/useCatalog";
 import { useDebounce } from "../../hooks/useDebounce";
@@ -25,6 +26,7 @@ import {
   Notice,
 } from "../../components/UI";
 import { statuses, type Filters } from "../../types/models";
+import { supabase } from "../../lib/supabase";
 import { ThaiDateField } from "../../components/ThaiDateField";
 
 const initial: Filters = {
@@ -48,6 +50,7 @@ export default function StaffDashboard({
     [page, setPage] = useState(0),
     [sort, setSort] = useState("created"),
     [exporting, setExporting] = useState(false),
+    [deletingId, setDeletingId] = useState<string | null>(null),
     [error, setError] = useState("");
   const search = useDebounce(filters.search);
   const applied = {
@@ -102,6 +105,30 @@ export default function StaffDashboard({
       setError(errorTH(e));
     } finally {
       setExporting(false);
+    }
+  };
+  const deleteApplication = async (id: string, number: string | null) => {
+    if (a.role !== "admin") return;
+    if (!number) { setError("ใบสมัครต้องมีเลขผู้สมัครก่อนจึงจะลบได้"); return; }
+    const typed = window.prompt("ลบใบสมัครถาวร: พิมพ์เลขใบสมัครเพื่อยืนยัน\n" + number);
+    if (typed === null) return;
+    if (typed.trim() !== number) { setError("เลขยืนยันไม่ตรงกับใบสมัคร"); return; }
+    if (!window.confirm("ยืนยันลบใบสมัคร " + number + " และข้อมูล/เอกสารที่เกี่ยวข้องอย่างถาวร?")) return;
+    setDeletingId(id);
+    setError("");
+    try {
+      await rpc("admin_delete_application", { p_id: id, p_confirm_number: number });
+      await Promise.all([
+        q.refetch(), dashboard.refetch(),
+      ]);
+      const { data: cleanup, error: cleanupError } = await supabase.functions.invoke("admin-cleanup-files", { body: {} });
+      if (cleanupError || Number(cleanup?.failed || 0) > 0) {
+        setError("ลบใบสมัครเรียบร้อยแล้ว แต่ไฟล์แนบบางรายการยังรอการลบจาก Storage โปรดติดต่อผู้ดูแลระบบ");
+      }
+    } catch (e) {
+      setError(errorTH(e));
+    } finally {
+      setDeletingId(null);
     }
   };
   const counts = dashboard.data?.statuses || {};
@@ -304,12 +331,24 @@ export default function StaffDashboard({
                       <Badge status={r.payment_status} payment />
                     </td>
                     <td>
-                      <Link
-                        className="btn small outline"
-                        to={`/staff/applications/${r.id}`}
-                      >
-                        ตรวจใบสมัคร <ArrowRight size={14} />
-                      </Link>
+                      <div className="flex gap-2 flex-wrap">
+                        <Link
+                          className="btn small outline"
+                          to={`/staff/applications/${r.id}`}
+                        >
+                          ตรวจใบสมัคร <ArrowRight size={14} />
+                        </Link>
+                        {a.role === "admin" && r.application_number && (
+                          <button
+                            type="button"
+                            className="btn small danger"
+                            disabled={deletingId !== null}
+                            onClick={() => void deleteApplication(r.id, r.application_number)}
+                          >
+                            <Trash2 size={14} /> {deletingId === r.id ? "กำลังลบ…" : "ลบ"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
