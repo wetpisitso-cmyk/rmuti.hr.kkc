@@ -17,7 +17,7 @@ import {
 import { errorTH } from "../lib/errors";
 import { dateTH } from "../lib/format";
 import { ThaiDateField } from "../components/ThaiDateField";
-import { personalSchema, validThaiID } from "../validation/forms";
+import { personalSchema, validThaiID, educationIssue } from "../validation/forms";
 import type { Personal, Education, Experience } from "../types/models";
 const emptyEducation = (): Education => ({
   degree: "",
@@ -95,6 +95,8 @@ export default function ApplicationWizard() {
   const documents = q.data?.documents || [];
   const save = async () => {
     if (!selected) throw new Error("กรุณาเลือกตำแหน่ง");
+    const educationError = educationIssue(education);
+    if (educationError) throw new Error(educationError);
     const newId = await saveDraft(
       appId,
       selected,
@@ -131,12 +133,10 @@ export default function ApplicationWizard() {
             !validThaiID(personal.national_id || "")))
       )
         throw new Error("กรุณากรอกข้อมูลส่วนตัวให้ครบและถูกต้อง");
-      if (
-        step === 1 &&
-        (!education.length ||
-          education.some((e) => !e.degree || !e.major || !e.institution))
-      )
-        throw new Error("กรุณากรอกข้อมูลการศึกษาให้ครบ");
+      if (step === 1) {
+        const issue = educationIssue(education);
+        if (issue) throw new Error(issue);
+      }
       if (step === 2) await save();
       if (
         step === 3 &&
