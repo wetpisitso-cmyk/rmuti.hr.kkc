@@ -11,6 +11,7 @@ import { PreviewButton } from "../../components/DocumentUpload";
 import {
   State,
   Title,
+  Field,
   Notice,
   Badge,
   Textarea,
@@ -42,7 +43,8 @@ export default function Review() {
     [error, setError] = useState(""),
     [success, setSuccess] = useState(""),
     [next, setNext] = useState("under_review"),
-    [deadline, setDeadline] = useState("");
+    [deadline, setDeadline] = useState(""),
+    [assignedNumber, setAssignedNumber] = useState("");
   const d = q.data,
     a = d?.application;
   const actualNext =
@@ -78,6 +80,19 @@ export default function Review() {
     } finally {
       setBusy(false);
     }
+  };
+  const assignNumber = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (auth.role !== "admin" || !a || a.application_number) return;
+    setBusy(true);
+    setError("");
+    try {
+      await rpc("admin_assign_application_number", { p_id: id, p_number: assignedNumber.trim() });
+      await refresh();
+      await qc.invalidateQueries({ queryKey: ["my-applications"] });
+      setSuccess("กำหนดเลขผู้สมัครเรียบร้อยแล้ว ผู้สมัครสามารถเห็นเลขได้ทันที");
+    } catch (e) { setError(errorTH(e)); }
+    finally { setBusy(false); }
   };
   const note = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -125,7 +140,7 @@ export default function Review() {
     <>
       <Title
         title="ตรวจใบสมัคร"
-        description={a?.application_number || "แบบร่าง"}
+        description={a?.application_number || (a?.submitted_at ? "รอ Admin กำหนดเลขผู้สมัคร" : "แบบร่าง")}
         action={
           <Link className="btn outline" to={`/application/${id}`}>
             เปิดข้อมูลและใบสมัคร A4
@@ -169,6 +184,17 @@ export default function Review() {
                 </p>
               ))}
             </section>
+            {auth.role === "admin" && a.submitted_at && !a.application_number && (
+              <form className="panel stack" onSubmit={assignNumber}>
+                <h2>ออกเลขผู้สมัครโดย Admin</h2>
+                <Notice>ตรวจเอกสารและข้อมูลก่อนออกเลขผู้สมัคร ระบบจะไม่สร้างเลขให้อัตโนมัติ</Notice>
+                <Field label="เลขผู้สมัคร (กรอกเอง)" value={assignedNumber}
+                  onChange={e => setAssignedNumber(e.target.value.toUpperCase())}
+                  placeholder={"KKC-" + (a.job_positions?.recruitment_rounds?.year_be || "2569") + "-000001"}
+                  required pattern="KKC-[0-9]{4}-[0-9]{6,}" maxLength={40} />
+                <Submit busy={busy}>ยืนยันออกเลขผู้สมัคร</Submit>
+              </form>
+            )}
             <section className="panel">
               <h2>ตรวจเอกสารแนบ</h2>
               {d.documents.map((doc) => (
