@@ -18,6 +18,7 @@ import {
   printPage,
 } from "../lib/format";
 import { errorTH } from "../lib/errors";
+import { ThaiDateField } from "../components/ThaiDateField";
 import {
   Badge,
   Field,
@@ -40,7 +41,8 @@ export default function ApplicationView() {
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [success, setSuccess] = useState(""),
-    [withdraw, setWithdraw] = useState(false);
+    [withdraw, setWithdraw] = useState(false),
+    [paidAt, setPaidAt] = useState(() => bangkokInput(new Date().toISOString()));
   const pay = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = Object.fromEntries(new FormData(e.currentTarget));
@@ -301,13 +303,7 @@ export default function ApplicationView() {
                           required
                           step="0.01"
                         />
-                        <Field
-                          label="วันเวลาชำระ (ค.ศ. เวลาไทย)"
-                          type="datetime-local"
-                          name="paid_at"
-                          defaultValue={bangkokInput(new Date().toISOString())}
-                          required
-                        />
+                        <ThaiDateField label="วันเวลาชำระ (พ.ศ. เวลาไทย)" withTime name="paid_at" value={paidAt} onChange={setPaidAt} required />
                         <Field
                           label="เลขอ้างอิง (ถ้ามี)"
                           name="reference"

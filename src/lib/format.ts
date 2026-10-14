@@ -1,6 +1,6 @@
 export const dateTH = (s?: string | null, time = false) =>
   s
-    ? new Intl.DateTimeFormat("th-TH", {
+    ? new Intl.DateTimeFormat("th-TH-u-ca-buddhist", {
         dateStyle: "medium",
         ...(time ? { timeStyle: "short" as const } : {}),
         timeZone: "Asia/Bangkok",

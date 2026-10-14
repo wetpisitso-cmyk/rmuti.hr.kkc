@@ -15,6 +15,7 @@ import {
   Submit,
 } from "../../components/UI";
 import type { DocRequirement } from "../../types/models";
+import { ThaiDateField } from "../../components/ThaiDateField";
 type Table =
   | "departments"
   | "recruitment_rounds"
@@ -83,13 +84,13 @@ export default function Catalog({ table }: { table: Table }) {
       },
       {
         key: "opens_at",
-        label: "วันเวลาเปิดรับ (ค.ศ. เวลาไทย)",
+        label: "วันเวลาเปิดรับ (พ.ศ. เวลาไทย)",
         type: "datetime-local",
         required: true,
       },
       {
         key: "closes_at",
-        label: "วันเวลาปิดรับ (ค.ศ. เวลาไทย)",
+        label: "วันเวลาปิดรับ (พ.ศ. เวลาไทย)",
         type: "datetime-local",
         required: true,
       },
@@ -194,7 +195,7 @@ export default function Catalog({ table }: { table: Table }) {
       { key: "title", label: "ชื่อการสอบ", required: true },
       {
         key: "exam_at",
-        label: "วันเวลาสอบ (ค.ศ. เวลาไทย)",
+        label: "วันเวลาสอบ (พ.ศ. เวลาไทย)",
         type: "datetime-local",
         required: true,
       },
@@ -292,6 +293,8 @@ export default function Catalog({ table }: { table: Table }) {
                   />
                   {f.label}
                 </label>
+              ) : f.type === "datetime-local" ? (
+                <ThaiDateField key={f.key} label={f.label} withTime required={f.required} value={data[f.key] || ""} onChange={next=>setData({...data,[f.key]:next})}/>
               ) : f.type === "textarea" ? (
                 <div className="col-span-full" key={f.key}>
                   <Textarea

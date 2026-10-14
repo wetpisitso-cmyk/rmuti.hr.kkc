@@ -16,6 +16,7 @@ import {
 } from "../components/UI";
 import { errorTH } from "../lib/errors";
 import { dateTH } from "../lib/format";
+import { ThaiDateField } from "../components/ThaiDateField";
 import { personalSchema, validThaiID } from "../validation/forms";
 import type { Personal, Education, Experience } from "../types/models";
 const emptyEducation = (): Education => ({
@@ -211,11 +212,7 @@ export default function ApplicationWizard() {
                       <option key={p}>{p}</option>
                     ))}
                   </Select>
-                  <Field
-                    label="วันเกิด (ค.ศ.)"
-                    type="date"
-                    value={personal.birth_date || ""}
-                    onChange={(e) => update("birth_date", e.target.value)}
+                  <ThaiDateField label="วันเกิด (พ.ศ.)" value={personal.birth_date || ""} onChange={next=>update("birth_date",next)}
                     required
                   />
                   <Field
@@ -359,22 +356,12 @@ export default function ApplicationWizard() {
                         {[
                           ["employer", "หน่วยงาน / บริษัท"],
                           ["position", "ตำแหน่ง"],
-                          ["start_date", "เริ่มงาน (ค.ศ.)"],
-                          ["end_date", "สิ้นสุด (ค.ศ.)"],
-                        ].map(([k, l]) => (
-                          <Field
-                            key={k}
-                            label={l}
-                            value={ex[k as keyof Experience]}
-                            type={k.endsWith("date") ? "date" : "text"}
-                            onChange={(e) =>
-                              setExperience(
-                                experience.map((v, x) =>
-                                  x === i ? { ...v, [k]: e.target.value } : v,
-                                ),
-                              )
-                            }
-                          />
+                          ["start_date", "เริ่มงาน (พ.ศ.)"],
+                          ["end_date", "สิ้นสุด (พ.ศ.)"],
+                        ].map(([k, l]) => k.endsWith("date") ? (
+                          <ThaiDateField key={k} label={l} value={ex[k as keyof Experience]} onChange={next=>setExperience(experience.map((v,x)=>x===i?{...v,[k]:next}:v))}/>
+                        ) : (
+                          <Field key={k} label={l} value={ex[k as keyof Experience]} onChange={e=>setExperience(experience.map((v,x)=>x===i?{...v,[k]:e.target.value}:v))}/>
                         ))}
                         <div className="col-span-full">
                           <Textarea
