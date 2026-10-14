@@ -28,3 +28,26 @@
 @media(max-width:800px){.hero-inner{grid-template-columns:1fr}.campus-visual{max-width:590px;width:100%;margin:auto;padding:0 12px 40px}.campus-photo-frame{aspect-ratio:1.65}.campus-floating-stats{right:4px}}
 @media(max-width:540px){.campus-visual{padding:0 5px 37px}.campus-photo-frame{aspect-ratio:1.25;border-radius:18px}.campus-floating-stats{right:1px;left:1px;bottom:0;justify-content:space-around;padding:12px}.campus-photo-caption{bottom:58px;left:12px}.campus-photo-caption strong{font-size:11px}.campus-photo-caption small{font-size:9px}}
 @media print{.campus-floating-stats,.campus-visual{display:none!important}}
+
+/* Application review layout inspired by the supplied HR portal example */
+.review-overview{padding:25px 28px!important;background:linear-gradient(135deg,#fff,#f7faff)!important;border:1px solid #e0e9f3!important}
+.review-overview-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.review-overview-top h2{color:#102d55;font-size:21px;margin:4px 0}
+.review-overview-top p{color:#64748b;font-size:13px}
+.review-status-tags{display:flex;gap:8px;flex-wrap:wrap}
+.review-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
+.review-metrics>div{border-radius:14px;background:#fff;border:1px solid #e5ebf4;padding:14px 17px;min-width:0}
+.review-metrics span,.review-metrics small{display:block;font-size:11px;color:#62758e}
+.review-metrics strong{display:block;font-size:20px;color:#173d70;margin:3px 0;overflow-wrap:anywhere}
+.review-metrics>div:last-child{background:#fff1e6;border-color:#f7d9c3}
+.review-metrics>div:last-child strong{color:#d56a21;font-size:16px}
+.review-jump-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.review-jump-links a{padding:9px 13px;font-size:12px;font-weight:700;background:#edf3fb;color:#274d7b;border-radius:9px}
+.review-jump-links a:hover{background:#ffead8;color:#bc5511}
+#review-personal,#review-documents,#review-decision,#review-notes{scroll-margin-top:120px}
+#review-documents .document-row{padding:18px 15px;border:1px solid #e7edf5;border-radius:12px;margin-top:10px;background:#fcfdff}
+#review-documents .document-row strong{font-size:13px}
+#review-decision{border:1px solid #f8bd88;background:linear-gradient(180deg,#fffaf5,#fff)}
+#review-decision h2{color:#ac4e12}
+@media(max-width:780px){.review-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.review-overview{padding:18px!important}}
+@media(max-width:420px){.review-metrics>div{padding:11px}.review-metrics strong{font-size:17px}.review-jump-links a{font-size:11px}}
