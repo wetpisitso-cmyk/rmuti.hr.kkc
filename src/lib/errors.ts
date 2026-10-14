@@ -3,6 +3,11 @@ const errors: Record<string, string> = {
   CONFIRMATION_MISMATCH: "เลขใบสมัครที่ยืนยันไม่ตรงกัน",
   APPLICATION_NOT_FOUND: "ไม่พบใบสมัครนี้ อาจถูกลบไปแล้ว",
   FORBIDDEN: "คุณไม่มีสิทธิ์ทำรายการนี้",
+  APPLICATION_NUMBER_REQUIRED: "ต้องกำหนดเลขผู้สมัครก่อนอนุมัติผ่านคุณสมบัติ",
+  APPLICATION_NUMBER_ALREADY_ASSIGNED: "ใบสมัครนี้ได้รับเลขแล้ว",
+  DUPLICATE_APPLICATION_NUMBER: "เลขผู้สมัครนี้มีผู้ใช้แล้ว",
+  INVALID_APPLICATION_NUMBER: "รูปแบบเลขผิดหรือปีไม่ตรงกับรอบ",
+  APPLICATION_NOT_READY: "ใบสมัครยังไม่พร้อมออกเลข",
   ROUND_CLOSED: "ยังไม่เปิดรับสมัครหรือหมดเวลารับสมัครแล้ว",
   APPLICATION_LOCKED: "ใบสมัครนี้ถูกล็อกหรือหมดเวลาแก้ไขแล้ว",
   DUPLICATE_APPLICATION:
