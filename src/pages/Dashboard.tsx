@@ -115,7 +115,7 @@ export default function Dashboard() {
                 </div>
                 <h3>{x.job_positions?.title || x.snapshot?.job.title}</h3>
                 <p>
-                  {x.application_number || "ยังไม่ได้ส่งใบสมัคร"} · บันทึกล่าสุด{" "}
+                  {x.application_number || (x.submitted_at ? "รอเจ้าหน้าที่ออกเลขผู้สมัคร" : "ยังไม่ได้ส่งใบสมัคร")} · บันทึกล่าสุด{" "}
                   {dateTH(x.updated_at, true)}
                 </p>
                 {x.public_message && (

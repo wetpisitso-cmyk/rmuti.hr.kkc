@@ -95,7 +95,7 @@ export default function ApplicationView() {
         {a && j && (
           <>
             <Title
-              eyebrow={a.application_number || "DRAFT APPLICATION"}
+              eyebrow={a.application_number || (a.submitted_at ? "รอเจ้าหน้าที่ออกเลขผู้สมัคร" : "แบบร่าง")}
               title={j.title}
               description={j.departments?.name}
               action={
@@ -136,9 +136,11 @@ export default function ApplicationView() {
                     <Badge status={a.status} />
                     <Badge status={a.payment_status} payment />
                   </div>
-                  {a.application_number && (
+                  {a.application_number ? (
                     <h2 className="mt-4">เลขผู้สมัคร {a.application_number}</h2>
-                  )}
+                  ) : a.submitted_at ? (
+                    <Notice>ได้รับใบสมัครแล้ว อยู่ระหว่างรอเจ้าหน้าที่ตรวจสอบและกำหนดเลขผู้สมัคร</Notice>
+                  ) : null}
                   {a.public_message && (
                     <Notice>
                       {a.public_message}
@@ -433,7 +435,7 @@ export function PrintApplication({ exam = false }: { exam?: boolean }) {
               <h2>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน</h2>
               <h3>วิทยาเขตขอนแก่น</h3>
               <h1>{exam ? "บัตรประจำตัวสอบ" : "ใบสมัครบุคลากรออนไลน์"}</h1>
-              <p>เลขผู้สมัคร {a?.application_number}</p>
+              <p>{a?.application_number ? "เลขผู้สมัคร " + a.application_number : "รอเจ้าหน้าที่ออกเลขผู้สมัคร"}</p>
             </header>
             {photo && (
               <img

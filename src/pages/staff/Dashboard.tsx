@@ -315,7 +315,7 @@ export default function StaffDashboard({
                 {q.data?.rows.map((r) => (
                   <tr key={r.id}>
                     <td>
-                      <strong>{r.application_number || "แบบร่าง"}</strong>
+                      <strong>{r.application_number || (r.submitted_at ? "รอออกเลขผู้สมัคร" : "แบบร่าง")}</strong>
                       <small>
                         {r.personal_data.first_name} {r.personal_data.last_name}
                       </small>
