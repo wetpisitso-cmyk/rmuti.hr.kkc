@@ -1,0 +1,30 @@
+
+/* Recruitment V2 – campus photography and a calm navy/orange HR console */
+.hero-inner{grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);gap:58px;min-height:555px}
+.campus-visual{position:relative;isolation:isolate;padding:17px 14px 35px 15px;min-width:0}
+.campus-visual:before{content:"";position:absolute;inset:0 0 45px 45px;border:1px solid rgba(244,119,33,.65);border-radius:30px;transform:rotate(4deg);z-index:-1}
+.campus-photo-frame{position:relative;aspect-ratio:1.28;overflow:hidden;border-radius:27px;background:linear-gradient(145deg,#305b8e,#0a284d);box-shadow:0 28px 60px rgba(0,14,36,.34);border:5px solid rgba(255,255,255,.13)}
+.campus-photo-frame>img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.campus-photo-frame:after{content:"";position:absolute;inset:30% 0 0;background:linear-gradient(transparent,rgba(5,20,44,.76));pointer-events:none}
+.campus-photo-caption{position:absolute;bottom:21px;left:22px;right:14px;display:flex;align-items:center;gap:12px;color:white;z-index:1}
+.campus-photo-caption strong{font-size:13px;letter-spacing:.12em;display:block}
+.campus-photo-caption small{display:block;font-size:11px;color:#e5edf9;margin-top:4px}
+.campus-photo-dot{width:12px;height:12px;border-radius:50%;background:#ff913e;box-shadow:0 0 0 6px rgba(244,119,33,.23)}
+.campus-floating-stats{position:absolute;right:-10px;bottom:2px;background:#fff;color:#183c68;border:1px solid #e6edf7;display:flex;gap:20px;box-shadow:0 18px 35px rgba(0,19,45,.19);border-radius:18px;padding:17px 21px}
+.campus-floating-stats>div{display:flex;align-items:center;gap:9px}
+.campus-floating-stats>div+div{border-left:1px solid #e2eaf4;padding-left:19px}
+.campus-floating-stats svg{color:#f47721}
+.campus-floating-stats strong{display:block;font-size:23px;line-height:1.2;font-weight:800}
+.campus-floating-stats small{display:block;color:#74869d;font-size:10px;white-space:nowrap}
+.auth-campus-image{position:relative;margin:34px -10px 8px;aspect-ratio:1.45;border-radius:20px;overflow:hidden;background:#18436e;border:3px solid rgba(255,255,255,.16)}
+.auth-campus-image img{display:block;width:100%;height:100%;object-fit:cover}
+.auth-security-note{display:flex;gap:8px;align-items:center;color:#d6e6fa;font-size:12px}
+.sidebar-campus-badge{display:flex;align-items:center;gap:12px;padding:5px 0 21px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:20px}
+.sidebar-campus-badge img{width:42px;height:55px;object-fit:contain;filter:drop-shadow(0 2px 7px rgba(0,0,0,.16))}
+.sidebar-campus-badge strong{font-size:15px;display:block;color:white}
+.sidebar-campus-badge small{font-size:9px;letter-spacing:.09em;color:#b5cbe3}
+.staff-main .panel{box-shadow:0 7px 25px rgba(16,45,85,.035)}
+@media(max-width:1100px){.hero-inner{gap:26px;grid-template-columns:minmax(0,1fr) minmax(300px,.85fr)}.campus-floating-stats{right:0}}
+@media(max-width:800px){.hero-inner{grid-template-columns:1fr}.campus-visual{max-width:590px;width:100%;margin:auto;padding:0 12px 40px}.campus-photo-frame{aspect-ratio:1.65}.campus-floating-stats{right:4px}}
+@media(max-width:540px){.campus-visual{padding:0 5px 37px}.campus-photo-frame{aspect-ratio:1.25;border-radius:18px}.campus-floating-stats{right:1px;left:1px;bottom:0;justify-content:space-around;padding:12px}.campus-photo-caption{bottom:58px;left:12px}.campus-photo-caption strong{font-size:11px}.campus-photo-caption small{font-size:9px}}
+@media print{.campus-floating-stats,.campus-visual{display:none!important}}
