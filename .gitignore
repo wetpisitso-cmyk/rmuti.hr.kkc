@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+supabase/.temp/
+supabase/.branches/
+coverage/
+applicant-files/
+test-artifacts/
+*.log
+*.pem
+*.key
+backend-secrets.*
+!supabase/backend-secrets.example
+.DS_Store
