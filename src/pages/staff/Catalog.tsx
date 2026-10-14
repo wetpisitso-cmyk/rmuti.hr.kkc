@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Save } from "lucide-react";
+import { Plus, Pencil, Save, Trash2 } from "lucide-react";
 import { rows, rpc } from "../../services/api";
 import { useCatalog } from "../../hooks/useCatalog";
 import { bangkokInput, bangkokISO, dateTH, safeUrl } from "../../lib/format";
@@ -16,6 +16,7 @@ import {
 } from "../../components/UI";
 import type { DocRequirement } from "../../types/models";
 import { ThaiDateField } from "../../components/ThaiDateField";
+import { useAuth } from "../../hooks/useAuth";
 type Table =
   | "departments"
   | "recruitment_rounds"
@@ -44,6 +45,7 @@ const defaultDocs: DocRequirement[] = [
   { key: "transcript", label: "Transcript", required: true },
 ];
 export default function Catalog({ table }: { table: Table }) {
+  const auth = useAuth();
   const qc = useQueryClient(),
     catalog = useCatalog();
   const q = useQuery({
@@ -54,6 +56,7 @@ export default function Catalog({ table }: { table: Table }) {
     [editing, setEditing] = useState(false),
     [docs, setDocs] = useState<DocRequirement[]>(defaultDocs),
     [busy, setBusy] = useState(false),
+    [deleting, setDeleting] = useState<string | null>(null),
     [error, setError] = useState(""),
     [success, setSuccess] = useState("");
   const defaults = {
@@ -211,6 +214,32 @@ export default function Catalog({ table }: { table: Table }) {
         type: "checkbox",
       },
     ],
+  };
+  const removeRecord = async (row: Record<string, any>) => {
+    if (auth.role !== "admin") return;
+    const titleToConfirm = String(row.title || row.name || "");
+    const confirmed = window.prompt("ต้องการลบรายการนี้ถาวร\nพิมพ์ชื่อรายการเพื่อยืนยัน:\n" + titleToConfirm);
+    if (confirmed === null) return;
+    if (confirmed !== titleToConfirm) { setError("ชื่อรายการที่ยืนยันไม่ตรงกัน"); return; }
+    if (!window.confirm("ยืนยันลบ " + titleToConfirm + " ถาวร? ข้อมูลที่มีผู้สมัครเชื่อมอยู่จะไม่สามารถลบได้")) return;
+    setDeleting(row.id);
+    setError("");
+    setSuccess("");
+    try {
+      await rpc("admin_delete_record", { p_table: table, p_id: row.id, p_expected_title: titleToConfirm });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["catalog", table] }),
+        qc.invalidateQueries({ queryKey: ["jobs"] }),
+        qc.invalidateQueries({ queryKey: ["rounds"] }),
+        qc.invalidateQueries({ queryKey: ["departments"] }),
+        qc.invalidateQueries({ queryKey: ["announcements"] }),
+        qc.invalidateQueries({ queryKey: ["exam-schedules"] }),
+        qc.invalidateQueries({ queryKey: ["published-results"] })
+      ]);
+      setEditing(false);
+      setSuccess("ลบรายการสำเร็จ");
+    } catch (e) { setError(errorTH(e)); }
+    finally { setDeleting(null); }
   };
   const start = (row?: Record<string, any>) => {
     const d = { ...defaults, ...row };
@@ -442,7 +471,7 @@ export default function Catalog({ table }: { table: Table }) {
                   <th>{title[table]}</th>
                   <th>รายละเอียด</th>
                   <th>สถานะ</th>
-                  <th>แก้ไข</th>
+                  <th>จัดการ</th>
                 </tr>
               </thead>
               <tbody>
@@ -469,12 +498,18 @@ export default function Catalog({ table }: { table: Table }) {
                             : "แบบร่าง"}
                     </td>
                     <td>
-                      <button
-                        className="btn small outline"
-                        onClick={() => start(row)}
-                      >
-                        <Pencil size={15} /> แก้ไข
-                      </button>
+                      <div className="flex gap-2 flex-wrap">
+                        <button className="btn small outline" onClick={() => start(row)}>
+                          <Pencil size={15} /> แก้ไข
+                        </button>
+                        {auth.role === "admin" && (
+                          <button type="button" className="btn small danger"
+                            disabled={deleting !== null}
+                            onClick={() => void removeRecord(row)}>
+                            <Trash2 size={15}/> {deleting === row.id ? "กำลังลบ…" : "ลบ"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
