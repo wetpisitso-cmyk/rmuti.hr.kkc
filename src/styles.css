@@ -1716,3 +1716,23 @@ td strong {
     display: none;
   }
 }
+
+/* Thai Buddhist Era date inputs shared by applicant and staff forms */
+.thai-date-field{position:relative}
+.thai-date-input-wrap{position:relative}
+.thai-date-input-wrap input{padding-right:46px}
+.thai-calendar-toggle{position:absolute;right:7px;top:50%;transform:translateY(-50%);background:transparent;border:0;border-radius:8px;color:#102d55;padding:7px;display:grid;place-items:center}
+.thai-calendar-toggle:hover{background:#edf2f8}
+.thai-date-field [aria-invalid="true"]{border-color:#b42318}
+.thai-calendar{position:absolute;z-index:70;top:calc(100% + 7px);right:0;width:min(340px,calc(100vw - 40px));padding:13px;background:white;border:1px solid #dfe5ef;border-radius:14px;box-shadow:0 16px 38px #102d5530}
+.thai-calendar-heading{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-bottom:9px}
+.thai-calendar-heading select{flex:1;min-width:0;padding:5px 3px}
+.thai-calendar-heading select[aria-label="ปี พ.ศ."]{flex:0 0 84px}
+.thai-calendar-heading button{background:white;border:1px solid #dfe5ef;border-radius:8px;padding:5px;display:grid;place-items:center}
+.thai-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;text-align:center}
+.thai-calendar-weekday{font-size:12px;color:#64748b}
+.thai-calendar-grid button{border:0;min-height:34px;border-radius:7px;background:transparent;color:#102d55}
+.thai-calendar-grid button.selected{background:#f47721;color:white;font-weight:700}
+.thai-calendar-grid button:hover:not(.selected){background:#fff1e6}
+.thai-calendar-footer{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#64748b;margin-top:9px}
+.thai-calendar-footer button{border:0;color:#bc540c;background:transparent;font-weight:700}
