@@ -1,5 +1,7 @@
 const errors: Record<string, string> = {
   UNAUTHORIZED: "กรุณาเข้าสู่ระบบอีกครั้ง",
+  CONFIRMATION_MISMATCH: "เลขใบสมัครที่ยืนยันไม่ตรงกัน",
+  APPLICATION_NOT_FOUND: "ไม่พบใบสมัครนี้ อาจถูกลบไปแล้ว",
   FORBIDDEN: "คุณไม่มีสิทธิ์ทำรายการนี้",
   ROUND_CLOSED: "ยังไม่เปิดรับสมัครหรือหมดเวลารับสมัครแล้ว",
   APPLICATION_LOCKED: "ใบสมัครนี้ถูกล็อกหรือหมดเวลาแก้ไขแล้ว",
