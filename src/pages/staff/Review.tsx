@@ -6,6 +6,7 @@ import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../hooks/useAuth";
 import { dateTH, bangkokISO, money } from "../../lib/format";
 import { errorTH } from "../../lib/errors";
+import { ThaiDateField } from "../../components/ThaiDateField";
 import { PreviewButton } from "../../components/DocumentUpload";
 import {
   State,
@@ -41,7 +42,8 @@ export default function Review() {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [success, setSuccess] = useState(""),
-    [next, setNext] = useState("under_review");
+    [next, setNext] = useState("under_review"),
+    [deadline, setDeadline] = useState("");
   const d = q.data,
     a = d?.application;
   const actualNext =
@@ -220,12 +222,7 @@ export default function Review() {
                     maxLength={2000}
                   />
                   {actualNext === "needs_correction" && (
-                    <Field
-                      label="กำหนดแก้ไข (ค.ศ. เวลาไทย)"
-                      type="datetime-local"
-                      name="deadline"
-                      required
-                    />
+                    <ThaiDateField label="กำหนดแก้ไข (พ.ศ. เวลาไทย)" withTime name="deadline" value={deadline} onChange={setDeadline} required />
                   )}
                   <Submit busy={busy}>บันทึกสถานะและแจ้งผู้สมัคร</Submit>
                 </form>
