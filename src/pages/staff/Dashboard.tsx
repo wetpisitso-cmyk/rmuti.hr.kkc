@@ -25,6 +25,7 @@ import {
   Notice,
 } from "../../components/UI";
 import { statuses, type Filters } from "../../types/models";
+import { BuddhistDateField, buddhistToISO } from "../../components/BuddhistDateField";
 const initial: Filters = {
   year: "",
   round: "",
@@ -43,29 +44,40 @@ export default function StaffDashboard({
   const a = useAuth(),
     catalog = useCatalog(),
     [filters, setFilters] = useState(initial),
+    [fromBE, setFromBE] = useState(""),
+    [toBE, setToBE] = useState(""),
     [page, setPage] = useState(0),
     [sort, setSort] = useState("created"),
     [exporting, setExporting] = useState(false),
     [error, setError] = useState("");
   const search = useDebounce(filters.search);
+  const fromISO = buddhistToISO(fromBE);
+  const toISO = buddhistToISO(toBE);
+  const fromInvalid = fromISO === null;
+  const toInvalid = toISO === null;
+  const rangeInvalid = Boolean(fromISO && toISO && fromISO > toISO);
+  const dateError = fromInvalid || toInvalid
+    ? "กรุณากรอกวันที่ พ.ศ. ให้ถูกต้อง เช่น 14/10/2569"
+    : rangeInvalid
+      ? "วันที่เริ่มต้องไม่อยู่หลังวันที่สิ้นสุด"
+      : "";
   const applied = {
     ...filters,
     search,
-    from: filters.from ? bangkokISO(filters.from) : "",
-    to: filters.to
-      ? new Date(
-          new Date(bangkokISO(filters.to)).getTime() + 86400000 - 1,
-        ).toISOString()
+    from: fromISO ? bangkokISO(fromISO) : "",
+    to: toISO
+      ? new Date(new Date(bangkokISO(toISO)).getTime() + 86400000 - 1).toISOString()
       : "",
   };
   const q = useQuery({
     queryKey: ["staff-list", applied, page, sort],
     queryFn: () => staffList(applied, page, 20, sort),
+    enabled: !dateError,
   });
   const dashboard = useQuery({
     queryKey: ["staff-dashboard", applied],
     queryFn: () => rpc("staff_dashboard", { p_filters: applied }),
-    enabled: !listOnly,
+    enabled: !listOnly && !dateError,
   });
   const set = (k: keyof Filters, v: string) => {
     setFilters((f) => ({ ...f, [k]: v }));
@@ -115,7 +127,7 @@ export default function StaffDashboard({
             {a.can("reports") && (
               <button
                 className="btn outline small"
-                disabled={exporting}
+                disabled={exporting || !!dateError}
                 onClick={exportAll}
               >
                 <Download size={16} />
@@ -129,6 +141,7 @@ export default function StaffDashboard({
         }
       />
       {error && <Notice kind="error">{error}</Notice>}
+      {dateError && <Notice kind="error">{dateError}</Notice>}
       <section className="filter-card no-print">
         <div className="filter-grid staff-filters">
           <Select
@@ -191,17 +204,17 @@ export default function StaffDashboard({
               </option>
             ))}
           </Select>
-          <Field
-            label="วันที่เริ่ม (ค.ศ.)"
-            type="date"
-            value={filters.from}
-            onChange={(e) => set("from", e.target.value)}
+          <BuddhistDateField
+            label="วันที่เริ่ม (พ.ศ.)"
+            value={fromBE}
+            invalid={fromInvalid || rangeInvalid}
+            onChange={(value) => { setFromBE(value); setPage(0); }}
           />
-          <Field
-            label="วันที่สิ้นสุด (ค.ศ.)"
-            type="date"
-            value={filters.to}
-            onChange={(e) => set("to", e.target.value)}
+          <BuddhistDateField
+            label="วันที่สิ้นสุด (พ.ศ.)"
+            value={toBE}
+            invalid={toInvalid || rangeInvalid}
+            onChange={(value) => { setToBE(value); setPage(0); }}
           />
           <Field
             label="ค้นหาชื่อ / เลขผู้สมัคร"
@@ -212,7 +225,7 @@ export default function StaffDashboard({
         </div>
       </section>
       {!listOnly && (
-        <State loading={dashboard.isPending} error={dashboard.error}>
+        <State loading={!dateError && dashboard.isPending} error={dateError ? new Error("INVALID_INPUT") : dashboard.error}>
           <div className="kpi-grid">
             {[
               ["ใบสมัครทั้งหมด", dashboard.data?.total || 0, Files],
@@ -278,9 +291,9 @@ export default function StaffDashboard({
           </Select>
         </div>
         <State
-          loading={q.isPending}
-          error={q.error}
-          empty={!q.data?.rows.length}
+          loading={!dateError && q.isPending}
+          error={dateError ? new Error("INVALID_INPUT") : q.error}
+          empty={!dateError && !q.data?.rows.length}
         >
           <div className="table-wrap">
             <table>
