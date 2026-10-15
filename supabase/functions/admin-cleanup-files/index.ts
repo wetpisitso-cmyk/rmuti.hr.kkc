@@ -1,5 +1,5 @@
 import { backend, corsFor, json } from "../_shared/helpers.ts";
-import { deleteR2, isR2Path, r2Enabled } from "../_shared/r2.ts";
+import { deleteR2, isR2Path } from "../_shared/r2.ts";
 
 // Drain the existing durable file-cleanup queue after an Admin deletes
 // an application. Legacy Supabase objects and new R2 objects are supported.
