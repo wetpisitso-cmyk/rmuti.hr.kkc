@@ -25,6 +25,9 @@ Deno.serve(async (req) => {
 
     // Fail closed: never silently fall back if R2 is explicitly enabled but misconfigured.
     if(r2Enabled()) {
+      // Do not allow R2 writes until reviewed R2 deletion and retention workflow is live.
+      if(Deno.env.get("R2_CLEANUP_READY")!=="true")
+        return json({error:"R2_CLEANUP_NOT_ENABLED"},503,cors);
       try {r2Config()}catch{return json({error:"R2_NOT_CONFIGURED"},503,cors);}
     }
 
