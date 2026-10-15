@@ -12,7 +12,7 @@ export function Guard({
     location = useLocation();
   if (a.loading) return <State loading>{null}</State>;
   if (!a.session)
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    return <Navigate to={staff ? "/admin/login" : "/login"} state={{ from: location.pathname }} replace />;
   if ((staff && a.role === "applicant") || (permission && !a.can(permission)))
     return (
       <div className="container section">
