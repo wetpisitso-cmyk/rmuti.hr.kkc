@@ -419,3 +419,7 @@ verify_jwt = false
 
 [functions.email-worker]
 verify_jwt = false
+
+# Admin username/password requests authenticate in the function body.
+[functions.admin-login]
+verify_jwt = false

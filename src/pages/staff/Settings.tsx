@@ -14,12 +14,32 @@ import {
 export default function Settings() {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
-    [success, setSuccess] = useState("");
+    [success, setSuccess] = useState(""),
+    [usernameBusy, setUsernameBusy] = useState(false),
+    [usernameError, setUsernameError] = useState(""),
+    [usernameSuccess, setUsernameSuccess] = useState("");
   const qc = useQueryClient();
   const q = useQuery({
     queryKey: ["settings"],
     queryFn: () => rows("app_settings", "*", "key"),
   });
+  const adminUsername = useQuery({
+    queryKey: ["admin-own-username"],
+    queryFn: () => rpc<string | null>("admin_get_own_username"),
+  });
+  const saveUsername = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setUsernameBusy(true);
+    setUsernameError("");
+    setUsernameSuccess("");
+    try {
+      const username = String(new FormData(e.currentTarget).get("username") || "").trim().toLowerCase();
+      await rpc("admin_set_own_username", { p_username: username });
+      await qc.invalidateQueries({ queryKey: ["admin-own-username"] });
+      setUsernameSuccess("บันทึกชื่อผู้ใช้ Admin สำเร็จแล้ว สามารถเข้าผ่านหน้า Login Admin ได้");
+    } catch (e) { setUsernameError(errorTH(e)); }
+    finally { setUsernameBusy(false); }
+  };
   const audit = useQuery({
     queryKey: ["audit"],
     queryFn: () =>
@@ -62,6 +82,20 @@ export default function Settings() {
   return (
     <>
       <Title title="ตั้งค่าและประวัติระบบ" />
+      <form className="panel stack admin-username-settings" key={adminUsername.dataUpdatedAt} onSubmit={saveUsername}>
+        <h2>ตั้ง Username สำหรับเข้าสู่ระบบ Admin</h2>
+        <p className="muted">บัญชี Admin เดิมใช้รหัสผ่านเดิมใน Supabase Auth ไม่มีการสร้างรหัสผ่านใหม่หรือเก็บรหัสผ่านใน GitHub</p>
+        {adminUsername.error && <Notice kind="error">{errorTH(adminUsername.error)}</Notice>}
+        {usernameError && <Notice kind="error">{usernameError}</Notice>}
+        {usernameSuccess && <Notice kind="success">{usernameSuccess}</Notice>}
+        <div className="admin-username-fields">
+          <Field label="Username Admin" name="username" defaultValue={adminUsername.data || ""} placeholder="เช่น hrkkc-admin" autoComplete="off"
+            pattern="[a-z][a-z0-9._-]{3,31}" minLength={4} maxLength={32} required
+            hint="ใช้ภาษาอังกฤษตัวพิมพ์เล็ก ขึ้นต้นด้วย a–z รวม 4–32 ตัวอักษร" />
+          <button type="submit" className="btn primary" disabled={usernameBusy || adminUsername.isPending}>{usernameBusy ? "กำลังบันทึก…" : "บันทึก Username"}</button>
+        </div>
+        <small className="muted">เมื่อบันทึกแล้ว ให้เข้าสู่ระบบด้วย Username นี้และรหัสผ่านของบัญชี Admin ที่ <a className="text-link inline" href="#/admin/login">หน้าเข้าสู่ระบบ Admin</a></small>
+      </form>
       {error && <Notice kind="error">{error}</Notice>}
       {success && <Notice kind="success">{success}</Notice>}
       <State loading={q.isPending} error={q.error}>

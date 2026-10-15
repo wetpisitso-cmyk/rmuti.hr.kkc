@@ -6,6 +6,7 @@ import { State, Notice } from "./components/UI";
 import { configured } from "./lib/supabase";
 import { Home, JobDetail, Announcements, Results, Guide } from "./pages/Public";
 const Auth = lazy(() => import("./pages/Auth"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Profile = lazy(() =>
   import("./pages/Dashboard").then((m) => ({ default: m.ProfilePage })),
@@ -38,6 +39,7 @@ export default function App() {
     <HashRouter>
       <Suspense fallback={<State loading>{null}</State>}>
         <Routes>
+          <Route path="admin/login" element={<AdminLogin />} />
           <Route element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="jobs/:id" element={<JobDetail />} />

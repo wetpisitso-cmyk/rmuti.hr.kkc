@@ -1,0 +1,71 @@
+/* Dedicated admin-only login. Visual style matches RMUTI white/orange/navy portal. */
+.admin-login-shell {
+  min-height:100vh;
+  background:radial-gradient(circle at 17% 42%,#f0f5fc 0,transparent 37%),#f8fafd;
+  color:#102d55;
+  padding:0 24px 55px;
+}
+.admin-login-top {
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:1360px;margin:auto;height:102px;
+}
+.admin-login-brand {display:flex;align-items:center;gap:13px;color:#102d55}
+.admin-login-brand img {width:57px;height:69px;object-fit:contain}
+.admin-login-brand strong {font-size:17px;display:block;font-weight:800}
+.admin-login-brand small {display:block;color:#6b7d94;font-size:12px}
+.admin-login-back {display:flex;align-items:center;gap:8px;color:#264567;font-size:13px;font-weight:700}
+.admin-login-back:hover {color:#e46c17}
+.admin-login-grid {
+  max-width:1240px;margin:32px auto 0;display:grid;
+  grid-template-columns:minmax(0,1.09fr) minmax(370px,.91fr);gap:72px;align-items:center;
+}
+.admin-login-story {padding:10px 0}
+.admin-login-eyebrow {display:flex;gap:9px;align-items:center;width:max-content;padding:10px 15px;
+  background:#fff2e9;border:1px solid #fbe1cd;border-radius:99px;color:#d6671c;font-size:11px;letter-spacing:.13em;font-weight:800}
+.admin-login-story h1 {font-size:clamp(2.7rem,4vw,4.3rem);line-height:1.28;letter-spacing:-.055em;margin:22px 0 14px}
+.admin-login-story h1 span {color:#f47721}
+.admin-login-story>p {font-size:15px;line-height:1.9;color:#667993;max-width:580px}
+.admin-login-story>img {width:100%;height:280px;object-fit:cover;object-position:50% 48%;border-radius:25px;margin-top:27px;
+  box-shadow:0 17px 40px #102d551c}
+.admin-login-card {background:#fff;border:1px solid #e6ecf5;border-radius:27px;padding:46px 40px;
+  box-shadow:0 26px 75px rgba(16,45,85,.09)}
+.admin-login-lock {width:57px;height:57px;border-radius:18px;background:#fff0e4;color:#f47721;display:grid;place-items:center;margin-bottom:18px}
+.admin-login-card>.eyebrow {color:#ef792b;font-size:11px;letter-spacing:.13em;margin-bottom:8px;font-weight:800}
+.admin-login-card h2 {font-size:28px;color:#102d55;margin:0 0 8px}
+.admin-login-card>.muted {font-size:13px;margin:0 0 26px}
+.admin-login-card .field {margin-bottom:3px}
+.admin-login-card .field input {min-height:51px;border-radius:13px}
+.admin-login-card .btn.primary {min-height:52px;margin-top:3px}
+.admin-login-foot {font-size:11px;color:#5c728d;display:flex;align-items:center;gap:8px;margin-top:25px;
+  padding:15px 0;border-top:1px solid #e9eef6}
+.admin-login-foot svg {color:#21996b;flex-shrink:0}
+.admin-login-help {line-height:1.85;color:#8190a2;font-size:11px}
+.admin-login-help a,.admin-login-applicant a {color:#ed701b;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.admin-login-applicant {border-radius:13px;background:#f5f8fc;margin-top:16px;padding:13px;
+  display:flex;justify-content:center;align-items:center;gap:7px;font-size:12px;flex-wrap:wrap}
+.admin-username-settings {border-left:4px solid #f47721!important}
+.admin-username-fields {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:15px}
+.admin-username-fields .btn {min-height:47px}
+.footer-admin-link {display:inline-flex;margin-left:15px;font-weight:700;color:#ffb07c;border-bottom:1px solid #ffb07c}
+@media(max-width:930px) {
+ .admin-login-grid {grid-template-columns:1fr;max-width:600px;gap:22px;margin:10px auto}
+ .admin-login-story{padding:0}
+ .admin-login-story h1 {font-size:2.7rem}
+ .admin-login-story>img{display:none}
+ .admin-login-story>p{font-size:13px}
+}
+@media(max-width:560px) {
+ .admin-login-shell {padding:0 16px 36px}
+ .admin-login-top {height:83px}
+ .admin-login-brand img {width:45px;height:53px}
+ .admin-login-brand strong {font-size:14px}
+ .admin-login-brand small {font-size:10px}
+ .admin-login-back {font-size:11px}
+ .admin-login-story h1 {font-size:2.25rem}
+ .admin-login-card {border-radius:22px;padding:28px 21px}
+ .admin-login-card h2 {font-size:24px}
+ .admin-username-fields{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce) {
+ .admin-login-shell *, .admin-login-shell *::before, .admin-login-shell *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}

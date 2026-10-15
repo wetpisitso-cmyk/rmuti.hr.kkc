@@ -128,6 +128,7 @@ export function Layout() {
           </p>
           <span>
             <ShieldCheck size={17} /> เอกสารส่วนบุคคลเข้าถึงตามสิทธิ์
+            <Link className="footer-admin-link" to="/admin/login">เข้าสู่ระบบ Admin</Link>
           </span>
         </div>
       </footer>
