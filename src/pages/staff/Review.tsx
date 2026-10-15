@@ -145,7 +145,7 @@ export default function Review() {
   return (
     <>
       <Title
-        title="ตรวจใบสมัคร"
+        title="รายละเอียดใบสมัคร"
         description={a?.application_number || (a?.submitted_at ? "รอ Admin กำหนดเลขผู้สมัคร" : "แบบร่าง")}
         action={
           <Link className="btn outline" to={`/application/${id}`}>
@@ -183,6 +183,7 @@ export default function Review() {
                 <a href="#review-notes">บันทึกเจ้าหน้าที่</a>
               </nav>
             </section>
+            <div className="apple-review-columns">
             <section className="panel" id="review-personal">
               <div className="flex gap-2">
                 <Badge status={a.status} />
@@ -340,6 +341,7 @@ export default function Review() {
                 </State>
               </section>
             )}
+            </div>
           </>
         )}
       </State>
