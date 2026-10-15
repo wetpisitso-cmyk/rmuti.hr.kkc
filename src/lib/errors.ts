@@ -5,6 +5,7 @@ const errors: Record<string, string> = {
   FORBIDDEN: "คุณไม่มีสิทธิ์ทำรายการนี้",
   ADMIN_USERNAME_TAKEN: "ชื่อผู้ใช้ Admin นี้มีคนใช้แล้ว กรุณาเลือกชื่ออื่น",
   INVALID_ADMIN_USERNAME: "ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษ เริ่มด้วยตัวอักษร และยาว 4–32 ตัวอักษร",
+  ADMIN_USE_SEPARATE_LOGIN: "บัญชี Admin กรุณาเข้าใช้ผ่านหน้าเข้าสู่ระบบ Admin ด้วย Username และ Password",
   ADMIN_LOGIN_RATE_LIMITED: "ลองเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่",
   SIGNER_PROFILE_NAME_REQUIRED: "กรุณากรอกชื่อและนามสกุลในโปรไฟล์บัญชีของคุณก่อนเซ็นรับรอง",
   APPLICATION_NUMBER_REQUIRED: "ต้องกำหนดเลขผู้สมัครก่อนอนุมัติผ่านคุณสมบัติ",
