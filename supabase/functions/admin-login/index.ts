@@ -26,7 +26,7 @@ function response(req: Request, body: object, status: number) {
     headers.set("Access-Control-Allow-Headers", "authorization, apikey, content-type, x-client-info");
     headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
   }
-  return new Response(JSON.stringify(body), { status, headers });
+  return new Response(status === 204 ? null : JSON.stringify(body), { status, headers });
 }
 async function keyFor(value: string) {
   const key = await crypto.subtle.importKey(
