@@ -1,5 +1,6 @@
 import type { Application, AppDocument } from "../types/models";
 import { dateTH } from "../lib/format";
+import type { AdminSignature } from "./AdminSignaturePad";
 
 type Submission = NonNullable<Application["snapshot"]>;
 type Props = {
@@ -7,6 +8,7 @@ type Props = {
   snapshot: Submission;
   documents: AppDocument[];
   photo: string;
+  signature: AdminSignature | null;
 };
 
 const dash = (value: unknown): string => {
@@ -26,7 +28,7 @@ function Row({ label, value }: { label: string; value: unknown }) {
 }
 
 export default function ApplicantSubmissionForm({
-  application, snapshot, documents, photo,
+  application, snapshot, documents, photo, signature,
 }: Props) {
   const person = snapshot.personal;
   const fullName = [person.prefix, person.first_name, person.last_name]
@@ -157,9 +159,15 @@ export default function ApplicantSubmissionForm({
           <div>
             <h4>สำหรับเจ้าหน้าที่รับสมัคร</h4>
             <p><strong>ชื่อผู้ตรวจ: แอดมิน</strong></p>
-            <p className="official-signature-line">(ลงชื่อ) ...................................................</p>
-            <p>(แอดมิน) เจ้าหน้าที่รับสมัคร</p>
-            <p>วันที่ ........../........../............</p>
+            {signature && signature.application_number_at_signing === application.application_number ? <>
+              <img className="official-admin-signed-image" src={signature.signature_png} alt="ลายเซ็น Admin ผู้ตรวจรับรองใบสมัคร"/>
+              <p>(แอดมิน) เจ้าหน้าที่รับสมัคร</p>
+              <p>วันที่ลงนาม {dateTH(signature.signed_at, true)}</p>
+            </> : <>
+              <p className="official-signature-line">(ลงชื่อ) ...................................................</p>
+              <p>(แอดมิน) เจ้าหน้าที่รับสมัคร — ยังไม่ลงนาม</p>
+              <p>วันที่ ........../........../............</p>
+            </>}
           </div>
         </div>
       </section>

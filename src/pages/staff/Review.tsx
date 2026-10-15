@@ -19,6 +19,7 @@ import {
   Submit,
 } from "../../components/UI";
 import { statuses } from "../../types/models";
+import { AdminSignaturePad, type AdminSignature } from "../../components/AdminSignaturePad";
 export default function Review() {
   const { id } = useParams(),
     auth = useAuth(),
@@ -26,6 +27,10 @@ export default function Review() {
   const q = useQuery({
     queryKey: ["application", id],
     queryFn: () => getApplication(id!),
+  });
+  const signature = useQuery({
+    queryKey: ["admin-signature", id],
+    queryFn: async () => { const r = await supabase.from("application_admin_signatures").select("*").eq("application_id", id).maybeSingle(); if(r.error)throw r.error; return r.data as AdminSignature | null; },
   });
   const notes = useQuery({
     queryKey: ["staff-notes", id],
@@ -57,6 +62,7 @@ export default function Review() {
     await qc.invalidateQueries({ queryKey: ["application", id] });
     await qc.invalidateQueries({ queryKey: ["staff-list"] });
     await qc.invalidateQueries({ queryKey: ["staff-dashboard"] });
+    await qc.invalidateQueries({ queryKey: ["admin-signature", id] });
   };
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -308,6 +314,7 @@ export default function Review() {
                   )}
                 </section>
               ))}
+            {auth.role === "admin" && <AdminSignaturePad applicationId={id!} existing={signature.data || null} eligible={a.status === "eligible" && !!a.application_number && ["confirmed","not_required"].includes(a.payment_status)} refresh={refresh} />}
             {auth.can("review") && (
               <section className="panel" id="review-notes">
                 <h2>บันทึกภายในของเจ้าหน้าที่</h2>

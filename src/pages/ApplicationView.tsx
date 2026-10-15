@@ -30,6 +30,7 @@ import {
 } from "../components/UI";
 import { DocumentUpload, PreviewButton } from "../components/DocumentUpload";
 import ApplicantSubmissionForm from "../components/ApplicantSubmissionForm";
+import type { AdminSignature } from "../components/AdminSignaturePad";
 import { outcomeLabels, statuses } from "../types/models";
 export default function ApplicationView() {
   const { id } = useParams(),
@@ -366,6 +367,11 @@ export function PrintApplication({ exam = false }: { exam?: boolean }) {
     queryKey: ["application", id],
     queryFn: () => getApplication(id!),
   });
+  const signature = useQuery({
+    queryKey: ["admin-signature", id],
+    enabled: !exam && !!id,
+    queryFn: async () => { const {data,error}=await (await import("../lib/supabase")).supabase.from("application_admin_signatures").select("*").eq("application_id", id!).maybeSingle(); if(error)throw error; return data as AdminSignature | null; },
+  });
   const schedules = useQuery({
     queryKey: ["exam-schedules"],
     queryFn: () => rows("exam_schedules", "*", "exam_at"),
@@ -423,15 +429,15 @@ export function PrintApplication({ exam = false }: { exam?: boolean }) {
         )}
       </div>
       <State
-        loading={q.isPending || (exam && schedules.isPending)}
-        error={q.error || schedules.error}
+        loading={q.isPending || (!exam && signature.isPending) || (exam && schedules.isPending)}
+        error={q.error || signature.error || schedules.error}
       >
         {!s ? (
           <Notice>ใบสมัครต้องส่งสำเร็จก่อนดาวน์โหลดเอกสาร</Notice>
         ) : exam && !schedule ? (
           <Notice>ยังไม่มีกำหนดสอบที่เผยแพร่</Notice>
         ) : !exam && a && d ? (
-          <ApplicantSubmissionForm application={a} snapshot={s} documents={d.documents} photo={photo} />
+          <ApplicantSubmissionForm application={a} snapshot={s} documents={d.documents} photo={photo} signature={signature.data || null} />
         ) : (
           <article className="print-sheet">
             <header className="print-heading">
