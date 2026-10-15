@@ -81,8 +81,16 @@ export default function AuthPage({
         const roleResult = await supabase.from("user_roles").select("role").eq("user_id",r.data.user.id).single();
         if (roleResult.error) throw roleResult.error;
         if (roleResult.data.role === "admin") {
-          await supabase.auth.signOut();
-          throw new Error("ADMIN_USE_SEPARATE_LOGIN");
+          // One-time bootstrap: legacy Admin accounts must be able to choose
+          // their username before the dedicated login can be used.
+          const alias = await supabase.rpc("admin_get_own_username");
+          if (alias.error) throw alias.error;
+          if (alias.data) {
+            await supabase.auth.signOut();
+            throw new Error("ADMIN_USE_SEPARATE_LOGIN");
+          }
+          nav("/staff/settings", { replace: true });
+          return;
         }
         const from = location.state?.from;
         nav(
