@@ -3,6 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
+  CheckCircle2,
+  ShieldCheck,
+  UserRound,
+  FileCheck2,
   BriefcaseBusiness,
   CalendarDays,
   Building2,
@@ -105,7 +109,7 @@ export function Home() {
       j.published && j.recruitment_rounds?.published && jobState(j) === "open",
   );
   return (
-    <>
+    <div className="rmuti-apple-home">
       <div className="hero">
         <div className="container hero-inner">
           <div>
@@ -113,25 +117,23 @@ export function Home() {
               <span /> RMUTI KHON KAEN · RECRUITMENT
             </div>
             <h1>
-              ร่วมเป็นส่วนหนึ่ง
+              โอกาสใหม่
               <br />
-              ของ<span>ราชมงคลอีสาน</span>
+              <span>เริ่มต้นที่นี่</span>
             </h1>
-            <p>
-              ระบบรับสมัครบุคลากรออนไลน์
-              <br />
-              มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น
-            </p>
+            <h2 className="hero-subtitle">ระบบรับสมัครบุคลากรออนไลน์</h2>
+            <p>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น</p>
+            <p className="hero-support-copy">ร่วมเป็นส่วนหนึ่งในการขับเคลื่อนการศึกษา นวัตกรรม และพัฒนาสังคม ไปกับ มทร.อีสาน วิทยาเขตขอนแก่น</p>
             <div className="hero-actions">
               <a href="#positions" className="btn primary">
-                ค้นหาตำแหน่งที่เปิดรับ <ArrowRight size={18} />
+                <BriefcaseBusiness size={18} /> ดูตำแหน่งที่เปิดรับ <ArrowRight size={18} />
               </a>
-              <Link className="btn hero-outline" to="/guide">
-                ขั้นตอนการสมัคร
+              <Link className="btn hero-outline" to="/login">
+                <UserRound size={18}/> เข้าสู่ระบบ
               </Link>
             </div>
             <div className="hero-caption">
-              สมัครสมาชิก · กรอกข้อมูล · ติดตามผลได้ในที่เดียว
+              <ShieldCheck size={15}/> สมัครสมาชิก · กรอกข้อมูล · ติดตามผลได้ในที่เดียว
             </div>
           </div>
           <div className="campus-visual">
@@ -143,6 +145,7 @@ export function Home() {
                 decoding="async"
                 onError={(e) => { e.currentTarget.style.display = "none"; }}
               />
+              <div className="campus-photo-quote" aria-hidden="true">สร้างคน<br/>สร้างเทคโนโลยี<br/>สร้างสังคมที่ยั่งยืน</div>
               <div className="campus-photo-caption">
                 <span className="campus-photo-dot" />
                 <div><strong>RMUTI KHON KAEN</strong><small>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน</small></div>
@@ -154,6 +157,11 @@ export function Home() {
             </div>
           </div>
         </div>
+      </div>
+      <div className="container home-stats-strip" aria-label="สรุปตำแหน่งเปิดรับสมัคร">
+        <div className="home-stat-pill"><span className="home-stat-icon orange"><BriefcaseBusiness size={22}/></span><div><strong>{numberTH(open.length)}</strong><small>ตำแหน่งที่เปิดรับ</small></div><ChevronRight size={16}/></div>
+        <div className="home-stat-pill"><span className="home-stat-icon navy"><Users size={22}/></span><div><strong>{numberTH(open.reduce((sum, j) => sum + j.vacancies, 0))}</strong><small>อัตราที่เปิดรับ</small></div><ChevronRight size={16}/></div>
+        <div className="home-stat-pill"><span className="home-stat-icon green"><CalendarDays size={22}/></span><div><strong>{open.length ? "เปิดรับสมัครอยู่" : "ตรวจสอบรอบรับสมัคร"}</strong><small>{open.length ? "สมัครได้ตามช่วงเวลาที่ประกาศ" : "ติดตามประกาศใหม่"}</small></div></div>
       </div>
       <div className="home-feature-strip">
         <div className="container home-feature-grid">
@@ -174,7 +182,7 @@ export function Home() {
       <div className="container section" id="positions">
         <Title
           eyebrow="OPEN POSITIONS"
-          title="ค้นหางานที่ใช่สำหรับคุณ"
+          title="ตำแหน่งที่เปิดรับสมัคร"
           description="ตรวจคุณสมบัติและกำหนดการตามประกาศแต่ละตำแหน่ง"
         />
         <div className="filter-card">
@@ -241,7 +249,7 @@ export function Home() {
         <div className="section-divider" />
         <Title
           eyebrow="LATEST NEWS"
-          title="ข่าวและประกาศ"
+          title="ประกาศและข่าวสาร"
           action={
             <Link className="text-link" to="/announcements">
               ดูทั้งหมด <ChevronRight size={18} />
@@ -277,7 +285,28 @@ export function Home() {
           </div>
         </State>
       </div>
-    </>
+      <section className="container home-steps-section">
+        <div className="home-steps-heading">
+          <div><span className="eyebrow">HOW TO APPLY</span><h2>ขั้นตอนการสมัคร</h2><p>สมัครออนไลน์และติดตามสถานะได้ง่ายในบัญชีของคุณ</p></div>
+          <Link className="text-link" to="/guide">ดูรายละเอียดขั้นตอน <ArrowRight size={16}/></Link>
+        </div>
+        <div className="home-steps-grid">
+          {[
+            { icon: UserRound, title:"สมัครสมาชิก", info:"สร้างบัญชีด้วยอีเมลและรหัสผ่าน" },
+            { icon: FileText, title:"กรอกใบสมัคร", info:"บันทึกข้อมูลและแนบเอกสารตามประกาศ" },
+            { icon: FileCheck2, title:"ติดตามสถานะ", info:"Admin ตรวจใบสมัครและกำหนดเลขผู้สมัคร" },
+            { icon: CheckCircle2, title:"เข้าสอบ / สัมภาษณ์", info:"ติดตามประกาศวันเวลาและผลการคัดเลือก" },
+          ].map((step, index) => {
+            const StepIcon=step.icon;
+            return <div className="home-step" key={step.title}>
+              <span className="home-step-number">{index+1}</span>
+              <StepIcon size={23}/>
+              <div><h3>{step.title}</h3><p>{step.info}</p></div>
+            </div>;
+          })}
+        </div>
+      </section>
+    </div>
   );
 }
 export function JobDetail() {
@@ -470,7 +499,7 @@ export function Guide() {
           ["01", "สร้างบัญชี", "ใช้อีเมลและรหัสผ่านอย่างน้อย 8 ตัวอักษร"],
           ["02", "กรอกข้อมูล", "ข้อมูลส่วนตัว การศึกษา และประสบการณ์"],
           ["03", "แนบเอกสาร", "อัปโหลดเอกสารบังคับให้ครบตามประกาศ"],
-          ["04", "ยืนยันใบสมัคร", "ตรวจทานและรับเลขผู้สมัครหลังส่งสำเร็จ"],
+          ["04", "ยืนยันใบสมัคร", "ตรวจทานและส่งใบสมัคร รอ Admin ตรวจและออกเลขผู้สมัคร"],
           ["05", "ติดตามผล", "ดูสถานะ แก้ไขเอกสาร และดาวน์โหลดบัตรสอบ"],
         ].map(([n, t, d]) => (
           <div className="panel" key={n}>
