@@ -158,14 +158,14 @@ export default function ApplicantSubmissionForm({
           </div>
           <div>
             <h4>สำหรับเจ้าหน้าที่รับสมัคร</h4>
-            <p><strong>ชื่อผู้ตรวจ: แอดมิน</strong></p>
+            <p><strong>ผู้ตรวจรับรอง: {signature?.signer_name || "รอผู้ตรวจลงนาม"}</strong></p>
             {signature && signature.application_number_at_signing === application.application_number ? <>
               <img className="official-admin-signed-image" src={signature.signature_png} alt="ลายเซ็น Admin ผู้ตรวจรับรองใบสมัคร"/>
-              <p>(แอดมิน) เจ้าหน้าที่รับสมัคร</p>
+              <p>({signature.signer_name}) เจ้าหน้าที่รับสมัคร</p>
               <p>วันที่ลงนาม {dateTH(signature.signed_at, true)}</p>
             </> : <>
               <p className="official-signature-line">(ลงชื่อ) ...................................................</p>
-              <p>(แอดมิน) เจ้าหน้าที่รับสมัคร — ยังไม่ลงนาม</p>
+              <p>เจ้าหน้าที่รับสมัคร — ยังไม่ลงนาม</p>
               <p>วันที่ ........../........../............</p>
             </>}
           </div>
