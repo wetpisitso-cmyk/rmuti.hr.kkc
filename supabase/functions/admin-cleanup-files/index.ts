@@ -32,7 +32,8 @@ Deno.serve(async (req) => {
       if(!belongs || !validBucket || !validPath){failed++;continue;}
       try{
         if(isR2){
-          if(!r2Enabled()){failed++;continue;} // Never erase queue when R2 not configured.
+          // Even when new R2 writes are disabled, old R2 files still require cleanup.
+          // Deletion fails safely if the R2 secrets have been removed.
           await deleteR2(item.path);
         }else{
           const {error}=await admin.storage.from("application-files").remove([item.path]);
