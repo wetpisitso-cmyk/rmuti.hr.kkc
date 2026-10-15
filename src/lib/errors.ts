@@ -3,6 +3,7 @@ const errors: Record<string, string> = {
   CONFIRMATION_MISMATCH: "เลขใบสมัครที่ยืนยันไม่ตรงกัน",
   APPLICATION_NOT_FOUND: "ไม่พบใบสมัครนี้ อาจถูกลบไปแล้ว",
   FORBIDDEN: "คุณไม่มีสิทธิ์ทำรายการนี้",
+  SIGNER_PROFILE_NAME_REQUIRED: "กรุณากรอกชื่อและนามสกุลในโปรไฟล์บัญชีของคุณก่อนเซ็นรับรอง",
   APPLICATION_NUMBER_REQUIRED: "ต้องกำหนดเลขผู้สมัครก่อนอนุมัติผ่านคุณสมบัติ",
   APPLICATION_NUMBER_ALREADY_ASSIGNED: "ใบสมัครนี้ได้รับเลขแล้ว",
   DUPLICATE_APPLICATION_NUMBER: "เลขผู้สมัครนี้มีผู้ใช้แล้ว",
