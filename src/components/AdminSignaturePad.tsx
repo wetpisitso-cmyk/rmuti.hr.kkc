@@ -7,6 +7,7 @@ import { Notice } from "./UI";
 export type AdminSignature = {
   application_id: string;
   signer_id: string;
+  signer_name: string;
   signed_at: string;
   signature_png: string;
   application_number_at_signing: string;
@@ -72,7 +73,7 @@ export function AdminSignaturePad({ applicationId, existing, eligible, refresh }
     {error && <Notice kind="error">{error}</Notice>}
     {existing ? <div className="admin-signature-approved">
       <img src={existing.signature_png} alt="ลายเซ็นที่ Admin ลงไว้" />
-      <strong>รับรองแล้วโดยแอดมิน</strong>
+      <strong>รับรองแล้วโดย {existing.signer_name}</strong>
       <span>ลงนามเมื่อ {dateTH(existing.signed_at, true)} · ไม่สามารถลงนามซ้ำได้</span>
     </div> : !eligible ? <Notice>ต้องผ่านคุณสมบัติ มีเลขผู้สมัคร และยืนยันค่าธรรมเนียม (ถ้ามี) ก่อนเซ็นรับรอง</Notice> :
       <>
