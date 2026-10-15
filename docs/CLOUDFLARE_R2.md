@@ -5,7 +5,9 @@
 - ฐานข้อมูล, สิทธิ์, บัญชี, ใบสมัคร, สลิป, สถานะ, PDF และ Admin ยังอยู่ใน Supabase ตามเดิม
 - ไฟล์เดิมใน private bucket `application-files` **ไม่ถูกย้ายหรือลบ** และยังเปิดผ่าน signed URL เดิม
 - ถ้ายังไม่ตั้ง `R2_ENABLED=true`, ไฟล์ใหม่ยังลง Supabase Storage ตามเดิม
-- เมื่อตั้ง `R2_ENABLED=true` และ secrets ครบ ไฟล์ใหม่จะเก็บใน private R2 bucket แล้วบันทึกเฉพาะ metadata/path ใน Supabase
+- เมื่อตั้ง `R2_ENABLED=true` และ secrets ครบ **รวมถึง `R2_CLEANUP_READY=true` หลังตรวจสอบการลบไฟล์ R2** ไฟล์ใหม่จะเก็บใน private R2 bucket และบันทึก metadata/path ใน Supabase
+- **สถานะปัจจุบัน:** การเผยแพร่ `admin-cleanup-files` เวอร์ชัน R2 ถูกระงับด้วยระบบความปลอดภัย จึงยังใช้เวอร์ชันเดิมที่ลบได้เฉพาะ Supabase Storage ต้องคง `R2_ENABLED=false` และ `R2_CLEANUP_READY=false` จนกว่าส่วนนี้จะได้รับอนุมัติและทดสอบ
+- ปัจจุบันฐานข้อมูลมี guard บล็อกการลบข้อมูลอ้างอิงไฟล์ R2 เพื่อไม่ให้เกิด orphan files โดยไม่ทราบตัว
 - R2 ไม่ได้เป็น public bucket และไม่มี public URL ของเอกสารผู้สมัคร
 - ถ้าตั้งเปิด R2 แต่ secret ไม่ครบ ระบบอัปโหลดจะขึ้น `R2_NOT_CONFIGURED` ไม่บันทึกไฟล์ใหม่ลงผิดพื้นที่
 
@@ -40,7 +42,8 @@
 | `R2_BUCKET` | `rmuti-kkc-applications` หรือชื่อ bucket ที่สร้าง |
 | `R2_ACCESS_KEY_ID` | Access Key ID จาก R2 token |
 | `R2_SECRET_ACCESS_KEY` | Secret Access Key จาก R2 token |
-| `R2_ENABLED` | `true` **หลังตั้งค่าสี่ช่องข้างบนครบแล้ว** |
+| `R2_ENABLED` | `false` จนกว่าส่วนลบไฟล์ R2 ผ่านการตรวจสอบและ Deploy แล้ว |
+| `R2_CLEANUP_READY` | `false` จนกว่าทดสอบส่วนลบไฟล์สำเร็จและยกเลิก database guard อย่างปลอดภัย |
 
 **สำคัญ:** ต้องตั้งค่าใน Supabase Edge Functions Secrets เท่านั้น ไม่ใช่ `VITE_*`, `.env` ที่ deploy หน้าเว็บ, หรือ GitHub Pages เนื่องจาก frontend เป็น public และมีผู้สมัครเข้าถึงได้
 
@@ -50,7 +53,7 @@
 
 - `upload-document`: ตรวจ JWT + เจ้าของใบสมัคร + จำนวนครั้งต่อเวลา + นามสกุล/magic bytes + ขนาดจากประกาศ ก่อน upload
 - `document-url`: ตรวจว่าไฟล์อยู่ในใบสมัครจริง ตรวจเจ้าของหรือเจ้าหน้าที่ แล้วสร้าง signed GET URL อายุ **120 วินาที**
-- `admin-cleanup-files`: ตอน Admin ยืนยันลบใบสมัคร ระบบคิวจะจัดการไฟล์เก่าบน Supabase และไฟล์ใหม่บน R2 ตามประเภท path
+- `admin-cleanup-files`: โค้ดฉบับใหม่เตรียมรองรับไฟล์เก่าบน Supabase และไฟล์ใหม่บน R2 แต่ **ยังไม่เผยแพร่ขึ้นระบบจริง** และมี database guard ป้องกันการลบใบสมัครที่มี R2 ระหว่างรอความพร้อม
 - `application_documents`: เก็บ path แบบ `r2/<user_id>/<application_id>/<random_uuid>.pdf` เมื่อใช้ R2 เพื่อแยกจากไฟล์ Supabase
 - `complete_r2_upload`: PostgreSQL function ที่ให้ service role เรียกได้เท่านั้น ตรวจสอบ path, ประเภท, ขนาด และสถานะอีกครั้ง
 
@@ -58,7 +61,7 @@
 
 ## 5. ทดสอบก่อนเปิดรับสมัครจริง
 
-1. เมื่อเปลี่ยน `R2_ENABLED=true` แล้ว ทดสอบด้วยบัญชีผู้สมัครทดสอบ
+1. **หลัง** Deploy ส่วนลบ R2 ที่ผ่านการอนุมัติ และยกเลิก database guard อย่างปลอดภัย จึงตั้ง `R2_CLEANUP_READY=true` และ `R2_ENABLED=true` แล้วทดสอบด้วยบัญชีผู้สมัครทดสอบ
 2. อัปโหลด PDF ตัวอย่างและรูป JPG/PNG แล้วตรวจว่ามี object ใน Cloudflare R2 bucket
 3. ตรวจตาราง `public.application_documents`: `storage_path` ต้องขึ้นต้นด้วย `r2/`
 4. ทดสอบดูเอกสารในหน้าใบสมัครและหน้า Admin; ตรวจว่าผู้สมัครอื่นเปิดไฟล์ไม่ได้
@@ -68,7 +71,7 @@
 
 ## 6. ย้อนกลับอย่างปลอดภัย
 
-ตั้ง `R2_ENABLED=false` เพื่อให้ **ไฟล์ใหม่** กลับไปอัปโหลด Supabase Storage ชั่วคราว แต่ไฟล์เก่าบน R2 ยังคงเปิดดูและลบตามสิทธิ์ได้ หากเก็บ Account ID, Bucket และ Access Key/Secret ที่ถูกต้องไว้
+ตั้ง `R2_ENABLED=false` เพื่อให้ **ไฟล์ใหม่** กลับไปอัปโหลด Supabase Storage ชั่วคราว แต่ไฟล์เก่าบน R2 ยังคงเปิดดูได้หากเก็บ Account ID, Bucket และ Access Key/Secret ไว้ การลบไฟล์ R2 จะทำได้เมื่อส่วนลบที่ผ่านการอนุมัติพร้อมใช้งาน
 
 **ห้ามลบ Bucket/Token/Secrets ของ R2** หากยังมีไฟล์ R2 อยู่ เพราะหน้า Preview ต้องใช้ token เพื่ออ่านไฟล์ที่เก็บไว้แล้ว ต้องเปิด R2 และ secrets ไว้สำหรับเอกสารเก่าที่ยังอยู่
 
