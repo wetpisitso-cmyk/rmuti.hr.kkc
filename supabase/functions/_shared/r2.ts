@@ -1,6 +1,8 @@
 // Private Cloudflare R2 integration. Never embed secrets in browser code.
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "npm:@aws-sdk/client-s3@3";
 import { getSignedUrl } from "npm:@aws-sdk/s3-request-presigner@3";
+import { isR2Path } from "./storage-paths.ts";
+export { isR2Path } from "./storage-paths.ts";
 
 type R2Config = { bucket:string; client:S3Client };
 let instance: R2Config | null = null;
@@ -26,9 +28,6 @@ export function r2Config(): R2Config {
   });
   instance = { bucket, client };
   return instance;
-}
-export function isR2Path(path: string): boolean {
-  return /^r2\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(pdf|jpg|png)$/.test(path);
 }
 export async function uploadR2(path: string, bytes: Uint8Array, mime: string) {
   if (!isR2Path(path)) throw new Error("INVALID_FILE_PATH");
