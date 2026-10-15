@@ -77,6 +77,13 @@ export default function AuthPage({
           password: String(data.password),
         });
         if (r.error) throw r.error;
+        if (!r.data.user) throw new Error("UNAUTHORIZED");
+        const roleResult = await supabase.from("user_roles").select("role").eq("user_id",r.data.user.id).single();
+        if (roleResult.error) throw roleResult.error;
+        if (roleResult.data.role === "admin") {
+          await supabase.auth.signOut();
+          throw new Error("ADMIN_USE_SEPARATE_LOGIN");
+        }
         const from = location.state?.from;
         nav(
           typeof from === "string" && from.startsWith("/")
@@ -254,6 +261,7 @@ export default function AuthPage({
             <div className="auth-links">
               <Link to="/forgot-password">ลืมรหัสผ่าน</Link>
               <Link to="/register">สมัครสมาชิก</Link>
+              <Link to="/admin/login">เข้าสู่ระบบ Admin</Link>
             </div>
           )}
           {mode === "register" && (
