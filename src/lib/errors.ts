@@ -44,6 +44,11 @@ const errors: Record<string, string> = {
   application_education_gpa_check: "เกรดเฉลี่ย GPA ต้องอยู่ระหว่าง 0.00–4.00 กรุณาย้อนกลับไปแก้ไขข้อมูลการศึกษา",
   application_education_graduation_year_check: "ปีสำเร็จการศึกษาต้องใช้ปี พ.ศ. ระหว่าง 2400–2800",
   application_experience_check: "วันที่สิ้นสุดการทำงานต้องไม่อยู่ก่อนวันเริ่มงาน",
+  R2_UPLOAD_FAILED: "ไม่สามารถบันทึกเอกสารลง Cloudflare R2 ได้ กรุณาลองใหม่หรือติดต่อผู้ดูแล",
+  R2_PREVIEW_FAILED: "ไม่สามารถเปิดเอกสาร Cloudflare R2 ได้ กรุณาลองใหม่",
+  R2_NOT_CONFIGURED: "พื้นที่ Cloudflare R2 ยังไม่ได้ตั้งค่าครบ กรุณาแจ้งผู้ดูแลระบบ",
+  FILE_CHECK_FAILED: "ระบบตรวจสิทธิ์เปิดเอกสารขัดข้อง กรุณาลองใหม่",
+  FILE_NOT_FOUND: "ไม่พบไฟล์เอกสารที่ร้องขอ",
   UPLOAD_FAILED: "อัปโหลดไม่สำเร็จ กรุณาลองใหม่",
 };
 export function errorTH(e: unknown): string {
