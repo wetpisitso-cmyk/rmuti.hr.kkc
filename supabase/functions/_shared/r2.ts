@@ -7,7 +7,8 @@ let instance: R2Config | null = null;
 export const r2Enabled = () => Deno.env.get("R2_ENABLED") === "true";
 export function r2Config(): R2Config {
   if (instance) return instance;
-  if (!r2Enabled()) throw new Error("R2_NOT_ENABLED");
+  // Read/delete existing R2 objects remain available after disabling new R2 uploads.
+  // Enabling new uploads is a separate switch from retaining read access.
   const accountId = Deno.env.get("R2_ACCOUNT_ID")?.trim() || "";
   const accessKeyId = Deno.env.get("R2_ACCESS_KEY_ID")?.trim() || "";
   const secretAccessKey = Deno.env.get("R2_SECRET_ACCESS_KEY") || "";
