@@ -1,0 +1,86 @@
+/* RMUTI Apple-inspired 2026 visual refresh: white, orange and navy */
+:root{--navy:#102D55;--orange:#F47721}
+body{background:#f7f9fc;color:#142e50}
+.rmuti-apple-home{background:#fff}
+.rmuti-apple-home .hero{background:radial-gradient(ellipse at 90% 10%,#eef5ff,transparent 54%),#fff;color:#102D55;border:0}
+.rmuti-apple-home .hero::before,.rmuti-apple-home .hero::after{display:none}
+.rmuti-apple-home .hero-inner{grid-template-columns:minmax(0, .87fr) minmax(0,1.13fr);max-width:1400px;min-height:515px;gap:45px;padding:54px 0 25px}
+.rmuti-apple-home .hero-tag{border:0;background:transparent;padding:0;color:#71829d;font-size:11px;letter-spacing:.34em;margin-bottom:14px}
+.rmuti-apple-home .hero-tag span{display:none}
+.rmuti-apple-home .hero h1{font-size:clamp(3.6rem,6vw,6rem);letter-spacing:-.065em;line-height:1.15;color:#102D55;margin:0 0 18px;text-shadow:none}
+.rmuti-apple-home .hero h1 span{color:#F47721;background:none;-webkit-text-fill-color:#F47721}
+.rmuti-apple-home .hero-subtitle{font-size:clamp(1.15rem,1.8vw,1.65rem);font-weight:800;color:#102D55;margin:0 0 6px}
+.rmuti-apple-home .hero p{color:#455e7e;line-height:1.7;font-size:14px;margin:0}
+.rmuti-apple-home .hero-support-copy{max-width:470px;margin-top:13px!important;color:#7d8ba3!important}
+.rmuti-apple-home .hero-actions{margin-top:24px}
+.rmuti-apple-home .hero-actions .btn{border-radius:16px;min-height:50px}
+.rmuti-apple-home .btn.hero-outline{color:#102D55;background:white;border:1px solid #d6e0ee;box-shadow:0 5px 18px #102d550a}
+.rmuti-apple-home .hero-caption{color:#7a8aa3;margin-top:22px}
+.rmuti-apple-home .campus-visual{padding:4px 4px 18px 4px}
+.rmuti-apple-home .campus-visual:before{display:none}
+.rmuti-apple-home .campus-photo-frame{aspect-ratio:1.64;border-radius:28px;border:0;background:#eef3fa;box-shadow:0 16px 45px #102d5514}
+.rmuti-apple-home .campus-photo-frame>img{object-position:center 39%}
+.rmuti-apple-home .campus-photo-quote{position:absolute;right:24px;top:20px;z-index:2;text-align:right;font-size:15px;line-height:1.6;font-weight:700;color:white;text-shadow:0 2px 9px #102d5570}
+.rmuti-apple-home .campus-photo-caption{background:#fffefaeb;color:#102D55;left:auto;right:17px;bottom:16px;border-radius:13px;padding:9px 13px;backdrop-filter:blur(15px)}
+.rmuti-apple-home .campus-photo-caption small{color:#536987}
+.rmuti-apple-home .campus-floating-stats{display:none}
+.home-stats-strip{display:flex;justify-content:center;gap:12px;padding-bottom:27px;flex-wrap:wrap}
+.home-stat-pill{background:#fff;border:1px solid #e6ebf3;box-shadow:0 8px 20px #102d5508;border-radius:18px;padding:15px 21px;display:flex;align-items:center;gap:13px;min-width:205px}
+.home-stat-pill>div{flex:1}.home-stat-pill strong{font-size:20px;display:block;color:#102d55}.home-stat-pill small{display:block;color:#7c89a0;font-size:11px}
+.home-stat-icon{border-radius:15px;width:46px;height:46px;display:grid;place-items:center}.home-stat-icon.orange{background:#fff0e5;color:#f47721}.home-stat-icon.navy{background:#eaf2fd;color:#1e5591}.home-stat-icon.green{background:#e8f8ef;color:#158953}
+.rmuti-apple-home .home-feature-strip{box-shadow:none;background:#f8fafc;border-top:1px solid #eff2f7}
+.rmuti-apple-home .home-feature-grid{max-width:1400px}
+.rmuti-apple-home .home-feature{padding-top:17px;padding-bottom:17px}
+.rmuti-apple-home .container.section{max-width:1400px;padding-top:41px}
+.rmuti-apple-home .page-title h1{font-size:27px}
+.rmuti-apple-home .filter-card{box-shadow:0 9px 32px #102d5508}
+.rmuti-apple-home .job-card{border-radius:20px;box-shadow:0 12px 28px #102d5509}
+.rmuti-apple-home .job-card::before{height:3px}
+.rmuti-apple-home .news-grid{gap:15px}
+.rmuti-apple-home .news-card{background:#fbfcfe}
+.home-steps-section{max-width:1400px;padding:30px 0 55px}
+.home-steps-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:19px}
+.home-steps-heading h2{font-size:25px;color:#102D55;margin:3px 0}
+.home-steps-heading p{font-size:13px;color:#73839c}
+.home-steps-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.home-step{background:#f8fafc;border:1px solid #e9edf5;border-radius:20px;padding:22px;display:flex;flex-wrap:wrap;align-items:center;gap:13px}
+.home-step-number{width:32px;height:32px;background:#102d55;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800}
+.home-step:first-child .home-step-number{background:#f47721}.home-step svg{color:#f47721}
+.home-step h3{font-size:14px;margin:0;color:#102d55}.home-step p{font-size:11px;color:#718099;margin:4px 0 0}
+.university-topbar{display:none}
+.header{background:#ffffffed;border-bottom:1px solid #e9eef6;box-shadow:0 2px 16px #102d5508}
+.header-inner{max-width:1400px;min-height:78px}
+.brand strong{color:#102d55}.brand strong span{color:#f47721}
+.main-nav>a.active:not(.btn){color:#ec6c14}
+.staff-shell{grid-template-columns:248px minmax(0,1fr);background:#f7f9fc}
+.staff-shell .sidebar{background:#fff;border-right:1px solid #e5ebf3;color:#102d55}
+.staff-shell .sidebar-heading{border-bottom:1px solid #e8edf4}
+.staff-shell .sidebar-heading::before{display:none}
+.staff-shell .sidebar-heading h2{color:#102d55}
+.staff-shell .sidebar-heading small,.staff-shell .sidebar-campus-badge small{color:#7c8aa0}
+.staff-shell .sidebar-campus-badge{border-color:#e5ebf3}
+.staff-shell .sidebar-campus-badge strong{color:#102d55}
+.staff-shell .sidebar-heading .eyebrow{color:#f47721}
+.staff-shell .sidebar>a{color:#274367;border-radius:13px;margin:5px 0;min-height:43px}
+.staff-shell .sidebar>a:hover{background:#f3f6fb;color:#102d55}
+.staff-shell .sidebar>a.active{background:linear-gradient(100deg,#ff781e,#fa8f47);color:white;box-shadow:0 8px 18px #f4772130}
+.staff-shell .sidebar>a.active svg{color:white}
+.staff-shell .sidebar-note{color:#8a98aa;border-top:1px solid #e8edf4}
+.staff-main{padding:30px clamp(16px,2.5vw,40px) 56px}
+.staff-main>.page-title{background:none;box-shadow:none;padding:8px 0 14px;border-radius:0}
+.staff-main>.page-title h1{color:#102d55;font-size:30px}
+.staff-main>.page-title p{color:#78869b}
+.staff-main>.page-title .eyebrow{color:#f47721}
+.staff-main .panel{box-shadow:0 9px 26px #102d5508;border:1px solid #e7edf5;border-radius:20px}
+.review-overview{background:#fff!important}
+.review-overview-top h2{font-size:27px}
+.review-jump-links a{border:1px solid #e5ecf5;background:#fff;color:#274367;padding:11px 14px}
+.review-jump-links a:first-child{color:#fff;background:#f47721;border-color:#f47721}
+.review-metrics>div{border-radius:15px}
+#review-decision{border:1px solid #e6edf6;background:#fff}
+#review-decision h2{color:#102d55}
+.admin-signature-canvas{border:1px dashed #bacce2;background:#fff;border-radius:16px}
+@media(max-width:900px){.rmuti-apple-home .hero-inner{gap:25px}.home-steps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){.rmuti-apple-home .hero-inner{grid-template-columns:1fr;padding-top:34px}.rmuti-apple-home .hero h1{font-size:clamp(3rem,9vw,5rem)}.rmuti-apple-home .campus-visual{max-width:100%}.rmuti-apple-home .campus-photo-frame{aspect-ratio:1.7}.home-stat-pill{flex:1;min-width:170px}.staff-shell .sidebar.open{display:block}}
+@media(max-width:540px){.rmuti-apple-home .hero h1{font-size:clamp(2.75rem,12vw,4rem)}.rmuti-apple-home .campus-photo-frame{aspect-ratio:1.26}.home-stat-pill{min-width:130px}.home-stat-pill strong{font-size:16px}.home-steps-grid{grid-template-columns:1fr}.home-steps-heading{align-items:flex-start;flex-direction:column}.rmuti-apple-home .campus-photo-quote{font-size:11px}.staff-main>.page-title h1{font-size:24px}}
+@media print{.home-stats-strip,.home-steps-section{display:none!important}}
