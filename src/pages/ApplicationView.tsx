@@ -391,14 +391,14 @@ export function PrintApplication({ exam = false }: { exam?: boolean }) {
   useEffect(() => {
     let active = true;
     setPhoto("");
-    if (access.data && photoPath)
+    if ((exam || access.data) && photoPath)
       void signedFile(photoPath).then((url) => {
         if (active) setPhoto(url);
       });
     return () => {
       active = false;
     };
-  }, [photoPath,access.data]);
+  }, [photoPath,access.data,exam]);
   const assignment =
     d?.assignments.find((x) => x.id === selected) || d?.assignments[0];
   const schedule = schedules.data?.find(
@@ -412,7 +412,7 @@ export function PrintApplication({ exam = false }: { exam?: boolean }) {
         </Link>
         <button
           className="btn primary"
-          disabled={!s || access.data !== true || (exam && !schedule)}
+          disabled={!s || (!exam && access.data !== true) || (exam && !schedule)}
           onClick={printPage}
         >
           <Printer size={17} /> พิมพ์ / บันทึกใบสมัคร PDF
@@ -432,10 +432,10 @@ export function PrintApplication({ exam = false }: { exam?: boolean }) {
         )}
       </div>
       <State
-        loading={q.isPending || access.isPending || (!exam && signature.isPending) || (exam && schedules.isPending)}
-        error={q.error || access.error || signature.error || schedules.error}
+        loading={q.isPending || (!exam && (access.isPending || signature.isPending)) || (exam && schedules.isPending)}
+        error={q.error || (!exam && (access.error || signature.error)) || schedules.error}
       >
-        {access.data !== true ? (
+        {!exam && access.data !== true ? (
           <Notice>ยังไม่สามารถดาวน์โหลดใบสมัครได้ กรุณารอ Admin ตรวจสอบและยืนยันก่อน</Notice>
         ) : !s ? (
           <Notice>ใบสมัครต้องส่งสำเร็จก่อนดาวน์โหลดเอกสาร</Notice>
