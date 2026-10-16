@@ -39,11 +39,21 @@ const title: Record<Table, string> = {
   announcements: "ข่าวและประกาศ",
   exam_schedules: "กำหนดการสอบ",
 };
-const defaultDocs: DocRequirement[] = [
-  { key: "photo", label: "รูปติดใบสมัคร", required: true },
-  { key: "degree", label: "หลักฐานวุฒิการศึกษา", required: true },
-  { key: "transcript", label: "Transcript", required: true },
+const documentOptions: [string,string][] = [
+  ["degree","หนังสือรับรองคุณวุฒิ / ปริญญาบัตร"],
+  ["transcript","ใบรายงานผลการศึกษา (Transcript)"],
+  ["photo","รูปถ่ายหน้าตรง 3 × 4 ซม."],
+  ["house_registration","สำเนาทะเบียนบ้าน"],
+  ["id_card","สำเนาบัตรประจำตัวประชาชน"],
+  ["military","สด.8 / สด.43 / เอกสารเกี่ยวกับการเป็นทหาร (ถ้ามี)"],
+  ["name_change","หลักฐานสมรส / เปลี่ยนชื่อ-สกุล (ถ้ามี)"],
+  ["other","เอกสารอื่น ๆ"],
+  ["certificates","ใบรับรองกิจกรรม / ใบรับรองประสบการณ์ (ถ้ามี)"],
+  ["experience","หลักฐานประสบการณ์"],
 ];
+const defaultDocs: DocRequirement[] = documentOptions.slice(0,9).map(([key,label],i)=>({
+  key,label,required:i<=4,
+}));
 export default function Catalog({ table }: { table: Table }) {
   const auth = useAuth();
   const qc = useQueryClient(),
@@ -385,14 +395,7 @@ export default function Catalog({ table }: { table: Table }) {
                       )
                     }
                   >
-                    {[
-                      ["photo", "รูปถ่าย"],
-                      ["degree", "วุฒิการศึกษา"],
-                      ["transcript", "Transcript"],
-                      ["id_card", "หลักฐานแสดงตน"],
-                      ["experience", "หลักฐานประสบการณ์"],
-                      ["other", "เอกสารอื่น"],
-                    ].map(([v, l]) => (
+                    {documentOptions.map(([v, l]) => (
                       <option key={v} value={v}>
                         {l}
                       </option>
