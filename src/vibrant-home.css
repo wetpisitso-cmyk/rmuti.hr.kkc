@@ -199,3 +199,50 @@
  .header .brand-mark img{width:39px;height:46px}
  .header .brand strong{font-size:14px}
 }
+
+/* Definitive header crest fix: keep the *whole* original seal in the bar.
+   Scoped and !important to override competing campus/legacy mobile rules. */
+.header .header-inner { align-items:center !important; }
+.header .brand { display:flex !important;align-items:center !important;flex-shrink:1; }
+.header .brand .brand-mark {
+  width:46px !important;height:53px !important;min-width:46px !important;
+  min-height:53px !important;flex:0 0 46px !important;
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  overflow:visible !important;transform:none !important;
+  padding:0 !important;margin:0 !important;
+}
+.header .brand .brand-mark img {
+  display:block !important;width:46px !important;height:53px !important;
+  max-width:46px !important;max-height:53px !important;
+  object-fit:contain !important;object-position:50% 50% !important;
+  transform:none !important;position:static !important;
+  margin:0 !important;padding:0 !important;
+}
+@media(max-width:800px) {
+  .header .header-inner { height:80px !important;min-height:80px !important; }
+  .header .brand .brand-mark {
+    width:40px !important;height:46px !important;min-width:40px !important;
+    min-height:46px !important;flex:0 0 40px !important;
+  }
+  .header .brand .brand-mark img {
+    width:40px !important;height:46px !important;
+    max-width:40px !important;max-height:46px !important;
+  }
+  .header .brand { gap:11px !important; }
+  .header .brand strong { font-size:15px !important;line-height:1.3; }
+  .header .brand small { font-size:10px !important; }
+}
+@media(max-width:400px) {
+  .header .brand .brand-mark {width:37px !important;min-width:37px !important;height:44px !important;min-height:44px !important;flex-basis:37px !important}
+  .header .brand .brand-mark img{width:37px !important;max-width:37px !important;height:44px !important;max-height:44px !important}
+}
+
+/* The logo is painted with background-size:contain inside a fixed mobile box,
+   avoiding any intrinsic image sizing / crop from overlapping style sheets. */
+.header .brand-mark-header {
+ background-repeat:no-repeat !important;
+ background-size:contain !important;
+ background-position:center center !important;
+ overflow:hidden !important;
+}
+.header .brand-mark-header img {opacity:0 !important;pointer-events:none !important}
