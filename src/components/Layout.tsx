@@ -16,6 +16,7 @@ import {
   Megaphone,
   ShieldCheck,
   ArrowUpRight,
+  BookOpenCheck,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
@@ -102,7 +103,7 @@ export function Layout() {
             </NavLink>
             <NavLink to="/announcements">ประกาศ</NavLink>
             <NavLink to="/results">ผลคัดเลือก</NavLink>
-            <NavLink to="/guide">คู่มือ / ติดต่อ</NavLink>
+            <NavLink to="/guide">คู่มือผู้สมัคร / ติดต่อ</NavLink>
             {a.session ? (
               <>
                 <Link
@@ -160,6 +161,7 @@ const links = [
   ["publish", "ประกาศและเผยแพร่", Megaphone, "publish"],
   ["users", "บัญชีและสิทธิ์", Users, "admin"],
   ["settings", "ตั้งค่า / ประวัติ", Settings, "admin"],
+  ["guide", "คู่มือการใช้งาน Admin", BookOpenCheck, "admin"],
 ] as const;
 export function StaffLayout() {
   const a = useAuth();

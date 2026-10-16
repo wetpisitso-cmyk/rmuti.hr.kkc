@@ -4,7 +4,9 @@ import { Layout, StaffLayout } from "./components/Layout";
 import { Guard } from "./components/Guard";
 import { State, Notice } from "./components/UI";
 import { configured } from "./lib/supabase";
-import { Home, JobDetail, Announcements, Results, Guide } from "./pages/Public";
+import { Home, JobDetail, Announcements, Results } from "./pages/Public";
+const ApplicantGuide = lazy(() => import("./pages/ApplicantGuide"));
+const AdminGuide = lazy(() => import("./pages/staff/AdminGuide"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -45,7 +47,7 @@ export default function App() {
             <Route path="jobs/:id" element={<JobDetail />} />
             <Route path="announcements" element={<Announcements />} />
             <Route path="results" element={<Results />} />
-            <Route path="guide" element={<Guide />} />
+            <Route path="guide" element={<ApplicantGuide />} />
             <Route path="login" element={<Auth mode="login" />} />
             <Route path="register" element={<Auth mode="register" />} />
             <Route path="forgot-password" element={<Auth mode="forgot" />} />
@@ -89,6 +91,7 @@ export default function App() {
                   <Route path="publish" element={<Publish />} />
                 </Route>
                 <Route element={<Guard permission="admin" />}>
+                  <Route path="guide" element={<AdminGuide />} />
                   <Route path="users" element={<Users />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>

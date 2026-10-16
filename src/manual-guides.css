@@ -1,0 +1,98 @@
+/* RMUTI KKC HANDBOOKS – public applicant and protected Admin pages. */
+.manual-page{max-width:1380px;margin:0 auto;padding:36px 0 76px;color:#142f54}
+.manual-page *{box-sizing:border-box}
+.manual-page .manual-hero{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(210px,.65fr);gap:25px;min-height:365px;overflow:hidden;border-radius:28px;background:radial-gradient(ellipse at 97% 10%,#3777bc8c,transparent 58%),linear-gradient(115deg,#0a2447,#133e76 73%,#1c5898);box-shadow:0 25px 55px #102d5526;color:#fff;padding:49px clamp(25px,5vw,68px)}
+.manual-page .manual-hero:before{content:"";position:absolute;z-index:-1;width:550px;height:550px;right:-150px;top:-210px;border:1px solid #ffffff3a;border-radius:50%;box-shadow:0 0 0 45px #ffffff0a,0 0 0 90px #ffffff07}
+.manual-page .manual-hero:after{content:"";position:absolute;height:5px;inset:auto 0 0;background:linear-gradient(90deg,#ff7b20,#ffbc73,#367dc4)}
+.manual-hero-content{position:relative;z-index:1}
+.manual-eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:11px;font-weight:900;letter-spacing:.12em;background:#ffffff18;border:1px solid #ffffff48;color:#ffd6b3;padding:9px 14px;border-radius:100px}
+.manual-page .manual-hero h1{font-size:clamp(32px,4vw,53px);line-height:1.32;letter-spacing:-.035em;margin:20px 0 12px;color:#fff}
+.manual-page .manual-hero h1 span{color:#ffae61}
+.manual-page .manual-hero p{font-size:14px;line-height:1.95;color:#e3eeff;max-width:635px;margin:0}
+.manual-hero-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:27px}
+.manual-hero-actions .btn{min-height:45px;display:inline-flex;align-items:center;gap:9px;border-radius:12px;padding:10px 19px}
+.manual-light-btn{background:linear-gradient(100deg,#ff9639,#f47721)!important;color:#fff!important;border-color:#ffad6d!important;box-shadow:0 9px 20px #e75f1a36}
+.manual-ghost-btn{border:1px solid #ffffff77!important;background:#ffffff18!important;color:#fff!important}
+.manual-hero-art{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;min-width:0}
+.manual-art-icon{width:162px;height:162px;display:grid;place-items:center;border:1px solid #ffffff58;background:linear-gradient(145deg,#ffffff3e,#ffffff0b);border-radius:40px;transform:rotate(-7deg);box-shadow:0 19px 35px #071d3a2e}
+.manual-art-icon svg{color:#ffb56e;transform:rotate(7deg)}
+.manual-art-label{display:flex;gap:8px;align-items:center;font-size:11px;letter-spacing:.07em;font-weight:700;color:#e2edff}
+.manual-info-banner{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:-21px 30px 44px;position:relative;z-index:2}
+.manual-info-banner>div{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid #d9e6f6;border-radius:16px;padding:19px 17px;box-shadow:0 12px 28px #102d5517}
+.manual-info-banner>div>svg{flex-shrink:0;color:#f47721;width:44px;height:44px;padding:10px;border-radius:12px;background:#ffefe2}
+.manual-info-banner strong{display:block;font-size:13px;color:#102d55}
+.manual-info-banner small{display:block;font-size:11px;color:#637f9f;line-height:1.6;margin-top:3px}
+.manual-section{margin:46px 0 0}
+.manual-section-heading{display:flex;justify-content:space-between;gap:15px;align-items:end;margin-bottom:22px}
+.manual-kicker{font-size:11px;letter-spacing:.16em;font-weight:900;color:#ed6e13}
+.manual-section-heading h2{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:-.02em;font-size:clamp(22px,2.8vw,31px);margin:6px 0;color:#102d55}
+.manual-section-heading p{font-size:13px;color:#7c8fa9;margin:4px 0 0}
+.manual-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.manual-step{position:relative;background:linear-gradient(160deg,#fff,#f8fbff);border:1px solid #dce7f4;border-radius:22px;padding:25px 28px;min-width:0;box-shadow:0 10px 29px #102d550c}
+.manual-step:nth-child(4n+2),.manual-step:nth-child(4n+3){background:linear-gradient(160deg,#fff,#fff9f2);border-color:#f3e2d2}
+.manual-step-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.manual-step-number{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:#102d55;color:#fff;font-size:15px;font-weight:900}
+.manual-step:nth-child(4n+2) .manual-step-number,.manual-step:nth-child(4n+3) .manual-step-number{background:linear-gradient(120deg,#fa8d33,#ee6c16)}
+.manual-step-icon{color:#f47721;background:#ffefe4;width:50px;height:50px;display:grid;place-items:center;border-radius:15px}
+.manual-step h3{color:#102d55;font-size:19px;line-height:1.6;font-weight:900;margin:0 0 5px}
+.manual-step-summary{font-size:13px;font-weight:600;color:#617a99;line-height:1.75;margin:0 0 13px}
+.manual-step ul{padding-left:22px;margin:0 0 6px}
+.manual-step li{color:#324f70;font-size:13px;line-height:1.85;margin:7px 0}
+.manual-step li::marker{color:#f47721}
+.manual-step-link{display:inline-flex;align-items:center;gap:8px;color:#dc6713;font-size:13px;font-weight:800;margin-top:13px}
+.manual-step-link:hover{text-decoration:underline}
+.manual-help-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.8fr);gap:20px;align-items:start}
+.manual-faq-card,.manual-contact-card,.manual-admin-help{background:#fff;border:1px solid #e0eaf6;border-radius:22px;padding:28px;box-shadow:0 13px 30px #102d550c}
+.manual-faq-list{display:grid;gap:10px}
+.manual-faq-list details{border:1px solid #dfe8f5;border-radius:13px;background:#f8fbff;padding:13px 17px}
+.manual-faq-list summary{cursor:pointer;list-style:auto;color:#163d69;font-size:13px;font-weight:800}
+.manual-faq-list details[open]{background:#fff5e9;border-color:#f7dcc3}
+.manual-faq-list details p{color:#47617e;font-size:13px;margin:10px 0 2px;line-height:1.9}
+.manual-contact-card{background:linear-gradient(155deg,#113a73,#0a2446);color:#fff}
+.manual-contact-card .manual-kicker{color:#ffb578}
+.manual-contact-card h2{color:#fff;font-size:24px;margin:6px 0 9px}
+.manual-contact-card p{color:#d2e2f7;font-size:13px;line-height:1.85}
+.manual-contact-items{display:grid;gap:13px;margin:22px 0}
+.manual-contact-items>div{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.75;overflow-wrap:anywhere}
+.manual-contact-items svg{color:#ffb275;flex:0 0 auto;margin-top:2px}
+.manual-contact-items small{font-size:12px;color:#d3e2f5}
+.manual-contact-btn{background:#fff!important;border:0!important;color:#153c6a!important}
+.admin-manual .manual-hero{background:radial-gradient(ellipse at 88% 12%,#e873242e,transparent 46%),linear-gradient(115deg,#071b3c,#173f75 64%,#244c84)}
+.manual-admin-quick .manual-quick-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.manual-quick-links>a{display:flex;align-items:center;gap:12px;border:1px solid #dbe7f7;border-radius:14px;padding:17px 15px;background:#fff;color:#153c69;font-size:13px;font-weight:800;box-shadow:0 8px 20px #102d550c}
+.manual-quick-links>a>svg:first-child{color:#f47721;flex-shrink:0}
+.manual-quick-links>a>svg:last-child{margin-left:auto;flex-shrink:0}
+.manual-quick-links>a:hover{background:#fff3e8;border-color:#ffc997}
+.manual-admin-help{max-width:950px}
+.manual-admin-warning{display:flex;align-items:flex-start;gap:9px;margin:22px 0 2px;padding:14px 17px;border-radius:12px;background:#fff2e8;border:1px solid #f9d7b7;color:#914516;font-size:13px;line-height:1.7}
+.manual-admin-warning svg{flex-shrink:0}
+.manual-access-denied{margin:35px 0;border:1px solid #f1d1b5;border-radius:18px;background:#fff6eb;padding:35px;text-align:center}
+.manual-access-denied svg{color:#ef7725}
+@media(max-width:850px){
+ .manual-page{padding:25px 0 52px}
+ .manual-page .manual-hero{grid-template-columns:minmax(0,1fr) 175px;padding:32px 26px;min-height:320px}
+ .manual-art-icon{width:126px;height:126px}
+ .manual-help-grid{grid-template-columns:1fr}
+ .manual-admin-quick .manual-quick-links{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ .manual-page{padding:16px 0 45px}
+ .manual-page .manual-hero{display:block;padding:27px 21px;min-height:0;border-radius:19px}
+ .manual-page .manual-hero h1{font-size:32px}
+ .manual-hero-art{display:none}
+ .manual-info-banner{grid-template-columns:1fr;margin:13px 0 31px;gap:9px}
+ .manual-info-banner>div{padding:12px 15px}
+ .manual-info-banner>div>svg{width:39px;height:39px}
+ .manual-steps{grid-template-columns:1fr;gap:12px}
+ .manual-step{padding:21px 19px;border-radius:16px}
+ .manual-step h3{font-size:17px}
+ .manual-section{margin:34px 0 0}
+ .manual-section-heading h2{font-size:23px}
+ .manual-faq-card,.manual-contact-card,.manual-admin-help{padding:20px;border-radius:17px}
+ .manual-admin-quick .manual-quick-links{grid-template-columns:1fr}
+}
+@media print{
+ .manual-page .manual-hero{box-shadow:none}
+ .manual-page .manual-step,.manual-page .manual-contact-card,.manual-page .manual-faq-card{box-shadow:none;break-inside:avoid}
+ .manual-step-link,.manual-hero-actions,.manual-quick-links{display:none!important}
+}
