@@ -108,19 +108,22 @@ export default function StaffDashboard({
       setExporting(false);
     }
   };
-  const deleteApplication = async (id: string, number: string | null) => {
+  const deleteApplication = async (id: string, number: string | null, status: string) => {
     if (a.role !== "admin") return;
-    if (!number) { setError("ใบสมัครต้องมีเลขผู้สมัครก่อนจึงจะลบได้"); return; }
-    const typed = window.prompt("ลบใบสมัครถาวร: พิมพ์เลขใบสมัครเพื่อยืนยัน\n" + number);
+    const unnumbered = !number && ["draft","withdrawn"].includes(status);
+    if (!number && !unnumbered) { setError("ใบสมัครที่ยังไม่มีเลขและไม่ใช่แบบร่างหรือถอนแล้ว ไม่สามารถลบด้วยวิธีนี้ได้"); return; }
+    const expected = unnumbered ? "ลบถาวร" : number!;
+    const typed = window.prompt("ลบใบสมัครและไฟล์แนบถาวร: พิมพ์ข้อความนี้เพื่อยืนยัน\n" + expected);
     if (typed === null) return;
-    if (typed.trim() !== number) { setError("เลขยืนยันไม่ตรงกับใบสมัคร"); return; }
-    if (!window.confirm("ยืนยันลบใบสมัคร " + number + " และข้อมูล/เอกสารที่เกี่ยวข้องอย่างถาวร?")) return;
+    if (typed.trim() !== expected) { setError("ข้อความยืนยันไม่ตรงกับรายการ"); return; }
+    if (!window.confirm("ยืนยันลบใบสมัคร " + (number || (status === "draft" ? "แบบร่าง" : "ที่ถอนแล้ว")) + " รวมข้อมูลและเอกสารที่เกี่ยวข้องอย่างถาวร?")) return;
     setDeletingId(id);
     setError("");
     setSuccess("");
     try {
-      await rpc("admin_delete_application", { p_id: id, p_confirm_number: number });
-      setSuccess("ลบใบสมัคร " + number + " จากฐานข้อมูลสำเร็จแล้ว");
+      if (unnumbered) await rpc("admin_delete_unnumbered_application", { p_id: id, p_confirmation: expected });
+      else await rpc("admin_delete_application", { p_id: id, p_confirm_number: number });
+      setSuccess("ลบใบสมัคร " + (number || (status === "draft" ? "แบบร่าง" : "ที่ถอนแล้ว")) + " จากฐานข้อมูลสำเร็จแล้ว");
       await Promise.all([
         q.refetch(), ...(listOnly ? [] : [dashboard.refetch()]),
       ]);
@@ -343,12 +346,12 @@ export default function StaffDashboard({
                         >
                           ตรวจใบสมัคร <ArrowRight size={14} />
                         </Link>
-                        {a.role === "admin" && r.application_number && (
+                        {a.role === "admin" && (r.application_number || ["draft","withdrawn"].includes(r.status)) && (
                           <button
                             type="button"
                             className="btn small danger"
                             disabled={deletingId !== null}
-                            onClick={() => void deleteApplication(r.id, r.application_number)}
+                            onClick={() => void deleteApplication(r.id, r.application_number, r.status)}
                           >
                             <Trash2 size={14} /> {deletingId === r.id ? "กำลังลบ…" : "ลบ"}
                           </button>
