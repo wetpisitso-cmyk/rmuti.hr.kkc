@@ -22,7 +22,7 @@ let library:Promise<PdfLib>|undefined;
 function loadPdfLib():Promise<PdfLib> {
   if(window.PDFLib) return Promise.resolve(window.PDFLib);
   if(library) return library;
-  library=new Promise((resolve,reject)=>{
+  const pending:Promise<PdfLib>=new Promise<PdfLib>((resolve,reject)=>{
     const script=document.createElement("script");
     script.src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
     script.crossOrigin="anonymous";
@@ -30,7 +30,8 @@ function loadPdfLib():Promise<PdfLib> {
     script.onload=()=>window.PDFLib?resolve(window.PDFLib):reject(new Error("PDF_LIBRARY_FAILED"));
     script.onerror=()=>reject(new Error("PDF_LIBRARY_FAILED"));
     document.head.appendChild(script);
-  }).catch(e=>{library=undefined;throw e});
+  });
+  library=pending.catch(e=>{library=undefined;throw e});
   return library;
 }
 const A4:[number,number]=[595.28,841.89];
