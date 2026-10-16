@@ -62,11 +62,12 @@ export function DocumentUpload({
     [progress, setProgress] = useState(0),
     [error, setError] = useState("");
   const qc = useQueryClient();
+  const uploadLimitMb = Math.min(maxMb, 3);
   const upload = async (f: File) => {
     setFile(f);
     setError("");
-    if (f.size > maxMb * 1048576) {
-      setError(`ไฟล์ต้องไม่เกิน ${maxMb} MB`);
+    if (f.size > uploadLimitMb * 1048576) {
+      setError(`ไฟล์ต้องไม่เกิน ${uploadLimitMb} MB`);
       return;
     }
     setBusy(true);
