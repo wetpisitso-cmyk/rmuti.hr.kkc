@@ -32,6 +32,16 @@ export default function Review() {
     queryKey: ["admin-signature", id],
     queryFn: async () => { const r = await supabase.from("application_admin_signatures").select("*").eq("application_id", id).maybeSingle(); if(r.error)throw r.error; return r.data as AdminSignature | null; },
   });
+  const printApproval = useQuery({
+    queryKey: ["print-approved", id],
+    enabled: !!id,
+    queryFn: async () => { const r = await supabase.from("application_print_approvals").select("*").eq("application_id",id).maybeSingle();if(r.error) throw r.error;return r.data; },
+  });
+  const canPrint = useQuery({
+    queryKey: ["can-print-application", id],
+    enabled: !!id,
+    queryFn: () => rpc<boolean>("can_print_application", {p_id:id}),
+  });
   const notes = useQuery({
     queryKey: ["staff-notes", id],
     queryFn: async () => {
@@ -63,6 +73,8 @@ export default function Review() {
     await qc.invalidateQueries({ queryKey: ["staff-list"] });
     await qc.invalidateQueries({ queryKey: ["staff-dashboard"] });
     await qc.invalidateQueries({ queryKey: ["admin-signature", id] });
+    await qc.invalidateQueries({ queryKey: ["print-approved", id] });
+    await qc.invalidateQueries({ queryKey: ["can-print-application", id] });
   };
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -89,16 +101,26 @@ export default function Review() {
   };
   const assignNumber = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (auth.role !== "admin" || !a || a.application_number) return;
+    if (auth.role !== "admin" || !a) return;
     setBusy(true);
     setError("");
     try {
       await rpc("admin_assign_application_number", { p_id: id, p_number: assignedNumber.trim() });
       await refresh();
       await qc.invalidateQueries({ queryKey: ["my-applications"] });
-      setSuccess("กำหนดเลขผู้สมัครเรียบร้อยแล้ว ผู้สมัครสามารถเห็นเลขได้ทันที");
+      setSuccess("บันทึกเลขผู้สมัครแล้ว โปรดยืนยันให้ดาวน์โหลดใบสมัครแยกต่างหาก");
     } catch (e) { setError(errorTH(e)); }
     finally { setBusy(false); }
+  };
+  const approvePrint = async () => {
+    if(auth.role!=="admin" || !a?.application_number) return;
+    if(!window.confirm("ยืนยันให้ผู้สมัครดาวน์โหลดใบสมัคร PDF เลขที่ "+a.application_number+" ?")) return;
+    setBusy(true);setError("");setSuccess("");
+    try {
+      await rpc("admin_confirm_application_print",{p_id:id,p_confirm:true});
+      await refresh();
+      setSuccess("ยืนยันใบสมัครแล้ว ผู้สมัครสามารถดาวน์โหลด PDF ได้");
+    } catch(e){setError(errorTH(e));}finally{setBusy(false);}
   };
   const note = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -216,16 +238,31 @@ export default function Review() {
                 </p>
               ))}
             </section>
-            {auth.role === "admin" && a.submitted_at && !a.application_number && (
+            {auth.role === "admin" && a.submitted_at && (
               <form className="panel stack" onSubmit={assignNumber}>
                 <h2>ออกเลขผู้สมัครโดย Admin</h2>
-                <Notice>ตรวจเอกสารและข้อมูลก่อนออกเลขผู้สมัคร ระบบจะไม่สร้างเลขให้อัตโนมัติ</Notice>
+                <Notice>กำหนดเลขได้เองทั้งภาษาไทย ภาษาอังกฤษ ตัวเลขและเครื่องหมาย เช่น รับสมัคร/๒๕๖๙/๑ หรือ HR-2569-A1 โดยห้ามซ้ำกับใบสมัครอื่น</Notice>
                 <Field label="เลขผู้สมัคร (กรอกเอง)" value={assignedNumber}
-                  onChange={e => setAssignedNumber(e.target.value.toUpperCase())}
-                  placeholder={"KKC-" + (a.job_positions?.recruitment_rounds?.year_be || "2569") + "-000001"}
-                  required pattern="KKC-[0-9]{4}-[0-9]{6,}" maxLength={40} />
-                <Submit busy={busy}>ยืนยันออกเลขผู้สมัคร</Submit>
+                  onChange={e => setAssignedNumber(e.target.value)}
+                  placeholder={a.application_number || "มทร.ขก./๒๕๖๙/๐๐๑"}
+                  required maxLength={80} />
+                <Submit busy={busy}>{a.application_number ? "เปลี่ยนเลขผู้สมัคร" : "ยืนยันออกเลขผู้สมัคร"}</Submit>
               </form>
+            )}
+            {auth.role === "admin" && a.submitted_at && (
+              <section className="panel stack" id="review-print-approval">
+                <h2>ยืนยันให้ผู้สมัครดาวน์โหลดใบสมัคร PDF</h2>
+                <p className="muted">Admin ตรวจเอกสารและเลขผู้สมัครแล้วจึงกดยืนยัน ผู้สมัครยังดาวน์โหลดไม่ได้ก่อนยืนยัน</p>
+                {printApproval.data && canPrint.data ? (
+                  <Notice kind="success">อนุมัติให้พิมพ์ใบสมัครแล้ว</Notice>
+                ) : (
+                  <Notice>ยังไม่อนุมัติ PDF ผู้สมัครจะไม่เห็นเอกสารฉบับพิมพ์</Notice>
+                )}
+                <button type="button" className="btn primary" disabled={busy || !a.application_number || ["draft","needs_correction","withdrawn"].includes(a.status) || Boolean(printApproval.data && canPrint.data)}
+                  onClick={() => void approvePrint()}>
+                  ยืนยันให้ดาวน์โหลดใบสมัคร
+                </button>
+              </section>
             )}
             <section className="panel" id="review-documents">
               <h2>ตรวจเอกสารแนบ</h2>
@@ -238,7 +275,7 @@ export default function Review() {
                       )?.label || doc.document_type}
                     </strong>
                     <small>
-                      {doc.file_name} · อัปโหลด {dateTH(doc.uploaded_at, true)}
+                      {doc.file_name} · {Math.round(doc.size_bytes / 1024).toLocaleString("th-TH")} KB · อัปโหลด {dateTH(doc.uploaded_at, true)}
                     </small>
                   </div>
                   <PreviewButton path={doc.storage_path} />

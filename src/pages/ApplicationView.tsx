@@ -36,6 +36,7 @@ export default function ApplicationView() {
   const { id } = useParams(),
     auth = useAuth(),
     qc = useQueryClient();
+  const printAccess = useQuery({queryKey:["can-print-application",id],enabled:!!id,queryFn:()=>rpc<boolean>("can_print_application",{p_id:id})});
   const q = useQuery({
     queryKey: ["application", id],
     queryFn: () => getApplication(id!),
@@ -110,7 +111,7 @@ export default function ApplicationView() {
                       <Pencil size={17} /> แก้ไขใบสมัคร
                     </Link>
                   )}
-                  {a.submitted_at && (
+                  {a.submitted_at && printAccess.data && (
                     <Link
                       className="btn outline"
                       to={`/application/${id}/print`}
@@ -129,6 +130,7 @@ export default function ApplicationView() {
                 </div>
               }
             />
+            {a.submitted_at && !printAccess.isPending && !printAccess.data && <Notice>ใบสมัคร PDF ยังดาวน์โหลดไม่ได้ กรุณารอ Admin ตรวจสอบและกดยืนยันให้ดาวน์โหลด</Notice>}
             {error && <Notice kind="error">{error}</Notice>}
             {success && <Notice kind="success">{success}</Notice>}
             <div className="detail-grid">
@@ -363,6 +365,7 @@ export default function ApplicationView() {
 }
 export function PrintApplication({ exam = false }: { exam?: boolean }) {
   const { id } = useParams();
+  const access=useQuery({queryKey:["can-print-application",id],enabled:!!id,queryFn:()=>rpc<boolean>("can_print_application",{p_id:id})});
   const q = useQuery({
     queryKey: ["application", id],
     queryFn: () => getApplication(id!),
@@ -388,14 +391,14 @@ export function PrintApplication({ exam = false }: { exam?: boolean }) {
   useEffect(() => {
     let active = true;
     setPhoto("");
-    if (photoPath)
+    if ((exam || access.data) && photoPath)
       void signedFile(photoPath).then((url) => {
         if (active) setPhoto(url);
       });
     return () => {
       active = false;
     };
-  }, [photoPath]);
+  }, [photoPath,access.data,exam]);
   const assignment =
     d?.assignments.find((x) => x.id === selected) || d?.assignments[0];
   const schedule = schedules.data?.find(
@@ -409,7 +412,7 @@ export function PrintApplication({ exam = false }: { exam?: boolean }) {
         </Link>
         <button
           className="btn primary"
-          disabled={!s || (exam && !schedule)}
+          disabled={!s || (!exam && access.data !== true) || (exam && !schedule)}
           onClick={printPage}
         >
           <Printer size={17} /> พิมพ์ / บันทึกใบสมัคร PDF
@@ -429,10 +432,12 @@ export function PrintApplication({ exam = false }: { exam?: boolean }) {
         )}
       </div>
       <State
-        loading={q.isPending || (!exam && signature.isPending) || (exam && schedules.isPending)}
-        error={q.error || signature.error || schedules.error}
+        loading={q.isPending || (!exam && (access.isPending || signature.isPending)) || (exam && schedules.isPending)}
+        error={q.error || (!exam && (access.error || signature.error)) || schedules.error}
       >
-        {!s ? (
+        {!exam && access.data !== true ? (
+          <Notice>ยังไม่สามารถดาวน์โหลดใบสมัครได้ กรุณารอ Admin ตรวจสอบและยืนยันก่อน</Notice>
+        ) : !s ? (
           <Notice>ใบสมัครต้องส่งสำเร็จก่อนดาวน์โหลดเอกสาร</Notice>
         ) : exam && !schedule ? (
           <Notice>ยังไม่มีกำหนดสอบที่เผยแพร่</Notice>
