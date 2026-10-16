@@ -21,21 +21,36 @@ import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { rows } from "../services/api";
-export function Brand() {
+export function Brand({ inHeader = false }: { inHeader?: boolean } = {}) {
   const [logo, setLogo] = useState(true);
   return (
-    <Link to="/" className="brand">
-      <span className="brand-mark">
-        {logo ? (
+    <Link to="/" className={inHeader ? "brand header-brand" : "brand"}>
+      {inHeader ? (
+        logo ? (
           <img
+            className="header-crest"
             src={`${import.meta.env.BASE_URL}logo.png`}
-            alt="ตรามหาวิทยาลัย"
+            alt="ตรามหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน"
+            width={54}
+            height={68}
             onError={() => setLogo(false)}
           />
         ) : (
-          <GraduationCap size={28} />
-        )}
-      </span>
+          <GraduationCap className="header-crest-fallback" size={40} aria-hidden="true" />
+        )
+      ) : (
+        <span className="brand-mark">
+          {logo ? (
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt="ตรามหาวิทยาลัย"
+              onError={() => setLogo(false)}
+            />
+          ) : (
+            <GraduationCap size={28} />
+          )}
+        </span>
+      )}
       <span>
         <strong>
           RMUTI <span>KHON KAEN</span>
@@ -69,7 +84,7 @@ export function Layout() {
           </div>
         </div>
         <div className="container header-inner">
-          <Brand />
+          <Brand inHeader />
           <button
             className="icon-btn mobile-only"
             aria-label="เปิดเมนู"
