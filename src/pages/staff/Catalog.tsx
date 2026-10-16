@@ -75,7 +75,7 @@ export default function Catalog({ table }: { table: Table }) {
     vacancies: 1,
     category: "support",
     fee_amount: 0,
-    max_file_mb: 10,
+    max_file_mb: 3,
     published: false,
     archived: false,
     require_national_id: false,
@@ -176,7 +176,7 @@ export default function Catalog({ table }: { table: Table }) {
         label: "ขนาดไฟล์สูงสุดต่อไฟล์ (MB)",
         type: "number",
         min: 1,
-        max: 10,
+        max: 3,
         required: true,
       },
       {
