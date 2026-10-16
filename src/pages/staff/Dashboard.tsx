@@ -28,6 +28,7 @@ import {
 import { statuses, type Filters } from "../../types/models";
 import { supabase } from "../../lib/supabase";
 import { ThaiDateField } from "../../components/ThaiDateField";
+import ApplicantDocumentsDownload from "../../components/ApplicantDocumentsDownload";
 
 const initial: Filters = {
   year: "",
@@ -346,6 +347,7 @@ export default function StaffDashboard({
                         >
                           ตรวจใบสมัคร <ArrowRight size={14} />
                         </Link>
+                        {a.role === "admin" && <ApplicantDocumentsDownload applicationId={r.id} compact />}
                         {a.role === "admin" && (r.application_number || ["draft","withdrawn"].includes(r.status)) && (
                           <button
                             type="button"
