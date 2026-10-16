@@ -10,6 +10,7 @@ import "./campus-design.css";
 import "./official-application.css";
 import "./apple-inspired-ui.css";
 import "./admin-login.css";
+import "./vibrant-home.css";
 class ErrorBoundary extends Component<
   { children: ReactNode },
   { failed: boolean }
