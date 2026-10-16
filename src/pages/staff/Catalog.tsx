@@ -248,6 +248,30 @@ export default function Catalog({ table }: { table: Table }) {
       ]);
       setEditing(false);
       setSuccess("ลบรายการสำเร็จ");
+    } catch (e) {
+      const msg = String((e as Error)?.message || "");
+      if (msg.includes("DELETE_BLOCKED_HAS_APPLICATIONS"))
+        setError("ตำแหน่งนี้มีผู้สมัครแล้ว จึงลบถาวรไม่ได้ กรุณาใช้ปุ่มเก็บถาวรแทน เพื่อรักษาข้อมูลผู้สมัคร");
+      else setError(errorTH(e));
+    }
+    finally { setDeleting(null); }
+  };
+  const archivePosition = async (row: Record<string, any>) => {
+    if (auth.role !== "admin" || table !== "job_positions") return;
+    const name = String(row.title || "");
+    if (!window.confirm("หยุดเผยแพร่และเก็บตำแหน่งนี้ถาวร?\\n" + name + "\\n\\nข้อมูลใบสมัครและเอกสารทั้งหมดจะยังอยู่")) return;
+    setDeleting(row.id);
+    setError("");
+    setSuccess("");
+    try {
+      await rpc("admin_save", { p_table: "job_positions", p_data: { ...row, archived: true, published: false } });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["catalog", table] }),
+        qc.invalidateQueries({ queryKey: ["jobs"] }),
+        qc.invalidateQueries({ queryKey: ["staff-list"] }),
+        qc.invalidateQueries({ queryKey: ["staff-dashboard"] }),
+      ]);
+      setSuccess("เก็บถาวรและหยุดเผยแพร่ตำแหน่งสำเร็จ โดยคงข้อมูลผู้สมัครเดิมครบถ้วน");
     } catch (e) { setError(errorTH(e)); }
     finally { setDeleting(null); }
   };
@@ -505,6 +529,13 @@ export default function Catalog({ table }: { table: Table }) {
                         <button className="btn small outline" onClick={() => start(row)}>
                           <Pencil size={15} /> แก้ไข
                         </button>
+                        {auth.role === "admin" && table === "job_positions" && !row.archived && (
+                          <button type="button" className="btn small outline"
+                            disabled={deleting !== null}
+                            onClick={() => void archivePosition(row)}>
+                            <Trash2 size={15}/> {deleting === row.id ? "กำลังเก็บ…" : "เก็บถาวร"}
+                          </button>
+                        )}
                         {auth.role === "admin" && (
                           <button type="button" className="btn small danger"
                             disabled={deleting !== null}
