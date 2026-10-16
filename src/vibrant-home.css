@@ -165,3 +165,16 @@
 @media print{
  .rmuti-apple-home .hero,.rmuti-apple-home .home-stats-strip,.rmuti-apple-home .home-feature-strip,.rmuti-apple-home .home-steps-section{display:none!important}
 }
+
+/* Bright navigation identity across the recruitment website; Admin workspace remains unchanged */
+.header{background:#fffffffa;border-bottom:1px solid #d9e6f6;box-shadow:0 8px 32px rgba(9,42,90,.09)}
+.header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#ff8b28 0%,#f47721 34%,#164c8b 78%,#102d55 100%);pointer-events:none}
+.header .header-inner{min-height:81px}
+.header .main-nav>a:not(.btn){font-weight:800}
+.header .main-nav>a.active:not(.btn){color:#ee6b12}
+.header .main-nav>a.active:not(.btn)::after{height:3px;background:#f47721}
+.header .main-nav>.btn{border-radius:14px}
+.header .brand strong{letter-spacing:-.025em;font-weight:900}
+.header .brand strong span{color:#f47721;font-size:12px}
+.header .brand small{color:#547091;font-weight:500}
+@media(max-width:800px){.header .main-nav.open{background:#fff;border:1px solid #dce8f5;box-shadow:0 18px 38px #102d5520;border-radius:18px;padding:20px;z-index:60}}
