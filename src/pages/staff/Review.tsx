@@ -8,6 +8,7 @@ import { dateTH, bangkokISO, money } from "../../lib/format";
 import { errorTH } from "../../lib/errors";
 import { ThaiDateField } from "../../components/ThaiDateField";
 import { PreviewButton } from "../../components/DocumentUpload";
+import ApplicantDocumentsDownload from "../../components/ApplicantDocumentsDownload";
 import {
   State,
   Title,
@@ -170,9 +171,10 @@ export default function Review() {
         title="รายละเอียดใบสมัคร"
         description={a?.application_number || (a?.submitted_at ? "รอ Admin กำหนดเลขผู้สมัคร" : "แบบร่าง")}
         action={
-          <Link className="btn outline" to={`/application/${id}`}>
-            เปิดข้อมูลและใบสมัคร A4
-          </Link>
+          <div className="flex gap-2 flex-wrap">
+            {auth.role === "admin" && id && <ApplicantDocumentsDownload applicationId={id} />}
+            <Link className="btn outline" to={`/application/${id}`}>เปิดข้อมูลและใบสมัคร A4</Link>
+          </div>
         }
       />
       {error && <Notice kind="error">{error}</Notice>}
