@@ -143,7 +143,9 @@ export async function uploadDocument(
   const body = new FormData();
   body.set("application_id", id);
   body.set("document_type", type);
-  body.set("file", await compressImage(file));
+  const optimized = await compressImage(file);
+  if (optimized.size > 3 * 1048576) throw new Error("FILE_TOO_LARGE");
+  body.set("file", optimized);
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${supabaseUrl}/functions/v1/upload-document`);
