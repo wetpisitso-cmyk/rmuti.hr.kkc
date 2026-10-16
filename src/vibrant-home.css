@@ -246,3 +246,25 @@
  overflow:hidden !important;
 }
 .header .brand-mark-header img {opacity:0 !important;pointer-events:none !important}
+
+/* Standalone original university crest — deliberately bypasses legacy .brand-mark rules.
+   The image keeps its native aspect ratio; no cropping, scaling up or bleed into hero. */
+.header .header-brand {display:flex;align-items:center;gap:12px;min-width:0;flex-shrink:1}
+.header .header-brand>.header-crest{
+ display:block!important;position:static!important;
+ width:auto!important;height:58px!important;
+ max-width:54px!important;max-height:58px!important;
+ flex:0 0 auto;object-fit:contain!important;object-position:center!important;
+ margin:0!important;padding:0!important;border:0!important;
+ transform:none!important;clip-path:none!important;filter:none!important;
+}
+.header .header-brand>.header-crest-fallback{flex:0 0 auto}
+.header .header-brand>span:last-child{min-width:0}
+@media(max-width:800px){
+ .header .header-inner{height:80px;min-height:80px;align-items:center}
+ .header .header-brand>.header-crest{height:51px!important;max-height:51px!important;max-width:46px!important}
+ .header .header-brand{gap:10px}
+}
+@media(max-width:400px){
+ .header .header-brand>.header-crest{height:47px!important;max-height:47px!important;max-width:42px!important}
+}
