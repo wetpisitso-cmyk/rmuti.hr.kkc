@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpenCheck, BriefcaseBusiness, CalendarDays, CheckCircle2, ClipboardCheck, CreditCard, FileDown, FileSignature, FileText, LockKeyhole, Megaphone, Settings, ShieldCheck, Trash2, Users } from "lucide-react";
+import { ArrowRight, BookOpenCheck, BriefcaseBusiness, CalendarDays, ClipboardCheck, CreditCard, FileDown, FileSignature, FileText, LockKeyhole, Megaphone, Settings, ShieldCheck, Trash2, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 type GuideStep={number:string;title:string;description:string;details:string[];Icon:LucideIcon;to?:string;label?:string};
