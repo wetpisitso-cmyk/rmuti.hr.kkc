@@ -236,3 +236,13 @@
   .header .brand .brand-mark {width:37px !important;min-width:37px !important;height:44px !important;min-height:44px !important;flex-basis:37px !important}
   .header .brand .brand-mark img{width:37px !important;max-width:37px !important;height:44px !important;max-height:44px !important}
 }
+
+/* The logo is painted with background-size:contain inside a fixed mobile box,
+   avoiding any intrinsic image sizing / crop from overlapping style sheets. */
+.header .brand-mark-header {
+ background-repeat:no-repeat !important;
+ background-size:contain !important;
+ background-position:center center !important;
+ overflow:hidden !important;
+}
+.header .brand-mark-header img {opacity:0 !important;pointer-events:none !important}
