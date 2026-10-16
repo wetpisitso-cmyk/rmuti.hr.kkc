@@ -47,6 +47,7 @@ const errors: Record<string, string> = {
   R2_UPLOAD_FAILED: "ไม่สามารถบันทึกเอกสารลง Cloudflare R2 ได้ กรุณาลองใหม่หรือติดต่อผู้ดูแล",
   R2_PREVIEW_FAILED: "ไม่สามารถเปิดเอกสาร Cloudflare R2 ได้ กรุณาลองใหม่",
   R2_NOT_CONFIGURED: "พื้นที่ Cloudflare R2 ยังไม่ได้ตั้งค่าครบ กรุณาแจ้งผู้ดูแลระบบ",
+  INVALID_DOCUMENT_TABLE: "ตารางเอกสารไม่รองรับการลบ กรุณาติดต่อผู้ดูแลระบบ",
   R2_CLEANUP_NOT_ENABLED: "ระบบเก็บไฟล์ R2 ยังไม่พร้อมใช้งานอย่างปลอดภัย กรุณาติดต่อผู้ดูแลระบบ",
   FILE_CHECK_FAILED: "ระบบตรวจสิทธิ์เปิดเอกสารขัดข้อง กรุณาลองใหม่",
   FILE_NOT_FOUND: "ไม่พบไฟล์เอกสารที่ร้องขอ",
