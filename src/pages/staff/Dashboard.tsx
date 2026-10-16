@@ -51,7 +51,8 @@ export default function StaffDashboard({
     [sort, setSort] = useState("created"),
     [exporting, setExporting] = useState(false),
     [deletingId, setDeletingId] = useState<string | null>(null),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [success, setSuccess] = useState("");
   const search = useDebounce(filters.search);
   const applied = {
     ...filters,
@@ -116,17 +117,20 @@ export default function StaffDashboard({
     if (!window.confirm("ยืนยันลบใบสมัคร " + number + " และข้อมูล/เอกสารที่เกี่ยวข้องอย่างถาวร?")) return;
     setDeletingId(id);
     setError("");
+    setSuccess("");
     try {
       await rpc("admin_delete_application", { p_id: id, p_confirm_number: number });
+      setSuccess("ลบใบสมัคร " + number + " จากฐานข้อมูลสำเร็จแล้ว");
       await Promise.all([
-        q.refetch(), dashboard.refetch(),
+        q.refetch(), ...(listOnly ? [] : [dashboard.refetch()]),
       ]);
       const { data: cleanup, error: cleanupError } = await supabase.functions.invoke("admin-cleanup-files", { body: {} });
       if (cleanupError || Number(cleanup?.failed || 0) > 0) {
         setError("ลบใบสมัครเรียบร้อยแล้ว แต่ไฟล์แนบบางรายการยังรอการลบจาก Storage โปรดติดต่อผู้ดูแลระบบ");
       }
     } catch (e) {
-      setError(errorTH(e));
+      const detail = e as { message?: string; code?: string };
+      setError(errorTH(e) + (detail.code ? " (รหัสข้อผิดพลาด: " + detail.code + ")" : ""));
     } finally {
       setDeletingId(null);
     }
@@ -157,6 +161,7 @@ export default function StaffDashboard({
         }
       />
       {error && <Notice kind="error">{error}</Notice>}
+      {success && <Notice kind="success">{success}</Notice>}
       <section className="filter-card no-print">
         <div className="filter-grid staff-filters">
           <Select
