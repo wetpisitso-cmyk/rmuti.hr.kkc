@@ -231,12 +231,20 @@ export default function Catalog({ table }: { table: Table }) {
     const confirmed = window.prompt("ต้องการลบรายการนี้ถาวร\nพิมพ์ชื่อรายการเพื่อยืนยัน:\n" + titleToConfirm);
     if (confirmed === null) return;
     if (confirmed !== titleToConfirm) { setError("ชื่อรายการที่ยืนยันไม่ตรงกัน"); return; }
-    if (!window.confirm("ยืนยันลบ " + titleToConfirm + " ถาวร? ข้อมูลที่มีผู้สมัครเชื่อมอยู่จะไม่สามารถลบได้")) return;
+    if (!window.confirm(table === "job_positions" ? "ยืนยันลบถาวรทั้งตำแหน่งและใบสมัครทุกคน รวมถึงเอกสารและประวัติที่เกี่ยวข้อง?\\n\\nกู้คืนไม่ได้: " + titleToConfirm : "ยืนยันลบ " + titleToConfirm + " ถาวร?")) return;
     setDeleting(row.id);
     setError("");
     setSuccess("");
     try {
-      await rpc("admin_delete_record", { p_table: table, p_id: row.id, p_expected_title: titleToConfirm });
+      if (table === "job_positions") {
+        await rpc("admin_force_delete_job", { p_id: row.id, p_expected_title: titleToConfirm });
+        // Database deletion is committed before file cleanup; failures remain in
+        // durable queue for retry and do not restore already deleted records.
+        const { error: cleanupError } = await (await import("../../lib/supabase")).supabase.functions.invoke("admin-cleanup-files", { body: {} });
+        if (cleanupError) setSuccess("ลบตำแหน่งและใบสมัครถาวรแล้ว แต่การลบไฟล์แนบบางส่วนอาจยังอยู่ในคิว");
+      } else {
+        await rpc("admin_delete_record", { p_table: table, p_id: row.id, p_expected_title: titleToConfirm });
+      }
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["catalog", table] }),
         qc.invalidateQueries({ queryKey: ["jobs"] }),
@@ -247,7 +255,7 @@ export default function Catalog({ table }: { table: Table }) {
         qc.invalidateQueries({ queryKey: ["published-results"] })
       ]);
       setEditing(false);
-      setSuccess("ลบรายการสำเร็จ");
+      setSuccess((prev) => prev || (table === "job_positions" ? "ลบตำแหน่งและใบสมัครที่เกี่ยวข้องทั้งหมดถาวรสำเร็จ" : "ลบรายการสำเร็จ"));
     } catch (e) {
       const msg = String((e as Error)?.message || "");
       if (msg.includes("DELETE_BLOCKED_HAS_APPLICATIONS"))
