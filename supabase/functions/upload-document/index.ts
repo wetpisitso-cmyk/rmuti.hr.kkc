@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
       p_scope:"upload",p_key:user.id,p_limit:15
     });
     if(rateError || !rate) return json({error:"RATE_LIMITED"},429,cors);
-    if(Number(req.headers.get("content-length")||0)>11*1048576)
+    if(Number(req.headers.get("content-length")||0)>4*1048576)
       return json({error:"FILE_TOO_LARGE"},413,cors);
 
     // Fail closed: never silently fall back if R2 is explicitly enabled but misconfigured.
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     });
     const {data:limit,error:denied}=await scoped.rpc("check_upload",{p_id:id,p_type:type});
     if(denied) return json({error:denied.message},403,cors);
-    if(file.size<1 || file.size>limit.max_bytes)
+    if(file.size<1 || file.size>Math.min(Number(limit.max_bytes),3*1048576))
       return json({error:"FILE_TOO_LARGE"},400,cors);
     const bytes=new Uint8Array(await file.arrayBuffer());
     const mime=sniff(bytes);
