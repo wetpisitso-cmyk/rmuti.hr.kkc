@@ -131,7 +131,7 @@ export default function ApplicationView() {
               }
             />
             {a.submitted_at && !printAccess.isPending && !printAccess.data && <Notice>ใบสมัคร PDF ยังดาวน์โหลดไม่ได้ กรุณารอ Admin ตรวจสอบและกดยืนยันให้ดาวน์โหลด</Notice>}
-            {error && <Notice kind="error">{error}</Notice>
+            {error && <Notice kind="error">{error}</Notice>}
             {success && <Notice kind="success">{success}</Notice>}
             <div className="detail-grid">
               <div>
