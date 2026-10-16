@@ -15,7 +15,7 @@ import {
   Title,
 } from "../components/UI";
 import { errorTH } from "../lib/errors";
-import { dateTH } from "../lib/format";
+import { dateTH, money, bangkokISO, bangkokInput } from "../lib/format";
 import { ThaiDateField } from "../components/ThaiDateField";
 import { personalSchema, validThaiID, educationIssue } from "../validation/forms";
 import type { Personal, Education, Experience } from "../types/models";
@@ -38,6 +38,7 @@ const steps = [
   "การศึกษา / ประสบการณ์",
   "เลือกตำแหน่ง",
   "แนบเอกสาร",
+  "ชำระเงิน / แนบสลิป",
   "ตรวจทาน / ยืนยัน",
 ];
 export default function ApplicationWizard() {
@@ -52,7 +53,9 @@ export default function ApplicationWizard() {
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [saved, setSaved] = useState(""),
-    [consent, setConsent] = useState(false);
+    [consent, setConsent] = useState(false),
+    [paidAt, setPaidAt] = useState(() => bangkokInput(new Date().toISOString())),
+    [paymentRef, setPaymentRef] = useState("");
   const [personal, setPersonal] = useState<Personal>({
     prefix: auth.profile?.prefix || "นาย",
     first_name: auth.profile?.first_name || "",
@@ -93,6 +96,11 @@ export default function ApplicationWizard() {
     q.data &&
     !["draft", "needs_correction"].includes(q.data.application.status);
   const documents = q.data?.documents || [];
+  const paymentRequired = Number(job?.fee_amount || 0) > 0;
+  const paymentDoc = documents.find((d) => d.document_type === "payment");
+  const paymentRecords = q.data?.payments || [];
+  const slipSubmitted = !!paymentDoc && paymentRecords.some((p: {slip_path?:string;status?:string}) => p.slip_path === paymentDoc.storage_path && p.status !== "rejected");
+  const lastStep = steps.length - 1;
   const save = async () => {
     if (!selected) throw new Error("กรุณาเลือกตำแหน่ง");
     const educationError = educationIssue(education);
@@ -146,11 +154,15 @@ export default function ApplicationWizard() {
         )
       )
         throw new Error("กรุณาแนบเอกสารบังคับให้ครบ");
-      setStep((s) => s + 1);
+      if (step === 4 && paymentRequired && !slipSubmitted)
+        throw new Error("กรุณาแนบสลิปและกดส่งหลักฐานชำระเงินก่อนดำเนินการต่อ");
+      setStep((s) => s + (s === 3 && !paymentRequired ? 2 : 1));
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   const submit = () =>
     run(async () => {
+      if (paymentRequired && !slipSubmitted)
+        throw new Error("กรุณาแนบสลิปและกดส่งหลักฐานชำระเงินก่อนยืนยันใบสมัคร");
       if (!consent || !policy?.version)
         throw new Error("กรุณารับทราบนโยบายและรับรองข้อมูล");
       const savedId = await save();
@@ -161,6 +173,12 @@ export default function ApplicationWizard() {
       await qc.invalidateQueries({ queryKey: ["my-applications"] });
       nav(`/application/${savedId}`, { replace: true });
     });
+  const submitSlip = () => run(async () => {
+    if (!appId || !job || !paymentDoc) throw new Error("กรุณาแนบสลิปชำระเงินก่อน");
+    await rpc("save_payment", { p_app: appId, p_amount: Number(job.fee_amount), p_paid: bangkokISO(paidAt), p_reference: paymentRef });
+    await qc.invalidateQueries({ queryKey: ["application", appId] });
+    setSaved(new Date().toISOString());
+  });
   const update = (k: keyof Personal, v: string) =>
     setPersonal((p) => ({ ...p, [k]: v }));
   return (
@@ -434,7 +452,19 @@ export default function ApplicationWizard() {
                   ))}
                 </div>
               )}
-              {step === 4 && (
+              {step === 4 && paymentRequired && appId && job && (
+                <div className="stack">
+                  <Notice>ต้องแนบสลิปและบันทึกหลักฐานชำระเงินให้เรียบร้อยก่อนกดถัดไป เจ้าหน้าที่จะตรวจสอบภายหลัง</Notice>
+                  <div className="subpanel"><strong>ค่าธรรมเนียม {money(Number(job.fee_amount))}</strong><p className="pre-wrap">{job.payment_instructions}</p></div>
+                  <DocumentUpload id={appId} requirement={{key:"payment",label:"สลิปชำระเงิน",required:true}} document={paymentDoc} maxMb={job.max_file_mb}/>
+                  <Field label="ยอดชำระ (บาท)" value={String(job.fee_amount)} readOnly />
+                  <ThaiDateField label="วันเวลาชำระ (พ.ศ. เวลาไทย)" withTime value={paidAt} onChange={setPaidAt} required />
+                  <Field label="เลขอ้างอิง (ถ้ามี)" value={paymentRef} maxLength={100} onChange={e=>setPaymentRef(e.target.value)}/>
+                  <button type="button" className="btn primary" disabled={busy || !paymentDoc} onClick={submitSlip}>ส่งหลักฐานชำระเงินให้เจ้าหน้าที่ตรวจ</button>
+                  {slipSubmitted && <Notice kind="success">ส่งสลิปเรียบร้อยแล้ว สามารถกดถัดไปเพื่อตรวจทานใบสมัครได้</Notice>}
+                </div>
+              )}
+              {step === lastStep && (
                 <>
                   <div className="review-summary">
                     <h3>
@@ -488,7 +518,7 @@ export default function ApplicationWizard() {
                   <button
                     className="btn outline"
                     disabled={busy}
-                    onClick={() => setStep((s) => s - 1)}
+                    onClick={() => setStep((s) => s === lastStep && !paymentRequired ? s - 2 : s - 1)}
                   >
                     <ArrowLeft size={17} /> ย้อนกลับ
                   </button>
@@ -509,10 +539,10 @@ export default function ApplicationWizard() {
                   >
                     <Save size={17} /> บันทึกร่าง
                   </button>
-                  {step < 4 ? (
+                  {step < lastStep ? (
                     <button
                       className="btn primary"
-                      disabled={busy}
+                      disabled={busy || (step === 4 && paymentRequired && !slipSubmitted)}
                       onClick={next}
                     >
                       ถัดไป <ArrowRight size={17} />
