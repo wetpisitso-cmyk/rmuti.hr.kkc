@@ -145,7 +145,7 @@ export default function StaffDashboard({
       <Title
         eyebrow="RECRUITMENT OVERVIEW"
         title={listOnly ? "รายการใบสมัคร" : "ภาพรวมการรับสมัคร"}
-        description="การ์ด กราฟ และรายการปรับตามตัวกรองที่เลือก"
+        description="แสดงเฉพาะใบสมัครที่ยืนยันส่งแล้ว โดยสถิติและรายการปรับตามตัวกรองที่เลือก"
         action={
           <div className="flex gap-2 no-print">
             {a.can("reports") && (
@@ -221,8 +221,8 @@ export default function StaffDashboard({
             value={filters.status}
             onChange={(e) => set("status", e.target.value)}
           >
-            <option value="">ทุกสถานะ</option>
-            {Object.entries(statuses).map(([k, l]) => (
+            <option value="">ทุกสถานะที่ส่งแล้ว</option>
+            {Object.entries(statuses).filter(([k]) => k !== "draft").map(([k, l]) => (
               <option key={k} value={k}>
                 {l}
               </option>
@@ -242,7 +242,7 @@ export default function StaffDashboard({
         <State loading={dashboard.isPending} error={dashboard.error}>
           <div className="kpi-grid">
             {[
-              ["ใบสมัครทั้งหมด", dashboard.data?.total || 0, Files],
+              ["ใบสมัครที่ส่งแล้ว", dashboard.data?.total || 0, Files],
               [
                 "รอตรวจ",
                 (counts.submitted || 0) + (counts.under_review || 0),
