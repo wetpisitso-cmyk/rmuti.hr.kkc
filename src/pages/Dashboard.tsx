@@ -32,6 +32,8 @@ export default function Dashboard() {
         .from("applications")
         .select("*,job_positions(*,departments(*),recruitment_rounds(*))")
         .eq("user_id", a.session!.user.id)
+        .not("submitted_at", "is", null)
+        .neq("status", "draft")
         .order("updated_at", { ascending: false });
       if (r.error) throw r.error;
       return r.data as Application[];
@@ -79,7 +81,7 @@ export default function Dashboard() {
       />
       <div className="kpi-grid three">
         <div className="kpi">
-          <span>ใบสมัครทั้งหมด</span>
+          <span>ใบสมัครที่ส่งแล้ว</span>
           <strong>{q.data?.length || 0}</strong>
           <BriefcaseBusiness />
         </div>
@@ -100,7 +102,7 @@ export default function Dashboard() {
           <Bell />
         </div>
       </div>
-      <h2 className="section-heading">ใบสมัครของฉัน</h2>
+      <h2 className="section-heading">ใบสมัครที่ยืนยันส่งแล้ว</h2>
       <State loading={q.isPending} error={q.error} empty={!q.data?.length}>
         <div className="stack">
           {q.data?.map((x) => (
