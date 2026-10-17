@@ -135,7 +135,7 @@ export default function ApplicationWizard() {
   const lastStep = steps.length - 1;
   const save = async () => {
     if (!selected) throw new Error("กรุณาเลือกตำแหน่ง");
-    const educationError = educationIssue(education);
+    const educationError = educationIssue(education, true);
     if (educationError) throw new Error(educationError);
     const newId = await saveDraft(
       appId,
@@ -178,14 +178,12 @@ export default function ApplicationWizard() {
         if (issue) throw new Error(issue);
       }
       if (step === 2) await save();
-      if (
-        step === 3 &&
-        job?.required_documents.some(
-          (r) =>
-            r.required && !documents.some((d) => d.document_type === r.key),
-        )
-      )
-        throw new Error("กรุณาแนบเอกสารบังคับให้ครบ");
+      if (step === 3 && job) {
+        const missing = job.required_documents.filter((r) =>
+          r.required && !documents.some((d) => d.document_type === r.key));
+        if (missing.length)
+          throw new Error("กรุณาแนบเอกสารให้ครบ: " + missing.map((r) => r.label).join(", "));
+      }
       if (step === 4 && paymentRequired && !slipSubmitted)
         throw new Error("กรุณาแนบสลิปและกดส่งหลักฐานชำระเงินก่อนดำเนินการต่อ");
       setStep((s) => s + (s === 3 && !paymentRequired ? 2 : 1));
@@ -193,6 +191,14 @@ export default function ApplicationWizard() {
     });
   const submit = () =>
     run(async () => {
+      if (!personalSchema.safeParse(personal).success ||
+          (job?.require_national_id && !validThaiID(personal.national_id || "")))
+        throw new Error("กรุณากรอกข้อมูลส่วนตัวให้ครบและถูกต้อง");
+      const educationError = educationIssue(education);
+      if (educationError) throw new Error(educationError);
+      if (job?.required_documents.some((r) =>
+        r.required && !documents.some((d) => d.document_type === r.key)))
+        throw new Error("กรุณาแนบเอกสารบังคับให้ครบ");
       if (paymentRequired && !slipSubmitted)
         throw new Error("กรุณาแนบสลิปและกดส่งหลักฐานชำระเงินก่อนยืนยันใบสมัคร");
       if (!consent || !policy?.version)
@@ -472,6 +478,14 @@ export default function ApplicationWizard() {
               {step === 3 && appId && job && (
                 <div className="stack">
                   <CopyCertificationNotice />
+                  {job.required_documents.some((r) =>
+                    r.required && !documents.some((d) => d.document_type === r.key)) && (
+                    <Notice kind="error">
+                      ยังขาดเอกสารบังคับ: {job.required_documents
+                        .filter((r) => r.required && !documents.some((d) => d.document_type === r.key))
+                        .map((r) => r.label).join(", ")}
+                    </Notice>
+                  )}
                   {job.required_documents.map((r) => (
                     <DocumentUpload
                       key={r.key}
@@ -499,6 +513,25 @@ export default function ApplicationWizard() {
               )}
               {step === lastStep && (
                 <>
+                  {(() => {
+                    const missing = job?.required_documents.filter((r) =>
+                      r.required && !documents.some((d) => d.document_type === r.key)) || [];
+                    const issues = [
+                      ...(!personalSchema.safeParse(personal).success ||
+                        (job?.require_national_id && !validThaiID(personal.national_id || ""))
+                        ? ["ข้อมูลส่วนตัวยังไม่ครบหรือไม่ถูกต้อง"] : []),
+                      ...(educationIssue(education) ? [educationIssue(education)!] : []),
+                      ...(missing.length ? ["เอกสารที่ขาด: " + missing.map((r) => r.label).join(", ")] : []),
+                      ...(paymentRequired && !slipSubmitted ? ["ยังไม่ได้ส่งหลักฐานชำระเงิน"] : []),
+                    ];
+                    return issues.length ? (
+                      <Notice kind="error">
+                        กรุณาแก้ไขก่อนส่งใบสมัคร: {issues.join(" • ")}
+                      </Notice>
+                    ) : (
+                      <Notice kind="success">ตรวจข้อมูลสำคัญครบแล้ว กรุณาตรวจทานอีกครั้งก่อนส่ง</Notice>
+                    );
+                  })()}
                   <div className="review-summary">
                     <h3>
                       {personal.prefix}
