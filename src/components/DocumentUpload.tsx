@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Upload, ExternalLink, RotateCw } from "lucide-react";
+import { Upload, ExternalLink, RotateCw, PenLine, AlertTriangle, FileCheck2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { signedFile, uploadDocument } from "../services/api";
 import { errorTH } from "../lib/errors";
@@ -42,6 +42,26 @@ export function PreviewButton({
       </button>
       {error && <small className="error-text">{error}</small>}
     </>
+  );
+}
+/** Applicant-facing reminder; this does not alter or sign uploaded files. */
+export function CopyCertificationNotice() {
+  return (
+    <aside className="copy-cert-banner" aria-label="คำแนะนำการเซ็นสำเนาถูกต้อง">
+      <span className="copy-cert-icon" aria-hidden="true"><PenLine size={30} strokeWidth={2.4} /></span>
+      <div className="copy-cert-content">
+        <div className="copy-cert-kicker"><AlertTriangle size={18} /> กรุณาอ่านก่อนแนบเอกสาร</div>
+        <strong className="copy-cert-title">เซ็นสำเนาถูกต้อง <span>ทุกฉบับ</span></strong>
+        <p>เอกสารที่เป็นสำเนา ให้เขียนคำว่า <b>“สำเนาถูกต้อง”</b> พร้อมลงลายมือชื่อรับรอง
+          บนเอกสารก่อนถ่ายภาพหรือสแกนอัปโหลด <span>ยกเว้นรูปถ่ายและสลิปชำระเงิน</span>
+        </p>
+      </div>
+      <div className="copy-cert-stamp" aria-hidden="true">
+        <FileCheck2 size={25} />
+        <b>สำเนาถูกต้อง</b>
+        <small>กรุณาลงลายมือชื่อ</small>
+      </div>
+    </aside>
   );
 }
 export function DocumentUpload({
@@ -97,6 +117,9 @@ export function DocumentUpload({
             ? document.file_name
             : `${requirement.key === "photo" ? "JPG / PNG" : "PDF / JPG / PNG"} ไม่เกิน ${maxMb} MB`}
         </small>
+        {requirement.key !== "photo" && requirement.key !== "payment" && (
+          <small className="copy-cert-inline">✍ เซ็นสำเนาถูกต้องก่อนอัปโหลด</small>
+        )}
         {busy && (
           <div className="upload-progress">
             <progress max="100" value={progress} />
