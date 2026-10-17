@@ -2,36 +2,12 @@ import { getApplication, signedFile } from "../services/api";
 import type { AppDocument, Application } from "../types/models";
 import { dateTH } from "./format";
 
-// pdf-lib only loads when an Admin actually exports a dossier.
-// Personal applicant data is processed locally: nothing is posted to the CDN.
-type PdfPage = { getSize(): {width:number;height:number} };
-type PdfDoc = {
-  addPage(size?:[number,number]): PdfPage;
-  embedPng(bytes: Uint8Array):Promise<{width:number;height:number}>;
-  embedJpg(bytes: Uint8Array):Promise<{width:number;height:number}>;
-  embedPdf?(bytes:Uint8Array):Promise<unknown>;
-  copyPages(from: PdfDoc, indexes:number[]):Promise<PdfPage[]>;
-  getPageCount():number;
-  getPageIndices():number[];
-  save():Promise<Uint8Array>;
-  insertPage(index:number,page:PdfPage):void;
-};
-type PdfLib = { PDFDocument: {create():Promise<PdfDoc>;load(bytes:Uint8Array):Promise<PdfDoc>} };
-declare global { interface Window { PDFLib?: PdfLib } }
-let library:Promise<PdfLib>|undefined;
-function loadPdfLib():Promise<PdfLib> {
-  if(window.PDFLib) return Promise.resolve(window.PDFLib);
-  if(library) return library;
-  const pending:Promise<PdfLib>=new Promise<PdfLib>((resolve,reject)=>{
-    const script=document.createElement("script");
-    script.src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
-    script.crossOrigin="anonymous";
-    script.referrerPolicy="no-referrer";
-    script.onload=()=>window.PDFLib?resolve(window.PDFLib):reject(new Error("PDF_LIBRARY_FAILED"));
-    script.onerror=()=>reject(new Error("PDF_LIBRARY_FAILED"));
-    document.head.appendChild(script);
-  });
-  library=pending.catch(e=>{library=undefined;throw e});
+// Bundle the pinned PDF engine with our Vite build. Never execute third-party
+// script tags on a page that handles private applicant documents.
+type PdfLib = typeof import("pdf-lib");
+let library: Promise<PdfLib> | undefined;
+function loadPdfLib():Promise<PdfLib>{
+  if(!library)library=import("pdf-lib").catch(e=>{library=undefined;throw e});
   return library;
 }
 const A4:[number,number]=[595.28,841.89];
@@ -70,7 +46,7 @@ function coverPng(title:string,lines:string[]):Uint8Array {
   for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
   return bytes;
 }
-function safeFilename(s:string){return s.replace(/[\\/:*?"<>|\\x00-\\x1f]/g,"-").trim().slice(0,100)||"ผู้สมัคร";}
+function safeFilename(s:string){return s.replace(/[\\/:*?"<>|\x00-\x1f]/g,"-").trim().slice(0,100)||"ผู้สมัคร";}
 function isImage(mime:string){return mime==="image/png"||mime==="image/jpeg";}
 export async function downloadApplicantDocumentsPdf(applicationId:string,onProgress?:(text:string)=>void){
   const {data:auth}=await (await import("../lib/supabase")).supabase.auth.getUser();
@@ -104,8 +80,7 @@ export async function downloadApplicantDocumentsPdf(applicationId:string,onProgr
     ...descriptors,
   ]));
   const coverPage=pdf.addPage(A4);
-  const cp=coverPage as PdfPage & {drawImage:(image:unknown,opts:Record<string,number>)=>void};
-  cp.drawImage(cover,{x:0,y:0,width:A4[0],height:A4[1]});
+  coverPage.drawImage(cover,{x:0,y:0,width:A4[0],height:A4[1]});
   for(let i=0;i<all.length;i++){
     const doc=all[i];
     onProgress?.(`กำลังรวมเอกสาร ${i+1}/${all.length}: ${doc.file_name}`);
@@ -120,7 +95,7 @@ export async function downloadApplicantDocumentsPdf(applicationId:string,onProgr
         for(const page of pages) pdf.insertPage(pdf.getPageCount(),page);
       }else if(isImage(doc.mime_type)||bytes[0]===255&&bytes[1]===216||bytes[0]===137&&bytes[1]===80){
         const image=bytes[0]===137?await pdf.embedPng(bytes):await pdf.embedJpg(bytes);
-        const page=pdf.addPage(A4) as PdfPage & {drawImage:(image:unknown,opts:Record<string,number>)=>void};
+        const page=pdf.addPage(A4);
         const scale=Math.min((A4[0]-48)/image.width,(A4[1]-48)/image.height);
         const w=image.width*scale,h=image.height*scale;
         page.drawImage(image,{x:(A4[0]-w)/2,y:(A4[1]-h)/2,width:w,height:h});
@@ -129,7 +104,7 @@ export async function downloadApplicantDocumentsPdf(applicationId:string,onProgr
   }
   onProgress?.("กำลังสร้างไฟล์ PDF…");
   const output=await pdf.save();
-  const blob=new Blob([output as BlobPart],{type:"application/pdf"});
+  const blob=new Blob([new Uint8Array(output).buffer],{type:"application/pdf"});
   const url=URL.createObjectURL(blob);
   const link=document.createElement("a");
   link.href=url;
