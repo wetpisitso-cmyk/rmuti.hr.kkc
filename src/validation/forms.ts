@@ -48,11 +48,11 @@ export type EducationInput = {
   graduation_year?: string | number | null;
   gpa?: string | number | null;
 };
-export function educationIssue(rows: EducationInput[]): string | null {
-  if (!rows.length) return "กรุณากรอกข้อมูลการศึกษาอย่างน้อยหนึ่งรายการ";
+export function educationIssue(rows: EducationInput[], allowIncomplete = false): string | null {
+  if (!rows.length && !allowIncomplete) return "กรุณากรอกข้อมูลการศึกษาอย่างน้อยหนึ่งรายการ";
   for (const [index, ed] of rows.entries()) {
     const name = "รายการการศึกษาที่ " + (index + 1);
-    if (!ed.degree?.trim() || !ed.major?.trim() || !ed.institution?.trim()) {
+    if (!allowIncomplete && (!ed.degree?.trim() || !ed.major?.trim() || !ed.institution?.trim())) {
       return "กรุณากรอกวุฒิ สาขาวิชา และสถานศึกษาให้ครบ (" + name + ")";
     }
     const year = String(ed.graduation_year ?? "").trim();
