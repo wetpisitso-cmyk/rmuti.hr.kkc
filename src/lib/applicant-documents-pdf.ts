@@ -46,7 +46,7 @@ function coverPng(title:string,lines:string[]):Uint8Array {
   for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
   return bytes;
 }
-function safeFilename(s:string){return s.replace(/[\\/:*?"<>|\x00-\x1f]/g,"-").trim().slice(0,100)||"ผู้สมัคร";}
+function safeFilename(s:string){return Array.from(s.replace(/[\\\\/:*?"<>|]/g,"-")).map(ch=>ch.charCodeAt(0)<32||ch.charCodeAt(0)===127?"-":ch).join("").trim().slice(0,100)||"ผู้สมัคร";}
 function isImage(mime:string){return mime==="image/png"||mime==="image/jpeg";}
 export async function downloadApplicantDocumentsPdf(applicationId:string,onProgress?:(text:string)=>void){
   const {data:auth}=await (await import("../lib/supabase")).supabase.auth.getUser();
