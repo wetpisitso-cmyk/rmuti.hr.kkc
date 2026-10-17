@@ -6,7 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
 import { useCatalog } from "../hooks/useCatalog";
 import { getApplication, saveDraft, rpc, rows } from "../services/api";
-import { DocumentUpload } from "../components/DocumentUpload";
+import { DocumentUpload, CopyCertificationNotice } from "../components/DocumentUpload";
 import {
   Field,
   Select,
@@ -471,6 +471,7 @@ export default function ApplicationWizard() {
               )}
               {step === 3 && appId && job && (
                 <div className="stack">
+                  <CopyCertificationNotice />
                   {job.required_documents.map((r) => (
                     <DocumentUpload
                       key={r.key}
