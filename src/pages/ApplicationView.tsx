@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Printer,
@@ -34,6 +34,7 @@ import type { AdminSignature } from "../components/AdminSignaturePad";
 import { outcomeLabels, statuses } from "../types/models";
 export default function ApplicationView() {
   const { id } = useParams(),
+    nav = useNavigate(),
     auth = useAuth(),
     qc = useQueryClient();
   const printAccess = useQuery({queryKey:["can-print-application",id],enabled:!!id,queryFn:()=>rpc<boolean>("can_print_application",{p_id:id})});
@@ -41,6 +42,13 @@ export default function ApplicationView() {
     queryKey: ["application", id],
     queryFn: () => getApplication(id!),
   });
+  // A draft is an in-progress form, not a submitted application.
+  // Applicants who open an old direct link should continue editing instead.
+  useEffect(() => {
+    if (auth.role === "applicant" && q.data?.application.status === "draft" && id) {
+      nav(`/application/${id}/edit`, { replace: true });
+    }
+  }, [auth.role, id, nav, q.data?.application.status]);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [success, setSuccess] = useState(""),
@@ -94,7 +102,7 @@ export default function ApplicationView() {
       >
         <ArrowLeft size={16} /> กลับรายการใบสมัคร
       </Link>
-      <State loading={q.isPending} error={q.error}>
+      <State loading={q.isPending || (auth.role === "applicant" && q.data?.application.status === "draft")} error={q.error}>
         {a && j && (
           <>
             <Title
