@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Save, Plus, Trash2, Check } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { supabase } from "../lib/supabase";
 import { useCatalog } from "../hooks/useCatalog";
 import { getApplication, saveDraft, rpc, rows } from "../services/api";
 import { DocumentUpload } from "../components/DocumentUpload";
@@ -73,6 +74,37 @@ export default function ApplicationWizard() {
     queryFn: () => getApplication(appId!),
     enabled: !!appId,
   });
+  // Resume a saved form when the applicant returns to its job.
+  // Unsubmitted records are hidden from the applicant's submitted list.
+  const existing = useQuery({
+    queryKey: ["existing-application-for-job", auth.session?.user.id, jobId],
+    enabled: !!jobId && !id && !!auth.session?.user.id,
+    queryFn: async () => {
+      const r = await supabase
+        .from("applications")
+        .select("id,status")
+        .eq("user_id", auth.session!.user.id)
+        .eq("job_id", jobId!)
+        .maybeSingle();
+      if (r.error) throw r.error;
+      return r.data;
+    },
+  });
+  useEffect(() => {
+    if (id) setAppId(id);
+  }, [id]);
+  useEffect(() => {
+    if (!id && existing.data) {
+      const editable = ["draft", "needs_correction"].includes(existing.data.status);
+      if (editable) setAppId(existing.data.id);
+      nav(
+        editable
+          ? `/application/${existing.data.id}/edit`
+          : `/application/${existing.data.id}`,
+        { replace: true },
+      );
+    }
+  }, [id, existing.data, nav]);
   const settings = useQuery({
     queryKey: ["settings"],
     queryFn: () => rows("app_settings", "*", "key"),
@@ -189,8 +221,8 @@ export default function ApplicationWizard() {
         description={job?.title}
       />
       <State
-        loading={catalog.jobs.isPending || (!!appId && q.isPending)}
-        error={catalog.jobs.error || q.error}
+        loading={catalog.jobs.isPending || (!!appId && q.isPending) || (!id && !!jobId && (existing.isPending || !!existing.data))}
+        error={catalog.jobs.error || q.error || existing.error}
       >
         {locked ? (
           <Notice>
