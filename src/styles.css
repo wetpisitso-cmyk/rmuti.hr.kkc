@@ -1736,3 +1736,20 @@ td strong {
 .thai-calendar-grid button:hover:not(.selected){background:#fff1e6}
 .thai-calendar-footer{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#64748b;margin-top:9px}
 .thai-calendar-footer button{border:0;color:#bc540c;background:transparent;font-weight:700}
+
+
+/* Certified-copy reminder — applicant document upload only */
+.copy-cert-banner{display:flex;align-items:center;gap:19px;position:relative;overflow:hidden;border:2px solid #e11d28;border-left:8px solid #dc1626;border-radius:18px;background:linear-gradient(113deg,#fff0f0 0%,#fff9f9 58%,#fff 100%);padding:22px 24px;box-shadow:0 10px 28px #b91c1c15;color:#9f1239}
+.copy-cert-icon{width:62px;height:62px;flex:0 0 62px;display:grid;place-items:center;background:#dc1626;color:white;border-radius:17px;box-shadow:0 6px 14px #dc162630}
+.copy-cert-content{flex:1;min-width:0}
+.copy-cert-kicker{display:flex;align-items:center;gap:6px;color:#bd1825;font-size:13px;font-weight:800;letter-spacing:.01em;margin-bottom:5px}
+.copy-cert-title{display:block;font-size:clamp(22px,3vw,34px);font-weight:900;line-height:1.3;color:#cd0c20;letter-spacing:-.025em}
+.copy-cert-title span{font-size:.6em;color:#b91c1c}
+.copy-cert-banner .copy-cert-content p{font-size:14px;line-height:1.8;color:#79343d;margin:8px 0 0}
+.copy-cert-content p b{color:#bf1320}
+.copy-cert-content p span{font-weight:700}
+.copy-cert-stamp{flex:0 0 145px;display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:center;text-align:center;padding:12px 8px;border:2px dashed #ec666c;border-radius:15px;color:#bb1828;transform:rotate(-3deg);background:#fff7f7}
+.copy-cert-stamp b{font-size:18px;line-height:1.3}
+.copy-cert-stamp small{font-size:11px}
+.upload-card .copy-cert-inline{font-size:13px;font-weight:800;color:#d31325;margin-top:5px;line-height:1.5}
+@media(max-width:720px){.copy-cert-banner{padding:17px;gap:12px;align-items:flex-start;border-left-width:5px}.copy-cert-icon{height:43px;width:43px;flex-basis:43px;border-radius:12px}.copy-cert-icon svg{width:24px}.copy-cert-title{font-size:24px}.copy-cert-kicker{font-size:12px}.copy-cert-banner .copy-cert-content p{font-size:13px}.copy-cert-stamp{display:none}}
