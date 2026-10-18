@@ -57,7 +57,8 @@ export default function ApplicationWizard() {
     [saved, setSaved] = useState(""),
     [consent, setConsent] = useState(false),
     [paidAt, setPaidAt] = useState(() => bangkokInput(new Date().toISOString())),
-    [paymentRef, setPaymentRef] = useState("");
+    [paymentRef, setPaymentRef] = useState(""),
+    [archivedJob, setArchivedJob] = useState<string | null>(null);
   const [personal, setPersonal] = useState<Personal>({
     prefix: auth.profile?.prefix || "นาย",
     first_name: auth.profile?.first_name || "",
@@ -87,6 +88,7 @@ export default function ApplicationWizard() {
         .select("id,status,archived_at")
         .eq("user_id", auth.session!.user.id)
         .eq("job_id", jobId!)
+        .is("archived_at", null)
         .maybeSingle();
       if (r.error) throw r.error;
       return r.data;
@@ -97,11 +99,6 @@ export default function ApplicationWizard() {
   }, [id]);
   useEffect(() => {
     if (!id && existing.data) {
-      // A previously archived application is not an active application.
-      if (existing.data.archived_at) {
-        nav("/dashboard", { replace: true });
-        return;
-      }
       const editable = ["draft", "needs_correction"].includes(existing.data.status);
       if (editable) setAppId(existing.data.id);
       nav(
@@ -112,6 +109,15 @@ export default function ApplicationWizard() {
       );
     }
   }, [id, existing.data, nav]);
+  const archiveLookup = useQuery({
+    queryKey: ["archived-application-job", id],
+    enabled: !!id && !!auth.session?.user.id && !!q.error,
+    retry: false,
+    queryFn: () => rpc<string | null>("applicant_archived_job", { p_id: id }),
+  });
+  useEffect(() => {
+    if (archiveLookup.data) setArchivedJob(archiveLookup.data);
+  }, [archiveLookup.data]);
   const settings = useQuery({
     queryKey: ["settings"],
     queryFn: () => rows("app_settings", "*", "key"),
@@ -160,7 +166,9 @@ export default function ApplicationWizard() {
       .maybeSingle();
     if (lookupError) return false;
     if (!data || data.archived_at) {
-      nav("/dashboard", { replace: true });
+      const archivedJobId = await rpc<string | null>("applicant_archived_job",{p_id:applicationId});
+      if (archivedJobId) nav(`/apply/${archivedJobId}`, { replace: true });
+      else nav("/dashboard", { replace: true });
       return true;
     }
     if (!["draft", "needs_correction"].includes(data.status)) {
@@ -271,9 +279,14 @@ export default function ApplicationWizard() {
       />
       <State
         loading={catalog.jobs.isPending || (!!appId && q.isPending) || (!id && !!jobId && (existing.isPending || !!existing.data))}
-        error={catalog.jobs.error || q.error || existing.error}
+        error={catalog.jobs.error || (archivedJob ? null : q.error) || existing.error}
       >
-        {locked ? (
+        {archivedJob ? (
+          <Notice>
+            ใบสมัครเก่าถูกย้ายออกจากรายการแล้ว สามารถเริ่มสมัครใหม่ได้หากตำแหน่งยังเปิดรับสมัคร
+            {" "}<Link to={`/apply/${archivedJob}`}>เริ่มสมัครใหม่</Link>
+          </Notice>
+        ) : locked ? (
           <Notice kind="success">
             ระบบได้รับใบสมัครที่ยืนยันส่งแล้วเรียบร้อย กำลังเปิดหน้าติดตามสถานะ{" "}
             <Link to={`/application/${appId}`}>ดูรายละเอียดใบสมัคร</Link>
