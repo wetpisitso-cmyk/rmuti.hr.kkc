@@ -346,3 +346,15 @@ button {
 @media print{
   .rmuti-apple-home .home-content-frame{box-shadow:none;border:1px solid #dae1ea;}
 }
+
+
+/* Announcement banners across public pages and HR admin */
+.announcement-admin-banner{border:1px solid #d9e5f3;background:#f8fafd}
+.announcement-banner-preview{display:block;width:min(100%,560px);aspect-ratio:16/9;object-fit:contain;background:#eef4fb;border:1px solid #d5e2f1;border-radius:14px}
+.announcement-table-thumb{display:block;width:112px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;margin-bottom:9px}
+.rmuti-apple-home .news-card .announcement-card-banner,.announcement-card-banner{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px;margin-bottom:17px}
+.announcement-full-banner{display:block;width:100%;max-height:490px;aspect-ratio:16/9;object-fit:contain;background:#f4f8fe;border-radius:16px;margin-bottom:22px}
+.announcement-full-card{overflow:hidden}
+.announcement-full-card h1{font-size:clamp(22px,3vw,32px);margin:12px 0}
+.announcement-full-card .pre-wrap{line-height:1.85;overflow-wrap:anywhere}
+@media(max-width:640px){.announcement-full-banner{max-height:290px}.announcement-table-thumb{width:90px}}
