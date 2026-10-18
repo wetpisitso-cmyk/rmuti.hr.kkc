@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApplication, rpc } from "../../services/api";
@@ -79,9 +80,41 @@ export default function Review() {
     [success, setSuccess] = useState(""),
     [next, setNext] = useState("under_review"),
     [deadline, setDeadline] = useState(""),
-    [assignedNumber, setAssignedNumber] = useState("");
+    [assignedNumber, setAssignedNumber] = useState(""),
+    [reviewStep, setReviewStep] = useState(0),
+    [stepBusy, setStepBusy] = useState(false),
+    [stepError, setStepError] = useState("");
+  const reviewMarks = useQuery({
+    queryKey: ["application-review-steps", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const {data,error} = await supabase.from("application_review_steps")
+        .select("step,checked_at").eq("application_id",id!);
+      if(error) throw error;
+      return data as {step:string;checked_at:string}[];
+    },
+  });
+  const setReviewMark = async (step: "personal" | "documents", done: boolean) => {
+    setStepBusy(true);setStepError("");
+    try {
+      await rpc("staff_mark_review_step",{p_id:id,p_step:step,p_done:done});
+      await qc.invalidateQueries({queryKey:["application-review-steps",id]});
+      if(done) setReviewStep(step === "personal" ? 1 : 2);
+    } catch(e){setStepError(errorTH(e));}
+    finally{setStepBusy(false);}
+  };
   const d = q.data,
     a = d?.application;
+  const marked = (step: string) => !!reviewMarks.data?.some(x=>x.step===step);
+  const feeNeeded = Number(a?.job_positions?.fee_amount || 0)>0;
+  const steps = [
+    {name:"ข้อมูลผู้สมัคร",hint:"ตรวจชื่อและประวัติ",tone:"blue",done:marked("personal")},
+    {name:"เอกสารแนบ",hint:"เปิดตรวจทีละไฟล์",tone:"purple",done:marked("documents")},
+    {name:"ชำระเงิน",hint:"ตรวจสลิปและใบรับชำระ",tone:"amber",done:!feeNeeded || a?.payment_status==="confirmed"},
+    {name:"ผลคุณสมบัติ",hint:"พิจารณาผล",tone:"green",done:["eligible","ineligible"].includes(a?.status || "")},
+    {name:"เลขที่และ PDF",hint:"ออกเลข ลงนาม และอนุมัติ",tone:"teal",done:!!a?.application_number && !!canPrint.data},
+    {name:"บันทึกเจ้าหน้าที่",hint:"บันทึกภายใน",tone:"slate",done:false},
+  ];
   const actualNext =
     a?.status === "submitted"
       ? "under_review"
@@ -219,15 +252,27 @@ export default function Review() {
                 <div><span>ประสบการณ์ทำงาน</span><strong>{d.experience.length}</strong><small>รายการ</small></div>
                 <div><span>เลขผู้สมัคร</span><strong>{a.application_number ? "ได้รับแล้ว" : "รอกำหนด"}</strong></div>
               </div>
-              <nav className="review-jump-links" aria-label="ไปยังส่วนของการตรวจใบสมัคร">
-                <a href="#review-personal">ข้อมูลผู้สมัคร</a>
-                <a href="#review-documents">เอกสารแนบ</a>
-                <a href="#review-decision">ผลการตรวจ</a>
-                <a href="#review-notes">บันทึกเจ้าหน้าที่</a>
-              </nav>
+              <div className="review-step-tabs" role="tablist" aria-label="ขั้นตอนการตรวจใบสมัคร">
+                {steps.map((item,i) => <button key={item.name} type="button" role="tab" aria-selected={reviewStep===i}
+                  className={`review-step-tab tone-${item.tone} ${reviewStep===i?"current":""}`}
+                  onClick={()=>{setReviewStep(i);setStepError("");}}>
+                  <span className="review-step-number">{item.done?<CheckCircle2 size={18}/>:i+1}</span>
+                  <span><strong>{item.name}</strong><small>{item.done?"เสร็จแล้ว":item.hint}</small></span>
+                </button>)}
+              </div>
+              {stepError&&<Notice kind="error">{stepError}</Notice>}
+              <div className="review-step-navigation">
+                <button type="button" className="btn outline" disabled={reviewStep===0} onClick={()=>setReviewStep(v=>Math.max(0,v-1))}>
+                  <ChevronLeft size={17}/> ก่อนหน้า
+                </button>
+                <span>ขั้นตอน {reviewStep+1} จาก {steps.length}</span>
+                <button type="button" className="btn primary" disabled={reviewStep===steps.length-1} onClick={()=>setReviewStep(v=>Math.min(steps.length-1,v+1))}>
+                  ขั้นตอนถัดไป <ChevronRight size={17}/>
+                </button>
+              </div>
             </section>
             <div className="apple-review-columns">
-            <section className="panel" id="review-personal">
+            <section className="panel review-color-panel tone-blue" id="review-personal" hidden={reviewStep!==0}>
               <div className="flex gap-2">
                 <Badge status={a.status} />
                 <Badge status={a.payment_status} payment />
@@ -258,9 +303,12 @@ export default function Review() {
                   {e.details}
                 </p>
               ))}
+              {auth.can("review") && <button type="button" className="btn primary mt-4" disabled={stepBusy||marked("personal")} onClick={()=>void setReviewMark("personal",true)}>
+                <CheckCircle2 size={17}/> {marked("personal")?"ตรวจข้อมูลแล้ว":"ยืนยันตรวจข้อมูลผู้สมัครแล้ว"}
+              </button>}
             </section>
             {auth.role === "admin" && a.submitted_at && (
-              <form className="panel stack" onSubmit={assignNumber}>
+              <form className="panel stack review-color-panel tone-teal" hidden={reviewStep!==4} onSubmit={assignNumber}>
                 <h2>ออกเลขผู้สมัครโดย Admin</h2>
                 <Notice>กำหนดเลขได้เองทั้งภาษาไทย ภาษาอังกฤษ ตัวเลขและเครื่องหมาย เช่น รับสมัคร/๒๕๖๙/๑ หรือ HR-2569-A1 โดยห้ามซ้ำกับใบสมัครอื่น</Notice>
                 <Field label="เลขผู้สมัคร (กรอกเอง)" value={assignedNumber}
@@ -271,7 +319,7 @@ export default function Review() {
               </form>
             )}
             {auth.role === "admin" && a.submitted_at && (
-              <section className="panel stack" id="review-print-approval">
+              <section className="panel stack review-color-panel tone-teal" hidden={reviewStep!==4} id="review-print-approval">
                 <h2>ยืนยันให้ผู้สมัครดาวน์โหลดใบสมัคร PDF</h2>
                 <p className="muted">Admin ตรวจเอกสารและเลขผู้สมัครแล้วจึงกดยืนยัน ผู้สมัครยังดาวน์โหลดไม่ได้ก่อนยืนยัน</p>
                 {printApproval.data && canPrint.data ? (
@@ -285,7 +333,7 @@ export default function Review() {
                 </button>
               </section>
             )}
-            <section className="panel" id="review-documents">
+            <section className="panel review-color-panel tone-purple" hidden={reviewStep!==1} id="review-documents">
               <h2>ตรวจเอกสารแนบ</h2>
               {d.documents.map((doc) => (
                 <div className="document-row" key={doc.id}>
@@ -302,10 +350,13 @@ export default function Review() {
                   <PreviewButton path={doc.storage_path} />
                 </div>
               ))}
+              {auth.can("review") && <button type="button" className="btn primary mt-4" disabled={stepBusy||marked("documents")} onClick={()=>void setReviewMark("documents",true)}>
+                <CheckCircle2 size={17}/> {marked("documents")?"ตรวจเอกสารแล้ว":"ยืนยันตรวจเอกสารครบแล้ว"}
+              </button>}
             </section>
             {auth.can("review") &&
               ["submitted", "under_review"].includes(a.status) && (
-                <form className="panel stack" id="review-decision" onSubmit={submit}>
+                <form className="panel stack review-color-panel tone-green" hidden={reviewStep!==3} id="review-decision" onSubmit={submit}>
                   <h2>ผลตรวจคุณสมบัติ</h2>
                   <Select
                     label="สถานะใหม่"
@@ -349,7 +400,7 @@ export default function Review() {
                   p.status === "confirmed" ||
                   (a.payment_status !== "confirmed" && index === 0))
                 .map((p) => (
-                <section className="panel" key={p.id}>
+                <section className="panel review-color-panel tone-amber" hidden={reviewStep!==2} key={p.id}>
                   <h2>ตรวจหลักฐานชำระเงิน</h2>
                   <p>
                     {money(Number(p.amount))} · {dateTH(p.paid_at, true)} ·
@@ -385,9 +436,9 @@ export default function Review() {
                   )}
                 </section>
               ))}
-            {auth.role === "admin" && <AdminSignaturePad applicationId={id!} existing={signature.data || null} eligible={a.status === "eligible" && !!a.application_number && ["confirmed","not_required"].includes(a.payment_status)} refresh={refresh} />}
+            {auth.role === "admin" && reviewStep===4 && <AdminSignaturePad applicationId={id!} existing={signature.data || null} eligible={a.status === "eligible" && !!a.application_number && ["confirmed","not_required"].includes(a.payment_status)} refresh={refresh} />}
             {auth.can("review") && (
-              <section className="panel" id="review-notes">
+              <section className="panel review-color-panel tone-slate" hidden={reviewStep!==5} id="review-notes">
                 <h2>บันทึกภายในของเจ้าหน้าที่</h2>
                 <small className="muted">
                   ผู้สมัครไม่สามารถอ่านบันทึกส่วนนี้
