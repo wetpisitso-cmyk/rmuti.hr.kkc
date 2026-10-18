@@ -179,13 +179,14 @@ export function Home() {
           </div>
         </div>
       </div>
-      <div className="container section" id="positions">
+      <div className="container section home-content-sections" id="positions">
+        <section className="home-content-frame home-openings-frame" aria-label="ค้นหาตำแหน่งที่เปิดรับสมัคร">
         <Title
           eyebrow="OPEN POSITIONS"
           title="ตำแหน่งที่เปิดรับสมัคร"
           description="ตรวจคุณสมบัติและกำหนดการตามประกาศแต่ละตำแหน่ง"
         />
-        <div className="filter-card">
+        <div className="filter-card home-filter-card">
           <div className="tabs">
             {[
               ["all", "ทั้งหมด"],
@@ -238,7 +239,12 @@ export function Home() {
             </Select>
           </div>
         </div>
-        <div className="section-count">พบ {list.length} ตำแหน่ง</div>
+        </section>
+        <section className="home-content-frame home-results-frame" aria-label="รายการตำแหน่งรับสมัคร">
+          <div className="home-results-heading">
+            <div><span className="eyebrow">AVAILABLE JOBS</span><h2>รายการตำแหน่งรับสมัคร</h2></div>
+            <span className="section-count" aria-live="polite">พบ {list.length} ตำแหน่ง</span>
+          </div>
         <State loading={jobs.isPending} error={jobs.error} empty={!list.length}>
           <div className="job-grid">
             {list.map((j) => (
@@ -246,7 +252,8 @@ export function Home() {
             ))}
           </div>
         </State>
-        <div className="section-divider" />
+        </section>
+        <section className="home-content-frame home-news-frame" aria-label="ประกาศและข่าวสาร">
         <Title
           eyebrow="LATEST NEWS"
           title="ประกาศและข่าวสาร"
@@ -284,8 +291,9 @@ export function Home() {
               ))}
           </div>
         </State>
+        </section>
       </div>
-      <section className="container home-steps-section">
+      <section className="container home-steps-section home-content-frame home-howto-frame">
         <div className="home-steps-heading">
           <div><span className="eyebrow">HOW TO APPLY</span><h2>ขั้นตอนการสมัคร</h2><p>สมัครออนไลน์และติดตามสถานะได้ง่ายในบัญชีของคุณ</p></div>
           <Link className="text-link" to="/guide">ดูรายละเอียดขั้นตอน <ArrowRight size={16}/></Link>
