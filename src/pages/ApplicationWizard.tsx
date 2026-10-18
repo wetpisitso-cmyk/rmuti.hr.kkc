@@ -74,6 +74,7 @@ export default function ApplicationWizard() {
     queryKey: ["application", appId],
     queryFn: () => getApplication(appId!),
     enabled: !!appId,
+    refetchOnMount: "always",
   });
   // Resume a saved form when the applicant returns to its job.
   // Unsubmitted records are hidden from the applicant's submitted list.
@@ -83,7 +84,7 @@ export default function ApplicationWizard() {
     queryFn: async () => {
       const r = await supabase
         .from("applications")
-        .select("id,status")
+        .select("id,status,archived_at")
         .eq("user_id", auth.session!.user.id)
         .eq("job_id", jobId!)
         .maybeSingle();
@@ -96,6 +97,11 @@ export default function ApplicationWizard() {
   }, [id]);
   useEffect(() => {
     if (!id && existing.data) {
+      // A previously archived application is not an active application.
+      if (existing.data.archived_at) {
+        nav("/dashboard", { replace: true });
+        return;
+      }
       const editable = ["draft", "needs_correction"].includes(existing.data.status);
       if (editable) setAppId(existing.data.id);
       nav(
@@ -125,15 +131,16 @@ export default function ApplicationWizard() {
   const job =
     catalog.jobs.data?.find((j) => j.id === selected) ||
     q.data?.application.job_positions;
-  const locked =
-    q.data &&
-    !["draft", "needs_correction"].includes(q.data.application.status);
+  const locked = !!q.data && (
+    !!q.data.application.archived_at ||
+    !["draft", "needs_correction"].includes(q.data.application.status)
+  );
 
   // A successfully submitted application is intentionally read-only.
   // Never leave applicants on the old /edit page with a confusing lock notice.
   useEffect(() => {
     if (id && q.data?.application.id === id && locked) {
-      nav(`/application/${id}`, { replace: true });
+      nav(q.data.application.archived_at ? "/dashboard" : `/application/${id}`, { replace: true });
     }
   }, [id, locked, nav, q.data?.application.id]);
 
@@ -143,8 +150,31 @@ export default function ApplicationWizard() {
   const paymentRecords = q.data?.payments || [];
   const slipSubmitted = !!paymentDoc && paymentRecords.some((p: {slip_path?:string;status?:string}) => p.slip_path === paymentDoc.storage_path && p.status !== "rejected");
   const lastStep = steps.length - 1;
+  // In another tab or after submission, the database may have locked this form.
+  // Reconcile with the server instead of continuing to show a stale editable form.
+  const redirectIfNotEditable = async (applicationId: string): Promise<boolean> => {
+    const { data, error: lookupError } = await supabase
+      .from("applications")
+      .select("status,archived_at")
+      .eq("id", applicationId)
+      .maybeSingle();
+    if (lookupError) return false;
+    if (!data || data.archived_at) {
+      nav("/dashboard", { replace: true });
+      return true;
+    }
+    if (!["draft", "needs_correction"].includes(data.status)) {
+      await qc.invalidateQueries({ queryKey: ["application", applicationId] });
+      await qc.invalidateQueries({ queryKey: ["my-applications"] });
+      nav(`/application/${applicationId}`, { replace: true });
+      return true;
+    }
+    return false;
+  };
   const save = async () => {
     if (!selected) throw new Error("กรุณาเลือกตำแหน่ง");
+    if (appId && await redirectIfNotEditable(appId))
+      throw new Error("APPLICATION_LOCKED");
     const educationError = educationIssue(education, true);
     if (educationError) throw new Error(educationError);
     const newId = await saveDraft(
@@ -168,7 +198,10 @@ export default function ApplicationWizard() {
     try {
       await fn();
     } catch (e) {
-      const msg = (e as Error).message;
+      const msg = (e as Error).message || "";
+      if (/APPLICATION_LOCKED|DUPLICATE_APPLICATION/.test(msg) && appId) {
+        if (await redirectIfNotEditable(appId)) return;
+      }
       setError(msg.startsWith("กรุณา") ? msg : errorTH(e));
     } finally {
       setBusy(false);
