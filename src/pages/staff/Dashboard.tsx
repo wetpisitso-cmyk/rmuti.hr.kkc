@@ -109,35 +109,39 @@ export default function StaffDashboard({
       setExporting(false);
     }
   };
-  const deleteApplication = async (id: string, number: string | null, status: string) => {
-    if (a.role !== "admin") return;
-    const unnumbered = !number && ["draft","withdrawn"].includes(status);
-    if (!number && !unnumbered) { setError("ใบสมัครที่ยังไม่มีเลขและไม่ใช่แบบร่างหรือถอนแล้ว ไม่สามารถลบด้วยวิธีนี้ได้"); return; }
-    const expected = unnumbered ? "ลบถาวร" : number!;
-    const typed = window.prompt("ลบใบสมัครและไฟล์แนบถาวร: พิมพ์ข้อความนี้เพื่อยืนยัน\n" + expected);
-    if (typed === null) return;
-    if (typed.trim() !== expected) { setError("ข้อความยืนยันไม่ตรงกับรายการ"); return; }
-    if (!window.confirm("ยืนยันลบใบสมัคร " + (number || (status === "draft" ? "แบบร่าง" : "ที่ถอนแล้ว")) + " รวมข้อมูลและเอกสารที่เกี่ยวข้องอย่างถาวร?")) return;
-    setDeletingId(id);
-    setError("");
-    setSuccess("");
+  const [showArchive,setShowArchive] = useState(false);
+  const archived = useQuery({
+    queryKey:["archived-applications"],
+    enabled:showArchive && a.role==="admin",
+    queryFn:async()=>{
+      const {data,error}=await supabase.from("applications")
+        .select("id,application_number,personal_data,archived_at,job_positions(title)")
+        .not("archived_at","is",null).order("archived_at",{ascending:false}).limit(100);
+      if(error)throw error;
+      return data;
+    },
+  });
+  const deleteApplication = async (id:string,number:string|null,_status:string)=>{
+    if(a.role!=="admin")return;
+    const expected=number||"ย้ายไปสำรอง";
+    if(!window.confirm("ย้ายใบสมัครออกจากรายการหลักและสำรองข้อมูลทั้งหมดไว้ก่อน?\\nสามารถกู้คืนได้ในคลังสำรอง"))return;
+    setDeletingId(id);setError("");setSuccess("");
     try {
-      if (unnumbered) await rpc("admin_delete_unnumbered_application", { p_id: id, p_confirmation: expected });
-      else await rpc("admin_delete_application", { p_id: id, p_confirm_number: number });
-      setSuccess("ลบใบสมัคร " + (number || (status === "draft" ? "แบบร่าง" : "ที่ถอนแล้ว")) + " จากฐานข้อมูลสำเร็จแล้ว");
-      await Promise.all([
-        q.refetch(), ...(listOnly ? [] : [dashboard.refetch()]),
-      ]);
-      const { data: cleanup, error: cleanupError } = await supabase.functions.invoke("admin-cleanup-files", { body: {} });
-      if (cleanupError || Number(cleanup?.failed || 0) > 0) {
-        setError("ลบใบสมัครเรียบร้อยแล้ว แต่ไฟล์แนบบางรายการยังรอการลบจาก Storage โปรดติดต่อผู้ดูแลระบบ");
-      }
-    } catch (e) {
-      const detail = e as { message?: string; code?: string };
-      setError(errorTH(e) + (detail.code ? " (รหัสข้อผิดพลาด: " + detail.code + ")" : ""));
-    } finally {
-      setDeletingId(null);
-    }
+      await rpc("admin_archive_application",{p_id:id,p_confirmation:expected});
+      setSuccess("ย้ายใบสมัครไปคลังสำรองสำเร็จแล้ว สามารถกู้คืนได้");
+      await Promise.all([q.refetch(),...(listOnly?[]:[dashboard.refetch()]),archived.refetch()]);
+    }catch(e){setError(errorTH(e));}
+    finally{setDeletingId(null);}
+  };
+  const restoreApplication=async(id:string)=>{
+    if(!window.confirm("กู้คืนใบสมัครนี้กลับสู่รายการหลัก?"))return;
+    setDeletingId(id);setError("");setSuccess("");
+    try{
+      await rpc("admin_restore_application",{p_id:id});
+      setSuccess("กู้คืนใบสมัครสำเร็จแล้ว");
+      await Promise.all([q.refetch(),...(listOnly?[]:[dashboard.refetch()]),archived.refetch()]);
+    }catch(e){setError(errorTH(e));}
+    finally{setDeletingId(null);}
   };
   const counts = dashboard.data?.statuses || {};
   return (
@@ -348,14 +352,14 @@ export default function StaffDashboard({
                           ตรวจใบสมัคร <ArrowRight size={14} />
                         </Link>
                         {a.role === "admin" && <ApplicantDocumentsDownload applicationId={r.id} compact />}
-                        {a.role === "admin" && (r.application_number || ["draft","withdrawn"].includes(r.status)) && (
+                        {a.role === "admin" && (
                           <button
                             type="button"
                             className="btn small danger"
                             disabled={deletingId !== null}
                             onClick={() => void deleteApplication(r.id, r.application_number, r.status)}
                           >
-                            <Trash2 size={14} /> {deletingId === r.id ? "กำลังลบ…" : "ลบ"}
+                            <Trash2 size={14} /> {deletingId === r.id ? "กำลังสำรอง…" : "ลบ (สำรอง)"}
                           </button>
                         )}
                       </div>
