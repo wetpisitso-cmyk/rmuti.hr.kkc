@@ -115,7 +115,7 @@ export default function Review() {
     ...(!["confirmed","not_required"].includes(a?.payment_status || "") ? ["ตรวจและยืนยันการชำระค่าธรรมเนียม (ถ้ามี)"] : []),
   ];
   const finalPrintApproved = Boolean(
-    a && signature.data && printApproval.data &&
+    a && canPrint.data && signature.data && printApproval.data &&
     signature.data.application_number_at_signing === a.application_number &&
     printApproval.data.application_number_at_approval === a.application_number &&
     signature.data.signed_snapshot_md5 === printApproval.data.approved_snapshot_md5 &&
