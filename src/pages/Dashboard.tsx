@@ -34,6 +34,7 @@ export default function Dashboard() {
         .eq("user_id", a.session!.user.id)
         .not("submitted_at", "is", null)
         .neq("status", "draft")
+        .is("archived_at", null)
         .order("updated_at", { ascending: false });
       if (r.error) throw r.error;
       return r.data as Application[];
