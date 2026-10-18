@@ -1,0 +1,145 @@
+/* RMUTI KKC | Consistent framed sections throughout the Staff / Admin workspace.
+   Scope is deliberately limited to .staff-shell so the applicant site and PDF
+   pages are not restyled. Existing form controls and data behavior are unchanged. */
+.staff-shell {
+  --admin-frame-border: #dce6f3;
+  --admin-frame-text: #102d55;
+  --admin-frame-shadow: 0 9px 28px rgba(16,45,85,.06);
+  --admin-inner-border: #e1eaf5;
+}
+.staff-shell .staff-main {
+  background: linear-gradient(180deg,#f6f8fc 0%,#f9fbfe 100%);
+  min-width:0;
+}
+.staff-shell .staff-main :is(
+  .panel,
+  .filter-card,
+  .kpi,
+  .review-overview,
+  .manual-framed-section,
+  .manual-faq-card,
+  .manual-contact-card
+) {
+  border:1px solid var(--admin-frame-border);
+  border-radius:18px;
+  box-shadow:var(--admin-frame-shadow);
+  background-clip:padding-box;
+  min-width:0;
+}
+.staff-shell .staff-main .panel,
+.staff-shell .staff-main .filter-card {
+  padding:clamp(18px,2.2vw,28px);
+}
+.staff-shell .staff-main .panel > :is(h2,h3):first-child,
+.staff-shell .staff-main .filter-card > :is(h2,h3):first-child {
+  color:var(--admin-frame-text);
+}
+.staff-shell .staff-main .panel > :is(h2,h3):first-child:not(:last-child) {
+  border-bottom:1px solid #edf1f7;
+  padding-bottom:13px;
+  margin-bottom:18px;
+}
+.staff-shell .staff-main .filter-card {
+  background:#fff;
+  margin-bottom:22px;
+}
+.staff-shell .staff-main .tabs {
+  display:flex;
+  flex-wrap:nowrap;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  overflow-x:auto;
+  gap:8px;
+  background:#fff;
+  border:1px solid var(--admin-frame-border);
+  border-radius:16px;
+  padding:10px;
+  box-shadow:var(--admin-frame-shadow);
+}
+.staff-shell .staff-main .tabs button {
+  flex-shrink:0;
+  border-radius:10px;
+}
+.staff-shell .staff-main .tabs button.active {
+  color:#af4d0b;
+  background:#fff3e8;
+  box-shadow:inset 0 0 0 1px #fad5b4;
+}
+.staff-shell .staff-main .subpanel {
+  min-width:0;
+  background:#f8fbff;
+  border:1px solid var(--admin-inner-border);
+  border-radius:13px;
+}
+.staff-shell .staff-main .table-wrap {
+  max-width:100%;
+  border:1px solid #e4ebf5;
+  border-radius:13px;
+  background:#fff;
+  overflow-x:auto;
+}
+.staff-shell .staff-main table {
+  width:100%;
+}
+.staff-shell .staff-main .chart-grid > .panel {
+  height:100%;
+  margin-bottom:0;
+}
+.staff-shell .staff-main .kpi-grid .kpi {
+  border-radius:16px;
+}
+.staff-shell .staff-main .review-step-tabs {
+  border-radius:14px;
+}
+.staff-shell .staff-main .manual-page .manual-hero {
+  border-radius:20px;
+  box-shadow:0 14px 32px rgba(16,45,85,.09);
+}
+.staff-shell .staff-main .manual-page .manual-framed-section {
+  background-color:#fff;
+  border-top:4px solid #f47721;
+}
+.staff-shell .staff-main .manual-page .manual-framed-section:nth-of-type(even) {
+  border-top-color:#102d55;
+}
+@media(max-width:800px) {
+  .staff-shell .staff-main :is(
+    .panel,.filter-card,.kpi,.review-overview,.manual-framed-section
+  ) {
+    border-radius:15px;
+  }
+  .staff-shell .staff-main :is(.panel,.filter-card) {
+    padding:clamp(15px,3vw,22px);
+  }
+  .staff-shell .staff-main .tabs {
+    padding:7px;
+    border-radius:13px;
+  }
+}
+@media(max-width:480px) {
+  .staff-shell .staff-main .panel,
+  .staff-shell .staff-main .filter-card {
+    padding:15px;
+  }
+  .staff-shell .staff-main .kpi-grid {
+    gap:10px;
+  }
+}
+@media print {
+  .staff-shell .staff-main {
+    background:#fff;
+  }
+  .staff-shell .staff-main :is(
+    .panel,.filter-card,.kpi,.review-overview,.manual-framed-section,
+    .manual-faq-card,.manual-contact-card,.tabs
+  ) {
+    box-shadow:none;
+    border-color:#dce1e8;
+  }
+  .staff-shell .staff-main .table-wrap {
+    overflow:visible;
+    border:0;
+    border-radius:0;
+  }
+}
