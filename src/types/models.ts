@@ -46,6 +46,7 @@ export interface Department {
 export interface Round {
   id: string;
   name: string;
+  description: string;
   year_be: number;
   opens_at: string;
   closes_at: string;
