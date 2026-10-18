@@ -86,6 +86,17 @@ export interface Personal {
   phone: string;
   address: string;
   national_id?: string;
+  /** ข้อมูลเพิ่มเติมสำหรับใบสมัคร PDF ฉบับทางการ */
+  english_name?: string;
+  gender?: string;
+  nationality?: string;
+  ethnicity?: string;
+  religion?: string;
+  marital_status?: string;
+  line_id?: string;
+  registered_address?: string;
+  military_status?: string;
+  skills?: string;
 }
 export interface Education {
   degree: string;
