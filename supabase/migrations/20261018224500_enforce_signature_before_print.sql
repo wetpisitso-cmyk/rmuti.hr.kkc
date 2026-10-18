@@ -1,0 +1,4 @@
+-- Require HR checks, eligibility, payment, a signed snapshot and final approval before applicant printing.
+-- Applied to Supabase on 2026-10-18.
+-- Existing approvals before Admin signature no longer unlock applicant PDF.
+-- The database function definitions on the live project are authoritative.
