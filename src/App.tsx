@@ -15,6 +15,7 @@ const Profile = lazy(() =>
 );
 const Wizard = lazy(() => import("./pages/ApplicationWizard"));
 const Application = lazy(() => import("./pages/ApplicationView"));
+const PaymentReceipt = lazy(() => import("./pages/PaymentReceipt"));
 const Print = lazy(() =>
   import("./pages/ApplicationView").then((m) => ({
     default: m.PrintApplication,
@@ -60,6 +61,7 @@ export default function App() {
               <Route path="application/:id/edit" element={<Wizard />} />
               <Route path="application/:id" element={<Application />} />
               <Route path="application/:id/print" element={<Print />} />
+              <Route path="application/:id/receipt" element={<PaymentReceipt />} />
               <Route path="application/:id/exam" element={<Print exam />} />
             </Route>
             <Route element={<Guard staff />}>
