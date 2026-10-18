@@ -10,15 +10,18 @@ const workflow:GuideStep[]=[
  {number:"04",title:"ตรวจสอบและค้นหาใบสมัคร",description:"อ่านรายละเอียดและหลักฐานก่อนพิจารณา",details:["เปิด «ตรวจใบสมัคร» กรองตามปี รอบ ตำแหน่ง หน่วยงาน สถานะ หรือค้นหาชื่อ/เลขผู้สมัคร","เปิดใบสมัครที่ต้องการ เพื่อตรวจข้อมูลส่วนตัว คุณวุฒิ และเอกสารแนบ","บันทึกหมายเหตุภายใน หรือส่งกลับให้แก้ไขเมื่อเอกสารไม่ครบ/ข้อมูลผิด","เปลี่ยนสถานะการตรวจคุณสมบัติตามผลการพิจารณา"],Icon:ClipboardCheck,to:"/staff/applications",label:"ตรวจใบสมัคร"},
  {number:"05",title:"ตรวจหลักฐานชำระเงิน",description:"กรณีตำแหน่งที่เรียกเก็บค่าธรรมเนียม",details:["เปิดใบสมัครที่มีหลักฐานชำระเงิน แล้วดูสลิป ยอดเงิน และวันเวลาชำระ","ตรวจความถูกต้องก่อนกดยืนยันหรือไม่ยืนยันรายการชำระเงิน","การอัปโหลดสลิปของผู้สมัครไม่ทำให้สถานะชำระเงินผ่านโดยอัตโนมัติ"],Icon:CreditCard,to:"/staff/applications",label:"เปิดรายการใบสมัคร"},
  {number:"06",title:"ออกเลขผู้สมัครแบบกำหนดเอง",description:"เลขภาษาไทย ภาษาอังกฤษ และตัวเลข",details:["เปิดใบสมัครที่ส่งแล้ว ไปที่ส่วน «ออกเลขผู้สมัครโดย Admin»","กำหนดเลขได้อิสระ เช่น มทร.ขก./๒๕๖๙/๐๐๑ หรือ HR-2569-001","ระบบตรวจเลขซ้ำ และอาจล็อกการเปลี่ยนเลขหลังมีลายเซ็นรับรองแล้ว","ตรวจเลขให้ถูกต้องก่อนกดยืนยันการออกเลข"],Icon:FileText,to:"/staff/applications",label:"จัดการเลขผู้สมัคร"},
- {number:"07",title:"ยืนยันดาวน์โหลด PDF และลายเซ็น",description:"รับรองใบสมัครผ่านระบบที่กำหนด",details:["หลังตรวจข้อมูลและออกเลข ให้ใช้ปุ่ม «ยืนยันให้ดาวน์โหลดใบสมัคร» ในหน้าใบสมัคร","ผู้สมัครจะดาวน์โหลดหรือพิมพ์ PDF ฉบับใบสมัครได้ต่อเมื่อ Admin ยืนยันแล้ว","ถ้าต้องใช้ลายเซ็นออนไลน์ ให้ลงนามในส่วน Admin หลังใบสมัครผ่านคุณสมบัติและสถานะชำระเงินตรงตามเงื่อนไข","ตรวจทานก่อนเซ็น เพราะระบบออกแบบให้ลายเซ็นที่บันทึกแล้วแก้ไขทับไม่ได้"],Icon:FileSignature,to:"/staff/applications",label:"ตรวจและรับรองใบสมัคร"},
+ {number:"07",title:"เซ็นรับรองก่อนอนุมัติ PDF",description:"ทุกขั้นต้องเสร็จก่อนผู้สมัครดาวน์โหลดได้",details:["ตรวจข้อมูลผู้สมัครและเอกสารแนบให้เสร็จทั้งสองขั้น แล้วตรวจสลิป (ถ้ามี) ให้สถานะยืนยันแล้ว","บันทึกผลเป็น «ผ่านคุณสมบัติ» และกำหนดเลขผู้สมัครในแท็บ «เลขที่และ PDF»","Admin วาดลายเซ็นในช่องรับรองและกดยืนยันการลงนามก่อน ลายเซ็นที่บันทึกแล้วไม่สามารถลงนามทับได้","เมื่อเซ็นเรียบร้อยจึงกด «ยืนยันให้ดาวน์โหลดใบสมัคร»; ระบบตรวจสิทธิ์ในฐานข้อมูลด้วย"],Icon:FileSignature,to:"/staff/applications",label:"ตรวจและรับรองใบสมัคร"},
  {number:"08",title:"กำหนดสอบและบันทึกผล",description:"จัดการเลขสอบ คะแนน และผลคัดเลือก",details:["เมนู «การสอบและคะแนน» ใช้สร้างกำหนดสอบและเลือกเผยแพร่ตามรอบ","กำหนดผู้เข้าสอบ เลขสอบ และข้อมูลที่จำเป็นผ่านเมนูของระบบ","บันทึกคะแนนและผลร่าง ตรวจความถูกต้องก่อนขั้นตอนเผยแพร่"],Icon:ClipboardCheck,to:"/staff/exams",label:"การสอบและคะแนน"},
- {number:"09",title:"ประกาศและเผยแพร่ผล",description:"เผยแพร่เฉพาะข้อมูลที่ผ่านการตรวจแล้ว",details:["เมนู «ประกาศและเผยแพร่» สร้างประกาศ พร้อมลิงก์เอกสารประกอบเมื่อมี","ตรวจตัวอย่างผลคัดเลือกและรายชื่อที่จะเผยแพร่ก่อนกดยืนยัน","ผลร่างที่ยังไม่ได้เผยแพร่ไม่ควรใช้เป็นประกาศทางการ"],Icon:Megaphone,to:"/staff/publish",label:"ประกาศและเผยแพร่"},
- {number:"10",title:"รายงาน บัญชีผู้ใช้ และการดูแลข้อมูล",description:"ตรวจสอบและจัดการหลังบ้านอย่างปลอดภัย",details:["หน้าภาพรวมและตรวจใบสมัครมีตัวกรองตามปี/รอบ/หน่วยงาน พร้อมส่งออก CSV หรือพิมพ์หน้าเป็น PDF ตามสิทธิ์","เมนู «บัญชีและสิทธิ์» ใช้กำหนดบทบาทและสิทธิ์ของเจ้าหน้าที่","เมนู «ตั้งค่า / ประวัติ» ใช้ตรวจประวัติการเปลี่ยนแปลง ข้อมูลติดต่อ นโยบาย และตั้ง Username Admin","ระมัดระวังคำสั่งลบถาวร: ลบได้เฉพาะเมื่อสิทธิ์และข้อจำกัดของข้อมูลอนุญาต และข้อมูลที่ลบอาจไม่สามารถกู้คืน"],Icon:Settings,to:"/staff/settings",label:"การตั้งค่าและประวัติ"},
+ {number:"09",title:"ประกาศพร้อมแบนเนอร์ / เผยแพร่ผล",description:"ข่าวและผลคัดเลือกมีขั้นตอนเผยแพร่แยกกัน",details:["เปิด «ประกาศและเผยแพร่» → «ข่าว / เอกสารประกาศ» แล้วเพิ่มหัวข้อ เนื้อหา และลิงก์ไฟล์ (ถ้ามี)","เพิ่มรูปแบนเนอร์ JPG/PNG/WebP ได้ ระบบแปลงเป็น WebP ก่อนจัดเก็บ ใช้ปุ่มตัวอย่าง เปลี่ยนรูป หรือนำรูปออก","ติ๊ก «เผยแพร่ประกาศ» ก่อนบันทึกเพื่อให้ผู้สมัครเห็นบนหน้าแรกและหน้าประกาศ","ในแท็บ «ตรวจร่าง / เผยแพร่รายชื่อ» ให้เลือกรายการสอบ ตรวจข้อมูล และกดเผยแพร่ผลเมื่ออนุมัติแล้ว"],Icon:Megaphone,to:"/staff/publish",label:"ประกาศและเผยแพร่"},
+ {number:"10",title:"บัญชีผู้ใช้ ตั้งค่าธนาคาร และประวัติ",description:"ตรวจสอบการตั้งค่าส่วนกลางและดูแลข้อมูลอย่างปลอดภัย",details:["หน้าภาพรวมและตรวจใบสมัครมีตัวกรองและเครื่องมือส่งออกตามสิทธิ์","เมนู «บัญชีและสิทธิ์» จัดการบทบาทและสิทธิ์เจ้าหน้าที่","เมนู «ตั้งค่า / ประวัติ» ตั้ง Username Admin ข้อมูลติดต่อ นโยบายความเป็นส่วนตัว และระยะเวลาเก็บข้อมูล","กำหนดธนาคาร เลขบัญชี และ QR Code ส่วนกลาง (PNG/JPG ไม่เกิน 1 MB) ไม่ต้องกรอกบัญชีซ้ำทุกตำแหน่ง","ก่อนลบข้อมูลผู้สมัครทดสอบ ตรวจว่ามีสลิป ใบรับชำระเงิน และไฟล์แนบหรือไม่; ข้อมูลการเงินอาจถูกป้องกันการลบถาวร"],Icon:Settings,to:"/staff/settings",label:"การตั้งค่าและประวัติ"},
 ];
 const faq=[
- ["ผู้สมัครยังดาวน์โหลดใบสมัคร PDF ไม่ได้ เพราะอะไร?","ต้องให้ Admin ออกเลขผู้สมัครและกด «ยืนยันให้ดาวน์โหลดใบสมัคร» ก่อน ระบบตรวจสิทธิ์ที่หน้าเปิด PDF ไม่ใช่เพียงซ่อนปุ่ม"],
+ ["ผู้สมัครยังดาวน์โหลดใบสมัคร PDF ไม่ได้ เพราะอะไร?","ต้องตรวจข้อมูลและเอกสารครบ ยืนยันชำระเงิน (ถ้ามี) บันทึกผ่านคุณสมบัติ ออกเลขผู้สมัคร Admin เซ็นรับรอง และจึงกด «ยืนยันให้ดาวน์โหลดใบสมัคร» ระบบตรวจสิทธิ์ในฐานข้อมูลด้วย"],
  ["ออกเลขภาษาไทยได้หรือไม่?","ได้ สามารถกรอกเลขที่ภาษาไทยและรูปแบบที่ต้องการได้โดยไม่ซ้ำกัน แต่บางกรณีไม่สามารถเปลี่ยนเลขได้หลังรับรองลายเซ็น"],
  ["อัปโหลดเอกสารได้ขนาดเท่าไร?","ระบบจำกัดไฟล์ใหม่สูงสุด 3 MB ต่อไฟล์ รวมรูปภาพ PDF และสลิป สามารถกำหนดขนาดต่ำกว่านี้ได้ตามตำแหน่ง"],
+ ["ต้องตั้งบัญชีธนาคารซ้ำทุกตำแหน่งไหม?","ไม่ต้อง ตั้งที่เมนู «ตั้งค่า / ประวัติ» เพียงจุดเดียว ส่วนตำแหน่งกำหนดเฉพาะค่าธรรมเนียมและคำแนะนำเพิ่มเติมได้"],
+ ["ลงลายเซ็นไม่ได้หรือช่องเซ็นไม่ขึ้นเพราะอะไร?","เปิดใบสมัครในบัญชี Admin ไปแท็บ «เลขที่และ PDF» และตรวจว่าใบสมัครผ่านคุณสมบัติ มีเลขผู้สมัคร ยืนยันค่าธรรมเนียม (ถ้ามี) และได้กดยืนยันตรวจข้อมูลกับเอกสารครบ"],
+ ["เพิ่มรูปแบนเนอร์ประกาศที่ไหน?","เปิด «ประกาศและเผยแพร่» → «ข่าว / เอกสารประกาศ» เพิ่มหรือแก้ไขประกาศ แล้วอัปโหลด JPG/PNG/WebP ซึ่งระบบบีบอัดก่อนเก็บ"],
  ["เหตุใดลบตำแหน่งไม่สำเร็จ?","หากมีใบสมัครหรือข้อมูลที่อ้างอิงตำแหน่ง ระบบอาจไม่อนุญาตให้ลบถาวร ให้ใช้ «เก็บถาวร» เพื่อหยุดเผยแพร่และคงข้อมูลเดิมก่อน"],
  ["เจ้าหน้าที่ทุกคนเห็นเมนู Admin หรือไม่?","ไม่ เมนูถูกจำกัดตามบทบาทและสิทธิ์ ส่วนคู่มือนี้ต้องเป็นบัญชี Admin เท่านั้น ผู้สมัครทั่วไปเข้าไม่ได้"],
  ["ต้องการดูประวัติการเปลี่ยนแปลงทำอย่างไร?","เปิดเมนู «ตั้งค่า / ประวัติ» และตรวจรายการในส่วนประวัติการเปลี่ยนแปลงล่าสุด"],
@@ -40,12 +43,18 @@ export default function AdminGuide(){
    </div>
    <div className="manual-hero-art" aria-hidden="true"><div className="manual-art-icon"><ShieldCheck size={76} strokeWidth={1.5}/></div><span className="manual-art-label"><LockKeyhole size={17}/> ADMIN ACCESS ONLY</span></div>
   </header>
+  <nav className="manual-topic-nav" aria-label="สารบัญคู่มือผู้ดูแลระบบ">
+   <a href="#admin-menu"><Settings size={17}/> เมนูหลังบ้าน</a>
+   <a href="#admin-workflow"><ClipboardCheck size={17}/> ขั้นตอน Admin</a>
+   <a href="#admin-pdf"><FileSignature size={17}/> อนุมัติ PDF</a>
+   <a href="#admin-faq"><BookOpenCheck size={17}/> คำถามที่พบบ่อย</a>
+  </nav>
   <section className="manual-info-banner admin-manual-info">
    <div><LockKeyhole size={23}/><span><strong>สิทธิ์เฉพาะ Admin</strong><small>เข้าสู่ระบบก่อนอ่านคู่มือ</small></span></div>
    <div><FileSignature size={23}/><span><strong>ออกเลข / อนุมัติ PDF</strong><small>ตรวจสอบก่อนรับรองทุกครั้ง</small></span></div>
    <div><ShieldCheck size={23}/><span><strong>คุ้มครองข้อมูลผู้สมัคร</strong><small>ตรวจสอบก่อนส่งออกและลบข้อมูล</small></span></div>
   </section>
-  <section className="manual-section" id="admin-workflow">
+  <section className="manual-section manual-framed-section" id="admin-workflow">
    <div className="manual-section-heading"><div><span className="manual-kicker">ADMIN WORKFLOW</span><h2>ขั้นตอนการจัดการระบบ 10 ขั้นตอน</h2><p>อ้างอิงชื่อเมนูและสิทธิ์จากระบบที่กำลังใช้งานจริง</p></div></div>
    <div className="manual-steps">
     {workflow.map(({number,title,description,details,Icon,to,label})=><article className="manual-step" key={number}>
@@ -56,13 +65,20 @@ export default function AdminGuide(){
     </article>)}
    </div>
   </section>
-  <section className="manual-section manual-admin-quick">
+  <section className="manual-section manual-framed-section manual-admin-quick" id="admin-menu">
    <div className="manual-section-heading"><div><span className="manual-kicker">QUICK ACCESS</span><h2>เมนูที่ใช้บ่อย</h2></div></div>
    <div className="manual-quick-links">
     {[{to:"/staff/applications",Icon:ClipboardCheck,label:"ตรวจใบสมัคร"},{to:"/staff/jobs",Icon:BriefcaseBusiness,label:"ตำแหน่งรับสมัคร"},{to:"/staff/rounds",Icon:CalendarDays,label:"รอบรับสมัคร"},{to:"/staff/publish",Icon:Megaphone,label:"ประกาศและผล"},{to:"/staff/users",Icon:Users,label:"บัญชีและสิทธิ์"},{to:"/staff/settings",Icon:Settings,label:"ตั้งค่า / ประวัติ"}].map(({to,Icon,label})=><Link to={to} key={to}><Icon size={21}/><span>{label}</span><ArrowRight size={16}/></Link>)}
    </div>
   </section>
-  <section className="manual-section manual-admin-help">
+  <section className="manual-section manual-framed-section" id="admin-pdf">
+   <div className="manual-section-heading"><div><span className="manual-kicker">APPROVAL CHECKLIST</span><h2>เช็กลิสต์ก่อนกดเปิดดาวน์โหลด PDF</h2><p>ใช้ตรวจครบทุกข้อก่อน Admin ลงลายเซ็นและอนุมัติ</p></div></div>
+   <div className="manual-after-grid">
+    {["ตรวจข้อมูลผู้สมัครเรียบร้อย","ตรวจเอกสารแนบครบถ้วน","ตรวจและยืนยันค่าธรรมเนียม (ถ้ามี)","สถานะผ่านคุณสมบัติ","มีเลขผู้สมัครที่ถูกต้อง","Admin ลงลายเซ็นรับรองแล้ว","Admin กดยืนยันให้ดาวน์โหลด PDF"].map((label,i)=><div className="manual-after-item" key={label}><span className="manual-after-num">{i+1}</span><ShieldCheck size={20}/><strong>{label}</strong></div>)}
+   </div>
+   <div className="manual-inline-note"><FileSignature size={20}/><span>ต้องลงลายเซ็นก่อนอนุมัติ ดาวน์โหลด PDF จะยังไม่เปิดสำหรับผู้สมัครหากยังขาดขั้นตอนใดขั้นตอนหนึ่ง</span></div>
+  </section>
+  <section className="manual-section manual-admin-help" id="admin-faq">
    <div className="manual-section-heading"><div><span className="manual-kicker">TROUBLESHOOTING</span><h2>คำถามที่พบบ่อยสำหรับ Admin</h2></div></div>
    <div className="manual-faq-list">{faq.map(([question,answer])=><details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div>
    <p className="manual-admin-warning"><Trash2 size={18}/> ก่อนลบข้อมูลผู้สมัครหรือตำแหน่ง โปรดตรวจสอบผลกระทบ เพราะการลบถาวรอาจไม่สามารถกู้คืนได้</p>
