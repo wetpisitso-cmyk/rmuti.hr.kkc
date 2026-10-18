@@ -149,6 +149,12 @@ export default function ApplicationView() {
                 </div>
               }
             />
+            {a.submitted_at && auth.role === "applicant" && (
+              <Notice kind="success">
+                ส่งใบสมัครสำเร็จแล้ว เมื่อวันที่ {dateTH(a.submitted_at, true)}
+                {a.application_number ? ` · เลขผู้สมัคร ${a.application_number}` : " · รอเจ้าหน้าที่ตรวจสอบและกำหนดเลขผู้สมัคร"}
+              </Notice>
+            )}
             {a.submitted_at && !printAccess.isPending && !printAccess.data && <Notice>ใบสมัคร PDF ยังดาวน์โหลดไม่ได้ กรุณารอ Admin ตรวจสอบและกดยืนยันให้ดาวน์โหลด</Notice>}
             {error && <Notice kind="error">{error}</Notice>}
             {success && <Notice kind="success">{success}</Notice>}
