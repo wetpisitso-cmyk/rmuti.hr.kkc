@@ -123,6 +123,7 @@ export interface Application {
   created_at: string;
   updated_at: string;
   submitted_at: string | null;
+  archived_at: string | null;
   job_positions: Job;
 }
 export interface AppDocument {
