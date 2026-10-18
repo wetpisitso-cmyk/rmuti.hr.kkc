@@ -24,6 +24,8 @@ import { dateTH, money, numberTH, safeUrl } from "../lib/format";
 import { State, Title, Select, Notice } from "../components/UI";
 import type { Announcement, Job, PublishedResult } from "../types/models";
 import { outcomeLabels } from "../types/models";
+import { bannerUrl } from "../lib/announcementBanner";
+import { supabase } from "../lib/supabase";
 export function jobState(j: Job) {
   if (
     !j.recruitment_rounds ||
@@ -273,10 +275,11 @@ export function Home() {
               ?.filter((n) => n.published)
               .map((n) => (
                 <article className="news-card" key={n.id}>
-                  <FileText />
+                  {bannerUrl(n.banner_path) ? <img className="announcement-card-banner" src={bannerUrl(n.banner_path)} alt={`แบนเนอร์ ${n.title}`} loading="lazy" /> : <FileText />}
                   <small>{dateTH(n.created_at)}</small>
-                  <h3>{n.title}</h3>
+                  <h3><Link to={`/announcements/${n.id}`}>{n.title}</Link></h3>
                   <p>{n.content.slice(0, 150)}</p>
+                  <Link className="text-link" to={`/announcements/${n.id}`}>อ่านรายละเอียด <ArrowRight size={16}/></Link>
                   {safeUrl(n.attachment_url) && (
                     <a
                       className="text-link"
@@ -428,9 +431,10 @@ export function Announcements() {
           {q.data
             ?.filter((a) => a.published)
             .map((a) => (
-              <article className="panel" key={a.id}>
+              <article className="panel announcement-full-card" key={a.id}>
+                {bannerUrl(a.banner_path) && <img className="announcement-full-banner" src={bannerUrl(a.banner_path)} alt={`แบนเนอร์ ${a.title}`} loading="lazy" />}
                 <small className="muted">{dateTH(a.created_at)}</small>
-                <h2>{a.title}</h2>
+                <h2><Link to={`/announcements/${a.id}`}>{a.title}</Link></h2>
                 <p className="pre-wrap">{a.content}</p>
                 {safeUrl(a.attachment_url) && (
                   <a
@@ -448,6 +452,31 @@ export function Announcements() {
       </State>
     </div>
   );
+}
+export function AnnouncementDetail() {
+  const { id } = useParams();
+  const q = useQuery({
+    queryKey: ["announcement-detail", id], enabled: !!id,
+    queryFn: async () => {
+      const {data,error} = await supabase.from("announcements")
+        .select("*").eq("id",id!).eq("published",true).maybeSingle();
+      if(error) throw error;
+      return data as Announcement|null;
+    },
+  });
+  const a=q.data;
+  return <div className="container section">
+    <Link className="breadcrumb" to="/announcements">ข่าวและประกาศ <ChevronRight size={16}/> รายละเอียด</Link>
+    <State loading={q.isPending} error={q.error}>
+      {!a ? <Notice>ไม่พบประกาศหรือยังไม่เผยแพร่</Notice> : <article className="panel announcement-full-card">
+        {bannerUrl(a.banner_path) && <img className="announcement-full-banner" src={bannerUrl(a.banner_path)} alt={`แบนเนอร์ ${a.title}`} />}
+        <small className="muted">{dateTH(a.created_at)}</small>
+        <h1>{a.title}</h1>
+        <p className="pre-wrap">{a.content}</p>
+        {safeUrl(a.attachment_url) && <a className="btn outline small mt-3" href={safeUrl(a.attachment_url)!} target="_blank" rel="noreferrer">ดาวน์โหลดเอกสาร <ArrowRight size={17}/></a>}
+      </article>}
+    </State>
+  </div>;
 }
 export function Results() {
   const q = useQuery({
