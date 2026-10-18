@@ -120,6 +120,7 @@ export default function Catalog({ table }: { table: Table }) {
         max: 20,
         required: true,
       },
+      { key: "description", label: "รายละเอียดการรับสมัคร (คำอธิบายรอบ)", type: "textarea" },
       { key: "published", label: "เผยแพร่รอบรับสมัคร", type: "checkbox" },
       { key: "archived", label: "เก็บถาวร", type: "checkbox" },
     ],
@@ -388,6 +389,7 @@ export default function Catalog({ table }: { table: Table }) {
                       setData({ ...data, [f.key]: e.target.value })
                     }
                     required={f.required}
+                    maxLength={f.key === "description" ? 4000 : undefined}
                   />
                 </div>
               ) : f.options || f.key.endsWith("_id") ? (
