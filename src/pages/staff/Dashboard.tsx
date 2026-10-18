@@ -121,10 +121,10 @@ export default function StaffDashboard({
       return data;
     },
   });
-  const deleteApplication = async (id:string,number:string|null,_status:string)=>{
+  const deleteApplication = async (id:string,number:string|null)=>{
     if(a.role!=="admin")return;
     const expected=number||"ย้ายไปสำรอง";
-    if(!window.confirm("ย้ายใบสมัครออกจากรายการหลักและสำรองข้อมูลทั้งหมดไว้ก่อน?\\nสามารถกู้คืนได้ในคลังสำรอง"))return;
+    if(!window.confirm("ย้ายใบสมัครออกจากรายการหลักและสำรองข้อมูลทั้งหมดไว้ก่อน?\nสามารถกู้คืนได้ในคลังสำรอง"))return;
     setDeletingId(id);setError("");setSuccess("");
     try {
       await rpc("admin_archive_application",{p_id:id,p_confirmation:expected});
@@ -292,6 +292,36 @@ export default function StaffDashboard({
           </section>
         </State>
       )}
+      {a.role === "admin" && (
+        <section className="panel no-print">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2>คลังสำรองใบสมัคร</h2>
+              <p className="muted">ใบสมัครที่ลบออกจากรายการหลักยังเก็บข้อมูล เอกสาร และหลักฐานการเงินไว้ กู้คืนได้</p>
+            </div>
+            <button className="btn outline" type="button" onClick={() => setShowArchive(v => !v)}>
+              {showArchive ? "ปิดคลังสำรอง" : "เปิดคลังสำรอง / กู้คืน"}
+            </button>
+          </div>
+          {showArchive && (
+            <State loading={archived.isPending} error={archived.error} empty={!archived.data?.length}>
+              <div className="stack mt-3">
+                {archived.data?.map(item => (
+                  <div className="subpanel flex justify-between items-center flex-wrap gap-3" key={item.id}>
+                    <div>
+                      <strong>{item.application_number || "ไม่มีเลขผู้สมัคร"}</strong>
+                      <small>{item.personal_data?.first_name} {item.personal_data?.last_name}</small>
+                      <small>ย้ายไปสำรองเมื่อ {dateTH(item.archived_at, true)}</small>
+                    </div>
+                    <button type="button" className="btn outline small" disabled={deletingId !== null}
+                      onClick={() => void restoreApplication(item.id)}>กู้คืนใบสมัคร</button>
+                  </div>
+                ))}
+              </div>
+            </State>
+          )}
+        </section>
+      )}
       <section className="panel">
         <div className="flex justify-between items-center mb-3 flex-wrap gap-3">
           <h2>ใบสมัคร {q.data?.count || 0} รายการ</h2>
@@ -357,7 +387,7 @@ export default function StaffDashboard({
                             type="button"
                             className="btn small danger"
                             disabled={deletingId !== null}
-                            onClick={() => void deleteApplication(r.id, r.application_number, r.status)}
+                            onClick={() => void deleteApplication(r.id, r.application_number)}
                           >
                             <Trash2 size={14} /> {deletingId === r.id ? "กำลังสำรอง…" : "ลบ (สำรอง)"}
                           </button>
