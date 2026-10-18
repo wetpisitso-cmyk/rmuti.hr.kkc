@@ -128,6 +128,15 @@ export default function ApplicationWizard() {
   const locked =
     q.data &&
     !["draft", "needs_correction"].includes(q.data.application.status);
+
+  // A successfully submitted application is intentionally read-only.
+  // Never leave applicants on the old /edit page with a confusing lock notice.
+  useEffect(() => {
+    if (id && q.data?.application.id === id && locked) {
+      nav(`/application/${id}`, { replace: true });
+    }
+  }, [id, locked, nav, q.data?.application.id]);
+
   const documents = q.data?.documents || [];
   const paymentRequired = Number(job?.fee_amount || 0) > 0;
   const paymentDoc = documents.find((d) => d.document_type === "payment");
@@ -232,9 +241,9 @@ export default function ApplicationWizard() {
         error={catalog.jobs.error || q.error || existing.error}
       >
         {locked ? (
-          <Notice>
-            ใบสมัครนี้ถูกล็อกแล้ว{" "}
-            <Link to={`/application/${appId}`}>ดูสถานะใบสมัคร</Link>
+          <Notice kind="success">
+            ระบบได้รับใบสมัครที่ยืนยันส่งแล้วเรียบร้อย กำลังเปิดหน้าติดตามสถานะ{" "}
+            <Link to={`/application/${appId}`}>ดูรายละเอียดใบสมัคร</Link>
           </Notice>
         ) : (
           <>
