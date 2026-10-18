@@ -97,3 +97,19 @@ body{background:#f7f9fc;color:#142e50}
 .apple-review-columns .panel{padding:22px}
 @media(max-width:1100px){.apple-review-columns{grid-template-columns:1fr 1fr}.apple-review-columns>#review-personal,.apple-review-columns>#review-documents{grid-row:auto}}
 @media(max-width:800px){.apple-review-columns{display:flex;flex-direction:column}.apple-review-columns>.panel,.apple-review-columns>form{width:100%}}
+
+
+/* Step-by-step HR review: one visible stage at a time */
+.apple-review-columns{display:flex!important;flex-direction:column;gap:16px}
+.apple-review-columns>[hidden]{display:none!important}
+.review-step-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
+.review-step-tab{--step:#183b65;display:flex;text-align:left;align-items:center;gap:11px;background:color-mix(in srgb,var(--step) 7%,white);border:1px solid color-mix(in srgb,var(--step) 20%,white);border-radius:13px;padding:12px;color:var(--step);cursor:pointer}
+.review-step-tab.current{border:2px solid var(--step);box-shadow:0 0 0 3px color-mix(in srgb,var(--step) 13%,transparent)}
+.review-step-tab strong,.review-step-tab small{display:block;line-height:1.5}.review-step-tab small{font-size:11px;color:#64748b}
+.review-step-number{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:var(--step);color:#fff;font-weight:700}
+.tone-blue{--step:#2563eb}.tone-purple{--step:#7c3aed}.tone-amber{--step:#d97706}.tone-green{--step:#15803d}.tone-teal{--step:#0f766e}.tone-slate{--step:#475569}
+.review-step-navigation{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.review-color-panel{border:1px solid color-mix(in srgb,var(--step) 28%,white)!important;border-top:5px solid var(--step)!important;background:linear-gradient(to bottom,color-mix(in srgb,var(--step) 6%,white),white 90px)!important}
+.review-color-panel>h2{color:var(--step)!important}
+@media(max-width:850px){.review-step-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:500px){.review-step-tabs{grid-template-columns:1fr 1fr}.review-step-tab{gap:7px;padding:10px}.review-step-number{width:26px;height:26px;flex-basis:26px}.review-step-tab strong{font-size:12px}.review-step-navigation>span{order:-1;width:100%;text-align:center}}
