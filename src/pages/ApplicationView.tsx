@@ -29,6 +29,7 @@ import {
   Submit,
 } from "../components/UI";
 import { DocumentUpload, PreviewButton } from "../components/DocumentUpload";
+import PaymentBankDetails from "../components/PaymentBankDetails";
 import ApplicantSubmissionForm from "../components/ApplicantSubmissionForm";
 import type { AdminSignature } from "../components/AdminSignaturePad";
 import { outcomeLabels, statuses } from "../types/models";
@@ -289,6 +290,7 @@ export default function ApplicationView() {
                   description={`ค่าธรรมเนียม ${money(Number(j.fee_amount))}`}
                 />
                 <p className="pre-wrap">{j.payment_instructions}</p>
+                <PaymentBankDetails />
                 <Badge status={a.payment_status} payment />
                 {auth.role === "applicant" &&
                   a.payment_status !== "confirmed" &&
