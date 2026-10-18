@@ -13,6 +13,7 @@ import "./admin-login.css";
 import "./vibrant-home.css";
 import "./manual-guides.css";
 import "./readability.css";
+import "./admin-frames.css";
 class ErrorBoundary extends Component<
   { children: ReactNode },
   { failed: boolean }
