@@ -1753,3 +1753,21 @@ td strong {
 .copy-cert-stamp small{font-size:11px}
 .upload-card .copy-cert-inline{font-size:13px;font-weight:800;color:#d31325;margin-top:5px;line-height:1.5}
 @media(max-width:720px){.copy-cert-banner{padding:17px;gap:12px;align-items:flex-start;border-left-width:5px}.copy-cert-icon{height:43px;width:43px;flex-basis:43px;border-radius:12px}.copy-cert-icon svg{width:24px}.copy-cert-title{font-size:24px}.copy-cert-kicker{font-size:12px}.copy-cert-banner .copy-cert-content p{font-size:13px}.copy-cert-stamp{display:none}}
+
+
+/* Recruitment payment details */
+.payment-bank-card{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:20px;padding:22px;background:linear-gradient(145deg,#f6f9fe,#fff);border:1px solid #dce5f2;border-radius:18px}
+.payment-bank-info>strong{display:block;font-size:17px;color:#102d55}
+.payment-bank-info dl{display:grid;grid-template-columns:90px minmax(0,1fr);gap:10px;margin:16px 0}
+.payment-bank-info dt{color:#64748b;font-size:13px}
+.payment-bank-info dd{font-weight:700;overflow-wrap:anywhere;color:#102d55}
+.payment-bank-number{font-size:20px;letter-spacing:.04em}
+.payment-bank-info p{font-size:13px;white-space:pre-wrap;color:#536780}
+.payment-bank-qr{text-align:center;display:flex;align-items:center;flex-direction:column;gap:6px}
+.payment-bank-qr img{width:180px;height:180px;max-width:100%;object-fit:contain;border:1px solid #e2e8f0;background:white;border-radius:12px;padding:7px}
+.payment-bank-qr span,.payment-bank-disclaimer{font-size:12px;color:#64748b}
+.payment-bank-disclaimer{grid-column:1/-1;line-height:1.7;border-top:1px solid #e2e8f0;padding-top:12px}
+.payment-qr-admin-preview{display:flex;align-items:center;flex-direction:column;gap:7px;max-width:200px}
+.payment-qr-admin-preview img{width:180px;height:180px;object-fit:contain;border:1px solid #dce5f2;border-radius:12px}
+.payment-qr-admin-preview small{color:#64748b}
+@media(max-width:620px){.payment-bank-card{grid-template-columns:1fr;padding:16px}.payment-bank-qr{justify-self:center}.payment-bank-info dl{grid-template-columns:80px minmax(0,1fr)}}
