@@ -131,3 +131,40 @@
     border: 0;
   }
 }
+
+
+/* Visible applicant-style section edges and a consistent heading card on each Admin route. */
+.staff-shell .staff-main > .page-title {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:22px 25px !important;
+  margin:0 0 22px;
+  background:#fff !important;
+  border:1px solid #d4dfed;
+  border-radius:19px;
+  box-shadow:0 7px 22px rgba(16,45,85,.055) !important;
+}
+.staff-shell .staff-main > .page-title h1 {color:#102d55;}
+.staff-shell .staff-main > .page-title p {color:#475569;}
+.staff-shell .staff-main :is(.panel,.filter-card,.kpi,.review-overview) {
+  border-color:#d4dfed;
+  box-shadow:0 7px 20px rgba(16,45,85,.055);
+}
+.staff-shell .staff-main .panel + .panel {margin-top:15px;}
+@media(max-width:700px) {
+  .staff-shell .staff-main > .page-title {
+    flex-wrap:wrap;
+    align-items:flex-start;
+    padding:19px 17px !important;
+    border-radius:16px;
+  }
+}
+@media print {
+  .staff-shell .staff-main > .page-title {
+    padding:0 !important;
+    border:0;
+    box-shadow:none !important;
+  }
+}
