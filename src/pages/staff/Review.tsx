@@ -43,6 +43,25 @@ export default function Review() {
     enabled: !!id,
     queryFn: () => rpc<boolean>("can_print_application", {p_id:id}),
   });
+  const receipt = useQuery({
+    queryKey: ["payment-receipt", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const {data,error} = await supabase.from("payment_receipts")
+        .select("receipt_number").eq("application_id", id!).maybeSingle();
+      if(error) throw error;
+      return data;
+    },
+  });
+  const issueLegacyReceipt = async (paymentId: string) => {
+    setBusy(true);setError("");
+    try {
+      const number = await rpc<string>("admin_issue_payment_receipt", {p_payment:paymentId});
+      await qc.invalidateQueries({queryKey:["payment-receipt",id]});
+      setSuccess("ออกใบรับชำระเงินเลขที่ " + number + " แล้ว ผู้สมัครดาวน์โหลด PDF ได้");
+    } catch(e) { setError(errorTH(e)); }
+    finally { setBusy(false); }
+  };
   const notes = useQuery({
     queryKey: ["staff-notes", id],
     queryFn: async () => {
@@ -332,6 +351,13 @@ export default function Review() {
                     อ้างอิง {p.reference || "ไม่ระบุ"}
                   </p>
                   <Badge status={p.status} payment />
+                  {p.status === "confirmed" && receipt.data && <p className="mt-3">
+                    <Link className="btn outline" to={`/application/${id}/receipt`}>ดูใบรับชำระเงิน {receipt.data.receipt_number}</Link>
+                  </p>}
+                  {p.status === "confirmed" && !receipt.isPending && !receipt.data && auth.can("payments") && (
+                    <button className="btn outline mt-3" disabled={busy} type="button"
+                      onClick={() => void issueLegacyReceipt(p.id)}>ออกใบรับชำระเงินสำหรับรายการที่ยืนยันก่อนปรับระบบ</button>
+                  )}
                   <div className="mt-3">
                     <PreviewButton path={p.slip_path} />
                   </div>
