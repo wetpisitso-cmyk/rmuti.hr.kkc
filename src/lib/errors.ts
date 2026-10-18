@@ -42,6 +42,8 @@ const errors: Record<string, string> = {
   INVALID_PAYMENT: "กรุณาตรวจยอดเงินและวันเวลาชำระ",
   INVALID_DOCUMENT_TYPE: "ประเภทเอกสารไม่ถูกต้อง",
   INVALID_INPUT: "กรุณาตรวจข้อมูลในแบบฟอร์ม",
+  INVALID_PAYMENT_SETTINGS: "กรุณาตรวจชื่อธนาคาร ชื่อบัญชี และเลขบัญชีให้ถูกต้อง",
+  PAYMENT_QR_NOT_FOUND: "ไม่พบ QR Code ที่อัปโหลด กรุณาอัปโหลดอีกครั้ง",
   application_education_gpa_check: "เกรดเฉลี่ย GPA ต้องอยู่ระหว่าง 0.00–4.00 กรุณาย้อนกลับไปแก้ไขข้อมูลการศึกษา",
   application_education_graduation_year_check: "ปีสำเร็จการศึกษาต้องใช้ปี พ.ศ. ระหว่าง 2400–2800",
   application_experience_check: "วันที่สิ้นสุดการทำงานต้องไม่อยู่ก่อนวันเริ่มงาน",
