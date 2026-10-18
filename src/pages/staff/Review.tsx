@@ -107,12 +107,26 @@ export default function Review() {
     a = d?.application;
   const marked = (step: string) => !!reviewMarks.data?.some(x=>x.step===step);
   const feeNeeded = Number(a?.job_positions?.fee_amount || 0)>0;
+  const signatureRequirements = [
+    ...(!marked("personal") ? ["กดยืนยันตรวจข้อมูลผู้สมัครในแท็บข้อมูลผู้สมัคร"] : []),
+    ...(!marked("documents") ? ["กดยืนยันตรวจเอกสารในแท็บเอกสารแนบ"] : []),
+    ...(a?.status !== "eligible" ? ["บันทึกผลคุณสมบัติเป็น ผ่านคุณสมบัติ"] : []),
+    ...(!a?.application_number ? ["กำหนดเลขผู้สมัครและกดบันทึก"] : []),
+    ...(!["confirmed","not_required"].includes(a?.payment_status || "") ? ["ตรวจและยืนยันการชำระค่าธรรมเนียม (ถ้ามี)"] : []),
+  ];
+  const finalPrintApproved = Boolean(
+    a && signature.data && printApproval.data &&
+    signature.data.application_number_at_signing === a.application_number &&
+    printApproval.data.application_number_at_approval === a.application_number &&
+    signature.data.signed_snapshot_md5 === printApproval.data.approved_snapshot_md5 &&
+    new Date(printApproval.data.approved_at).getTime() >= new Date(signature.data.signed_at).getTime()
+  );
   const steps = [
     {name:"ข้อมูลผู้สมัคร",hint:"ตรวจชื่อและประวัติ",tone:"blue",done:marked("personal")},
     {name:"เอกสารแนบ",hint:"เปิดตรวจทีละไฟล์",tone:"purple",done:marked("documents")},
     {name:"ชำระเงิน",hint:"ตรวจสลิปและใบรับชำระ",tone:"amber",done:!feeNeeded || a?.payment_status==="confirmed"},
     {name:"ผลคุณสมบัติ",hint:"พิจารณาผล",tone:"green",done:["eligible","ineligible"].includes(a?.status || "")},
-    {name:"เลขที่และ PDF",hint:"ออกเลข → ลงนาม → อนุมัติ",tone:"teal",done:!!a?.application_number && !!signature.data && !!printApproval.data && !!canPrint.data},
+    {name:"เลขที่และ PDF",hint:"ออกเลข → ลงนาม → อนุมัติ",tone:"teal",done:finalPrintApproved},
     {name:"บันทึกเจ้าหน้าที่",hint:"บันทึกภายใน",tone:"slate",done:false},
   ];
   const actualNext =
@@ -161,7 +175,7 @@ export default function Review() {
       await rpc("admin_assign_application_number", { p_id: id, p_number: assignedNumber.trim() });
       await refresh();
       await qc.invalidateQueries({ queryKey: ["my-applications"] });
-      setSuccess("บันทึกเลขผู้สมัครแล้ว โปรดยืนยันให้ดาวน์โหลดใบสมัครแยกต่างหาก");
+      setSuccess("บันทึกเลขผู้สมัครแล้ว โปรดตรวจผลคุณสมบัติและลงลายเซ็นรับรองก่อนอนุมัติดาวน์โหลด PDF");
     } catch (e) { setError(errorTH(e)); }
     finally { setBusy(false); }
   };
@@ -318,21 +332,6 @@ export default function Review() {
                 <Submit busy={busy}>{a.application_number ? "เปลี่ยนเลขผู้สมัคร" : "ยืนยันออกเลขผู้สมัคร"}</Submit>
               </form>
             )}
-            {auth.role === "admin" && a.submitted_at && (
-              <section className="panel stack review-color-panel tone-teal" hidden={reviewStep!==4} id="review-print-approval">
-                <h2>ยืนยันให้ผู้สมัครดาวน์โหลดใบสมัคร PDF</h2>
-                <p className="muted">Admin ตรวจเอกสารและเลขผู้สมัครแล้วจึงกดยืนยัน ผู้สมัครยังดาวน์โหลดไม่ได้ก่อนยืนยัน</p>
-                {printApproval.data && canPrint.data ? (
-                  <Notice kind="success">อนุมัติให้พิมพ์ใบสมัครแล้ว</Notice>
-                ) : (
-                  <Notice>ยังไม่อนุมัติ PDF ผู้สมัครจะไม่เห็นเอกสารฉบับพิมพ์</Notice>
-                )}
-                <button type="button" className="btn primary" disabled={busy || !a.application_number || ["draft","needs_correction","withdrawn"].includes(a.status) || Boolean(printApproval.data && canPrint.data)}
-                  onClick={() => void approvePrint()}>
-                  ยืนยันให้ดาวน์โหลดใบสมัคร
-                </button>
-              </section>
-            )}
             <section className="panel review-color-panel tone-purple" hidden={reviewStep!==1} id="review-documents">
               <h2>ตรวจเอกสารแนบ</h2>
               {d.documents.map((doc) => (
@@ -436,7 +435,35 @@ export default function Review() {
                   )}
                 </section>
               ))}
-            {auth.role === "admin" && reviewStep===4 && <AdminSignaturePad applicationId={id!} existing={signature.data || null} eligible={a.status === "eligible" && !!a.application_number && marked("personal") && marked("documents") && ["confirmed","not_required"].includes(a.payment_status)} refresh={refresh} />}
+            {auth.role === "admin" && reviewStep===4 && (
+              <>
+                <div className="notice">
+                  <CheckCircle2 size={18}/>
+                  ขั้นตอนการออกใบสมัครฉบับสมบูรณ์: 1. บันทึกเลขผู้สมัคร → 2. เซ็นรับรอง → 3. กดอนุมัติให้ดาวน์โหลด PDF
+                </div>
+                {a.status !== "eligible" && <button type="button" className="btn outline mb-4" onClick={() => setReviewStep(3)}>ไปที่แท็บผลคุณสมบัติ เพื่อบันทึกให้ผ่านคุณสมบัติ</button>}
+                <AdminSignaturePad applicationId={id!} existing={signature.data || null}
+                  eligible={signatureRequirements.length === 0} missingSteps={signatureRequirements} refresh={refresh} />
+                {auth.role === "admin" && a.submitted_at && (
+              <section className="panel stack review-color-panel tone-teal" hidden={reviewStep!==4} id="review-print-approval">
+                <h2>ขั้นตอนสุดท้าย: อนุมัติให้ผู้สมัครดาวน์โหลด PDF</h2>
+                <p className="muted">หลัง Admin ลงลายเซ็นรับรองสำเร็จแล้ว จึงกดอนุมัติ ผู้สมัครถึงจะดาวน์โหลดใบสมัครที่มีลายเซ็นได้</p>
+                {finalPrintApproved ? (
+                  <Notice kind="success">ลงลายเซ็นและอนุมัติให้ดาวน์โหลด PDF เรียบร้อยแล้ว</Notice>
+                ) : signature.data ? (
+                  <Notice kind="success">เซ็นรับรองเรียบร้อยแล้ว พร้อมให้ Admin ตรวจทานและอนุมัติดาวน์โหลดเป็นขั้นตอนสุดท้าย</Notice>
+                ) : (
+                  <Notice>ยังไม่สามารถอนุมัติดาวน์โหลดได้ กรุณาลงลายเซ็นรับรองใบสมัครในกรอบด้านบนก่อน</Notice>
+                )}
+                <button type="button" className="btn primary" disabled={busy || !a.application_number || !signature.data || signatureRequirements.length > 0 || finalPrintApproved}
+                  onClick={() => void approvePrint()}>
+                  {finalPrintApproved ? "อนุมัติให้ดาวน์โหลดแล้ว" : "อนุมัติให้ผู้สมัครดาวน์โหลด PDF"}
+                </button>
+              </section>
+            )}
+
+              </>
+            )}
             {auth.can("review") && (
               <section className="panel review-color-panel tone-slate" hidden={reviewStep!==5} id="review-notes">
                 <h2>บันทึกภายในของเจ้าหน้าที่</h2>
