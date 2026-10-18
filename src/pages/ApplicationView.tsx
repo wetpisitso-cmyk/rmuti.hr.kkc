@@ -50,6 +50,16 @@ export default function ApplicationView() {
       nav(`/application/${id}/edit`, { replace: true });
     }
   }, [auth.role, id, nav, q.data?.application.status]);
+  const receipt = useQuery({
+    queryKey: ["payment-receipt", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const {data,error} = await (await import("../lib/supabase")).supabase
+        .from("payment_receipts").select("receipt_number").eq("application_id",id!).maybeSingle();
+      if(error) throw error;
+      return data;
+    },
+  });
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [success, setSuccess] = useState(""),
@@ -292,6 +302,9 @@ export default function ApplicationView() {
                 <p className="pre-wrap">{j.payment_instructions}</p>
                 <PaymentBankDetails />
                 <Badge status={a.payment_status} payment />
+                {receipt.data && <Link className="btn primary mt-4" to={`/application/${id}/receipt`}>
+                  <Printer size={17} /> ดาวน์โหลดใบรับชำระเงิน PDF ({receipt.data.receipt_number})
+                </Link>}
                 {auth.role === "applicant" &&
                   a.payment_status !== "confirmed" &&
                   !["withdrawn", "ineligible"].includes(a.status) && (
