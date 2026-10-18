@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Save, Trash2 } from "lucide-react";
 import { rows, rpc } from "../../services/api";
@@ -17,6 +17,7 @@ import {
 import type { DocRequirement } from "../../types/models";
 import { ThaiDateField } from "../../components/ThaiDateField";
 import { useAuth } from "../../hooks/useAuth";
+import { bannerUrl, uploadBanner, setBanner, deleteBanner } from "../../lib/announcementBanner";
 type Table =
   | "departments"
   | "recruitment_rounds"
@@ -68,7 +69,11 @@ export default function Catalog({ table }: { table: Table }) {
     [busy, setBusy] = useState(false),
     [deleting, setDeleting] = useState<string | null>(null),
     [error, setError] = useState(""),
-    [success, setSuccess] = useState("");
+    [success, setSuccess] = useState(""),
+    [bannerFile, setBannerFile] = useState<File | null>(null),
+    [bannerPreview, setBannerPreview] = useState(""),
+    [removeBanner, setRemoveBanner] = useState(false);
+  useEffect(() => () => { if (bannerPreview) URL.revokeObjectURL(bannerPreview); }, [bannerPreview]);
   const defaults = {
     year_be: new Date().getFullYear() + 543,
     max_per_user: 1,
@@ -237,6 +242,7 @@ export default function Catalog({ table }: { table: Table }) {
     setSuccess("");
     try {
       await rpc("admin_delete_record", { p_table: table, p_id: row.id, p_expected_title: titleToConfirm });
+      if (table === "announcements" && row.banner_path) await deleteBanner(String(row.banner_path)).catch(() => {});
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["catalog", table] }),
         qc.invalidateQueries({ queryKey: ["jobs"] }),
@@ -283,6 +289,9 @@ export default function Catalog({ table }: { table: Table }) {
           String(d[f.key as keyof typeof d]),
         ) as never;
     setData(d);
+    setBannerFile(null);
+    setBannerPreview("");
+    setRemoveBanner(false);
     setDocs(row?.required_documents || defaultDocs);
     setEditing(true);
     setError("");
@@ -302,7 +311,19 @@ export default function Catalog({ table }: { table: Table }) {
           throw new Error("กรุณาใช้ลิงก์ HTTPS ที่ถูกต้อง");
       }
       if (table === "job_positions") payload.required_documents = docs;
-      await rpc("admin_save", { p_table: table, p_data: payload });
+      const savedId = await rpc<string>("admin_save", { p_table: table, p_data: payload });
+      if (table === "announcements" && (bannerFile || removeBanner)) {
+        const oldPath = String(data.banner_path || "");
+        let nextPath = "";
+        try {
+          if (bannerFile) nextPath = await uploadBanner(bannerFile);
+          await setBanner(savedId, nextPath);
+        } catch (bannerError) {
+          if (nextPath) await deleteBanner(nextPath).catch(() => {});
+          throw bannerError;
+        }
+        if (oldPath && oldPath !== nextPath) await deleteBanner(oldPath).catch(() => {});
+      }
       await qc.invalidateQueries({ queryKey: ["catalog", table] });
       for (const key of [
         "jobs",
@@ -403,6 +424,20 @@ export default function Catalog({ table }: { table: Table }) {
               ),
             )}
           </div>
+          {table === "announcements" && (
+            <section className="subpanel stack announcement-admin-banner">
+              <h3>รูปแบนเนอร์ประกาศ</h3>
+              <p className="muted">JPG / PNG / WebP บีบอัดเป็น WebP ไม่เกิน 500 KB</p>
+              {bannerPreview ? <img className="announcement-banner-preview" src={bannerPreview} alt="ตัวอย่างแบนเนอร์ใหม่" />
+               : !removeBanner && bannerUrl(data.banner_path) ? <img className="announcement-banner-preview" src={bannerUrl(data.banner_path)} alt="แบนเนอร์ปัจจุบัน" /> : null}
+              <label className="field">เลือกรูปแบนเนอร์
+                <input type="file" accept="image/png,image/jpeg,image/webp"
+                 onChange={e => { const next=e.target.files?.[0]||null; setBannerFile(next);setBannerPreview(next?URL.createObjectURL(next):"");setRemoveBanner(false); }} />
+              </label>
+              {data.banner_path && <label className="checkbox"><input type="checkbox" checked={removeBanner}
+                onChange={e=>{setRemoveBanner(e.target.checked);if(e.target.checked){setBannerFile(null);setBannerPreview("");}}} />นำรูปแบนเนอร์ออก</label>}
+            </section>
+          )}
           {table === "job_positions" && (
             <div className="subpanel">
               <h3>เอกสารที่ต้องแนบ</h3>
@@ -505,6 +540,8 @@ export default function Catalog({ table }: { table: Table }) {
                 {q.data?.map((row) => (
                   <tr key={row.id}>
                     <td>
+                      {table === "announcements" && bannerUrl(row.banner_path) &&
+                        <img className="announcement-table-thumb" src={bannerUrl(row.banner_path)} alt="" loading="lazy" />}
                       <strong>{row.title || row.name}</strong>
                     </td>
                     <td>
