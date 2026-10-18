@@ -47,7 +47,30 @@ export default function PaymentBankDetails() {
         </dl>
         {data.note && <p>{data.note}</p>}
       </div>
-      {qr && <div className="payment-bank-qr"><img src={qr} alt="QR Code สำหรับชำระค่าธรรมเนียมตามบัญชีที่มหาวิทยาลัยกำหนด" loading="lazy" /><span>สแกนเพื่อชำระเงิน</span></div>}
+      {qr && (
+        <div className="payment-bank-qr">
+          <a
+            className="payment-bank-qr-link"
+            href={qr}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="เปิดภาพ QR Code ขนาดเต็มในแท็บใหม่"
+            aria-label="เปิดภาพ QR Code ชำระค่าธรรมเนียมขนาดเต็ม"
+          >
+            <img
+              src={qr}
+              alt="QR Code สำหรับชำระค่าธรรมเนียมตามบัญชีที่มหาวิทยาลัยกำหนด"
+              loading="eager"
+              decoding="async"
+            />
+          </a>
+          <strong>สแกนเพื่อชำระเงิน</strong>
+          <a className="payment-bank-qr-open" href={qr} target="_blank" rel="noopener noreferrer">
+            เปิดรูป QR ขนาดเต็ม ↗
+          </a>
+          <span>ใช้มือถือเครื่องเดียวกัน? เปิดรูปเต็ม แล้วบันทึกรูปเพื่อสแกนผ่านแอปธนาคาร</span>
+        </div>
+      )}
       <small className="payment-bank-disclaimer">ตรวจสอบชื่อบัญชีและยอดเงินให้ถูกต้องก่อนโอน และแนบสลิปให้เจ้าหน้าที่ตรวจสอบ การโอนเงินไม่ถือเป็นการอนุมัติใบสมัครโดยอัตโนมัติ</small>
     </section>
   );
