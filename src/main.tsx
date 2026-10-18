@@ -12,6 +12,7 @@ import "./apple-inspired-ui.css";
 import "./admin-login.css";
 import "./vibrant-home.css";
 import "./manual-guides.css";
+import "./readability.css";
 class ErrorBoundary extends Component<
   { children: ReactNode },
   { failed: boolean }
