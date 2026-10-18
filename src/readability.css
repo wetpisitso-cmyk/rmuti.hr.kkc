@@ -358,3 +358,33 @@ button {
 .announcement-full-card h1{font-size:clamp(22px,3vw,32px);margin:12px 0}
 .announcement-full-card .pre-wrap{line-height:1.85;overflow-wrap:anywhere}
 @media(max-width:640px){.announcement-full-banner{max-height:290px}.announcement-table-thumb{width:90px}}
+
+
+/* Larger, tappable payment QR: preserve full original image and clear white margins. */
+.payment-bank-card{
+  grid-template-columns:minmax(0,1fr) minmax(280px,390px);
+  gap:clamp(18px,3vw,34px);
+  align-items:start;
+}
+.payment-bank-qr{width:100%;max-width:390px;justify-self:center;gap:10px;}
+.payment-bank-qr-link{
+  display:block;width:100%;padding:12px;
+  border:1px solid #d1ddec;background:#fff;border-radius:18px;
+  box-shadow:0 8px 26px rgba(16,45,85,.10);
+}
+.payment-bank-qr-link:focus-visible{outline:3px solid #f47721;outline-offset:3px;}
+.payment-bank-qr-link img{
+  display:block;width:100%;height:auto;max-width:none;max-height:none;
+  object-fit:contain;border:0;padding:0;background:#fff;border-radius:8px;
+}
+.payment-bank-qr>strong{font-size:16px;font-weight:800;color:#102d55;}
+.payment-bank-qr-open{font-weight:750;color:#a84a07;text-decoration:underline;text-underline-offset:3px;}
+.payment-bank-qr>span{max-width:350px;font-size:13px;line-height:1.7;color:#475569!important;}
+@media(max-width:800px){
+  .payment-bank-card{grid-template-columns:1fr;}
+  .payment-bank-qr{max-width:min(100%,360px);}
+}
+@media(max-width:420px){
+  .payment-bank-qr{max-width:100%;}
+  .payment-bank-qr-link{padding:8px;}
+}
