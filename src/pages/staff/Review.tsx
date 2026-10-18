@@ -112,7 +112,7 @@ export default function Review() {
     {name:"เอกสารแนบ",hint:"เปิดตรวจทีละไฟล์",tone:"purple",done:marked("documents")},
     {name:"ชำระเงิน",hint:"ตรวจสลิปและใบรับชำระ",tone:"amber",done:!feeNeeded || a?.payment_status==="confirmed"},
     {name:"ผลคุณสมบัติ",hint:"พิจารณาผล",tone:"green",done:["eligible","ineligible"].includes(a?.status || "")},
-    {name:"เลขที่และ PDF",hint:"ออกเลข ลงนาม และอนุมัติ",tone:"teal",done:!!a?.application_number && !!canPrint.data},
+    {name:"เลขที่และ PDF",hint:"ออกเลข → ลงนาม → อนุมัติ",tone:"teal",done:!!a?.application_number && !!signature.data && !!printApproval.data && !!canPrint.data},
     {name:"บันทึกเจ้าหน้าที่",hint:"บันทึกภายใน",tone:"slate",done:false},
   ];
   const actualNext =
@@ -166,7 +166,7 @@ export default function Review() {
     finally { setBusy(false); }
   };
   const approvePrint = async () => {
-    if(auth.role!=="admin" || !a?.application_number) return;
+    if(auth.role!=="admin" || !a?.application_number || !signature.data) return;
     if(!window.confirm("ยืนยันให้ผู้สมัครดาวน์โหลดใบสมัคร PDF เลขที่ "+a.application_number+" ?")) return;
     setBusy(true);setError("");setSuccess("");
     try {
@@ -436,7 +436,7 @@ export default function Review() {
                   )}
                 </section>
               ))}
-            {auth.role === "admin" && reviewStep===4 && <AdminSignaturePad applicationId={id!} existing={signature.data || null} eligible={a.status === "eligible" && !!a.application_number && ["confirmed","not_required"].includes(a.payment_status)} refresh={refresh} />}
+            {auth.role === "admin" && reviewStep===4 && <AdminSignaturePad applicationId={id!} existing={signature.data || null} eligible={a.status === "eligible" && !!a.application_number && marked("personal") && marked("documents") && ["confirmed","not_required"].includes(a.payment_status)} refresh={refresh} />}
             {auth.can("review") && (
               <section className="panel review-color-panel tone-slate" hidden={reviewStep!==5} id="review-notes">
                 <h2>บันทึกภายในของเจ้าหน้าที่</h2>
