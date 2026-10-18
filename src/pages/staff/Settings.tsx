@@ -2,6 +2,8 @@ import { useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { rows, rpc } from "../../services/api";
 import { dateTH } from "../../lib/format";
+import { supabase } from "../../lib/supabase";
+import { paymentQrUrl } from "../../components/PaymentBankDetails";
 import { errorTH } from "../../lib/errors";
 import {
   Field,
@@ -17,7 +19,11 @@ export default function Settings() {
     [success, setSuccess] = useState(""),
     [usernameBusy, setUsernameBusy] = useState(false),
     [usernameError, setUsernameError] = useState(""),
-    [usernameSuccess, setUsernameSuccess] = useState("");
+    [usernameSuccess, setUsernameSuccess] = useState(""),
+    [qrFile, setQrFile] = useState<File | null>(null),
+    [paymentBusy, setPaymentBusy] = useState(false),
+    [paymentError, setPaymentError] = useState(""),
+    [paymentSuccess, setPaymentSuccess] = useState("");
   const qc = useQueryClient();
   const q = useQuery({
     queryKey: ["settings"],
@@ -62,7 +68,8 @@ export default function Settings() {
   });
   const c = q.data?.find((x) => x.key === "contact")?.value,
     p = q.data?.find((x) => x.key === "privacy")?.value,
-    r = q.data?.find((x) => x.key === "retention")?.value;
+    r = q.data?.find((x) => x.key === "retention")?.value,
+    payment = q.data?.find((x) => x.key === "payment")?.value;
   const submit = async (e: FormEvent<HTMLFormElement>, key: string) => {
     e.preventDefault();
     setBusy(true);
@@ -77,6 +84,43 @@ export default function Settings() {
       setError(errorTH(e));
     } finally {
       setBusy(false);
+    }
+  };
+  const savePayment = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPaymentBusy(true);
+    setPaymentError("");
+    setPaymentSuccess("");
+    const form = e.currentTarget;
+    const values = Object.fromEntries(new FormData(form));
+    let qrPath: string = payment?.qr_path || "";
+    try {
+      if (qrFile) {
+        if (!["image/png", "image/jpeg"].includes(qrFile.type) || qrFile.size > 1048576 || qrFile.size === 0)
+          throw new Error("กรุณาเลือก QR Code เป็น PNG หรือ JPG ขนาดไม่เกิน 1 MB");
+        const ext = qrFile.type === "image/png" ? "png" : "jpg";
+        const path = `qr/${crypto.randomUUID()}.${ext}`;
+        const uploaded = await supabase.storage.from("recruitment-payment-qr")
+          .upload(path, qrFile, { contentType: qrFile.type, upsert: false });
+        if (uploaded.error) throw uploaded.error;
+        qrPath = path;
+      }
+      await rpc("save_setting", { p_key: "payment", p_value: {
+        bank_name: String(values.bank_name || "").trim(),
+        account_name: String(values.account_name || "").trim(),
+        account_number: String(values.account_number || "").trim(),
+        qr_path: values.remove_qr === "on" ? "" : qrPath,
+        note: String(values.note || "").trim(),
+      } });
+      setQrFile(null);
+      form.reset();
+      await qc.invalidateQueries({ queryKey: ["settings"] });
+      await qc.invalidateQueries({ queryKey: ["payment-bank-settings"] });
+      setPaymentSuccess("บันทึกบัญชีธนาคารและ QR Code สำเร็จแล้ว");
+    } catch (e) {
+      setPaymentError(e instanceof Error && e.message.startsWith("กรุณา") ? e.message : errorTH(e));
+    } finally {
+      setPaymentBusy(false);
     }
   };
   return (
@@ -178,6 +222,31 @@ export default function Settings() {
           <Submit busy={busy}>บันทึกระยะเวลา</Submit>
         </form>
       </State>
+      <section className="panel stack">
+        <h2>บัญชีธนาคารและ QR Code รับชำระค่าธรรมเนียม</h2>
+        <p className="muted">แสดงให้ผู้สมัครเฉพาะตำแหน่งที่มีค่าธรรมเนียม กรุณาใช้บัญชีที่หน่วยงานอนุมัติแล้วเท่านั้น</p>
+        {paymentError && <Notice kind="error">{paymentError}</Notice>}
+        {paymentSuccess && <Notice kind="success">{paymentSuccess}</Notice>}
+        {payment?.qr_path && paymentQrUrl(payment.qr_path) && (
+          <div className="payment-qr-admin-preview">
+            <img alt="QR Code ปัจจุบัน" src={paymentQrUrl(payment.qr_path)} />
+            <small>QR Code ที่ตั้งค่าไว้ในปัจจุบัน</small>
+          </div>
+        )}
+        <form className="stack" key={`payment-${q.dataUpdatedAt}`} onSubmit={savePayment}>
+          <div className="form-grid">
+            <Field label="ชื่อธนาคาร" name="bank_name" defaultValue={payment?.bank_name || ""} required maxLength={100} placeholder="ชื่อธนาคารตามบัญชีจริง" />
+            <Field label="ชื่อบัญชี" name="account_name" defaultValue={payment?.account_name || ""} required maxLength={160} />
+            <Field label="เลขที่บัญชี" name="account_number" defaultValue={payment?.account_number || ""} required maxLength={30} pattern="[0-9][0-9 \\-]{5,29}" />
+            <label className="field"><span>อัปโหลดรูป QR Code (PNG / JPG ไม่เกิน 1 MB)</span>
+              <input type="file" accept="image/png,image/jpeg" onChange={e=>setQrFile(e.target.files?.[0] || null)} />
+            </label>
+          </div>
+          <Textarea label="คำแนะนำเพิ่มเติม (ถ้ามี)" name="note" maxLength={500} defaultValue={payment?.note || ""} />
+          {payment?.qr_path && <label className="checkbox"><input type="checkbox" name="remove_qr" /> ไม่แสดง QR Code เดิม (คงข้อมูลบัญชีไว้)</label>}
+          <button type="submit" className="btn primary" disabled={paymentBusy}>{paymentBusy ? "กำลังบันทึก…" : "บันทึกข้อมูลรับชำระเงิน"}</button>
+        </form>
+      </section>
       <section className="panel">
         <h2>คิวอีเมลล่าสุด</h2>
         <State
