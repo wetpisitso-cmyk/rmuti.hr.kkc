@@ -13,8 +13,8 @@ export type AdminSignature = {
   application_number_at_signing: string;
   signed_snapshot_md5: string;
 };
-export function AdminSignaturePad({ applicationId, existing, eligible, refresh }: {
-  applicationId: string; existing: AdminSignature | null; eligible: boolean; refresh: () => Promise<unknown>;
+export function AdminSignaturePad({ applicationId, existing, eligible, missingSteps = [], refresh }: {
+  applicationId: string; existing: AdminSignature | null; eligible: boolean; missingSteps?: string[]; refresh: () => Promise<unknown>;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
@@ -75,7 +75,7 @@ export function AdminSignaturePad({ applicationId, existing, eligible, refresh }
       <img src={existing.signature_png} alt="ลายเซ็นที่ Admin ลงไว้" />
       <strong>รับรองแล้วโดย {existing.signer_name}</strong>
       <span>ลงนามเมื่อ {dateTH(existing.signed_at, true)} · ไม่สามารถลงนามซ้ำได้</span>
-    </div> : !eligible ? <Notice>ต้องผ่านคุณสมบัติ มีเลขผู้สมัคร และยืนยันค่าธรรมเนียม (ถ้ามี) ก่อนเซ็นรับรอง</Notice> :
+    </div> : !eligible ? <Notice>ยังเซ็นรับรองไม่ได้ กรุณาดำเนินการให้ครบก่อน:{missingSteps.length > 0 && <ul>{missingSteps.map((step) => <li key={step}>{step}</li>)}</ul>}</Notice> :
       <>
         <canvas key={revision} className="admin-signature-canvas" ref={canvas} width={600} height={220} style={{touchAction:"none"}}
           onPointerDown={start} onPointerMove={move} onPointerUp={stop} onPointerCancel={stop}
