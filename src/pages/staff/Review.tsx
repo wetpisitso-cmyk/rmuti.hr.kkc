@@ -396,7 +396,7 @@ export default function Review() {
             {auth.can("payments") &&
               [...d.payments]
                 .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                .filter((p, index, all) =>
+                .filter((p, index) =>
                   p.status === "confirmed" ||
                   (a.payment_status !== "confirmed" && index === 0))
                 .map((p) => (
