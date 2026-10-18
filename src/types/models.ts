@@ -141,6 +141,7 @@ export interface Announcement {
   title: string;
   content: string;
   attachment_url: string;
+  banner_path: string;
   created_at: string;
   published: boolean;
 }
