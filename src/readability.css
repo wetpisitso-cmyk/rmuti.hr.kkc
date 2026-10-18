@@ -1,0 +1,274 @@
+/*
+ * RMUTI KKC — accessible, readable text across applicant and Admin pages.
+ * Loaded AFTER all decorative themes. Colors on filled buttons, badges,
+ * photographs, banners and dark heroes are deliberately left intact.
+ */
+:root {
+  --readable-ink: #10243e;
+  --readable-heading: #102d55;
+  --readable-secondary: #33465f;
+  --readable-muted: #475569;
+  --readable-hint: #52647c;
+  --premium-muted: #475569;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  color: var(--readable-ink);
+  font-weight: 500;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 800;
+}
+h1, h2, h3, h4, h5, h6,
+.page-title h1,
+.panel > h2,
+.panel > h3,
+.section-heading {
+  color: var(--readable-heading);
+}
+small {
+  font-weight: 600;
+}
+/* Public and staff secondary copy on light surfaces. */
+.muted,
+.page-title p,
+.staff-main > .page-title p,
+.panel > p,
+.panel .muted,
+.filter-card .muted,
+.job-card p,
+.news-card > small,
+.home-stat-pill small,
+.rmuti-apple-home .home-stat-pill small,
+.home-step p,
+.rmuti-apple-home .home-step p,
+.document-list li span,
+.notification p,
+.notification small,
+.upload-card small,
+.document-row small,
+.timeline li small,
+.timeline li p,
+.sidebar-note,
+.sidebar-heading small,
+.sidebar-campus-badge small,
+.staff-shell .sidebar-note,
+.staff-shell .sidebar-heading small,
+.staff-shell .sidebar-campus-badge small,
+.payment-bank-info dt,
+.payment-bank-info p,
+.payment-bank-disclaimer,
+.payment-bank-qr span,
+.payment-qr-admin-preview small,
+.receipt-ref span,
+.receipt-heading p,
+.receipt-details dt,
+.receipt-footer,
+.manual-info-banner small,
+.manual-step p,
+.manual-faq-card p,
+.admin-login-story > p,
+.admin-login-help,
+.admin-login-card > .muted,
+.admin-login-foot {
+  color: var(--readable-muted) !important;
+  font-weight: 550 !important;
+}
+/* Fields in the full applicant wizard and all management settings/forms. */
+.field,
+.field > span,
+label.field,
+.form-grid > label,
+.filter-grid > label,
+.panel .field > span,
+.admin-username-settings label,
+.admin-login-card label {
+  color: var(--readable-secondary);
+  font-weight: 700;
+}
+.field small,
+.form-hint,
+.helper-text,
+.upload-card .muted,
+.field .muted {
+  color: var(--readable-hint) !important;
+  font-weight: 600 !important;
+}
+.field input,
+.field select,
+.field textarea,
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  color: var(--readable-ink);
+  font-weight: 600;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--readable-hint) !important;
+  opacity: 1 !important;
+  font-weight: 500;
+}
+input:disabled,
+select:disabled,
+textarea:disabled,
+input[readonly] {
+  color: #41536c;
+  -webkit-text-fill-color: #41536c;
+}
+/* Main navigation, side navigation and staff/account menus. */
+.header .brand small,
+.brand small,
+.header-brand small {
+  color: #415775 !important;
+  font-size: max(12px, 0.8rem) !important;
+  font-weight: 600;
+}
+.header .main-nav > a:not(.btn),
+.staff-shell .sidebar > a,
+.sidebar > a,
+.admin-login-back {
+  color: #233b5a;
+  font-weight: 700;
+}
+.staff-shell .sidebar > a.active,
+.sidebar > a.active,
+.header .main-nav > a.active:not(.btn) {
+  color: #a84a07;
+}
+.sidebar-heading small,
+.sidebar-campus-badge small,
+.staff-shell .sidebar-heading small,
+.staff-shell .sidebar-campus-badge small,
+.sidebar-note,
+.staff-shell .sidebar-note {
+  font-size: max(12px, 0.8rem);
+}
+.sidebar-note,
+.staff-shell .sidebar-note {
+  line-height: 1.7;
+}
+/* Tables, summaries, dashboards and applicant details. */
+table thead th,
+.table th,
+.data-table th {
+  color: #213b5b;
+  font-weight: 800;
+}
+table tbody td,
+.table td,
+.data-table td {
+  color: var(--readable-ink);
+  font-weight: 600;
+}
+td small,
+table tbody td small,
+.kpi > span,
+.bar-row > div:first-child,
+.section-count,
+.review-step-tab small {
+  color: var(--readable-muted) !important;
+  font-weight: 650 !important;
+}
+td small,
+table tbody td small,
+.review-step-tab small,
+.job-card p,
+.upload-card small,
+.document-row small {
+  font-size: max(12px, 0.8rem);
+}
+.section-count,
+.page-title p {
+  line-height: 1.75;
+}
+.state,
+.state > span {
+  color: var(--readable-secondary);
+  font-weight: 600;
+}
+/* Notices retain their semantic green/red/blue color meanings. */
+.notice {
+  font-weight: 650;
+}
+.notice.error { color: #9d2927; }
+.notice.success { color: #16653f; }
+/* Badge colors and status meaning remain distinct. */
+.badge {
+  font-weight: 800;
+  font-size: max(12px, 0.8rem);
+}
+.badge.withdrawn,
+.badge.closed {
+  color: #475569;
+}
+/* Buttons retain contrast: filled ones white, outlines dark. */
+.btn,
+button {
+  font-weight: 750;
+}
+.btn.outline,
+.btn:not(.primary):not(.danger):not(.hero-outline):not(.manual-light-btn):not(.manual-ghost-btn) {
+  color: #16345b;
+}
+.btn.primary,
+.btn.danger,
+.btn.hero-outline,
+.manual-light-btn,
+.manual-ghost-btn {
+  color: #fff;
+}
+.btn.primary :is(span,small,svg),
+.btn.danger :is(span,small,svg),
+.manual-light-btn :is(span,small,svg) {
+  color: inherit;
+}
+/* The footer has a dark background; brighten instead of darkening it. */
+.footer p,
+.footer span,
+.footer .brand small {
+  color: #dce8f7 !important;
+  font-weight: 600;
+  font-size: max(12px, 0.8rem);
+}
+.footer .footer-admin-link {
+  color: #ffbb86;
+}
+/* Public section labels remain warm orange but gain contrast. */
+.eyebrow,
+.manual-kicker,
+.rmuti-apple-home .section[id="positions"] > .page-title .eyebrow {
+  color: #ad4e0e;
+  font-weight: 900;
+}
+/* The home hero, admin login artwork, and handbook banner have dark
+   backgrounds. Preserve their specially chosen LIGHT text colors. */
+.rmuti-apple-home .hero .hero-caption,
+.rmuti-apple-home .hero .hero-tag,
+.rmuti-apple-home .home-feature-strip .home-feature p,
+.admin-login-story .admin-login-eyebrow,
+.manual-page .manual-hero p,
+.manual-page .manual-hero h1,
+.manual-page .manual-hero .manual-eyebrow,
+.manual-page .manual-hero .manual-art-label {
+  font-weight: 650;
+}
+@media (max-width: 768px) {
+  .field,
+  .field > span,
+  .header .main-nav > a:not(.btn),
+  .staff-shell .sidebar > a {
+    font-size: max(13px, 0.87rem);
+  }
+}
+/* Preserve print-form dimensions and official PDF typography. */
+@media print {
+  .official-application,
+  .print-sheet,
+  .receipt-paper {
+    font-weight: 400;
+  }
+}
