@@ -344,6 +344,12 @@ export function JobDetail() {
             />
             <div className="detail-grid">
               <div>
+                {j.recruitment_rounds?.description?.trim() && (
+                  <section className="panel">
+                    <h2>รายละเอียดรอบรับสมัคร</h2>
+                    <p className="pre-wrap">{j.recruitment_rounds.description}</p>
+                  </section>
+                )}
                 <section className="panel">
                   <h2>คุณสมบัติและเงื่อนไข</h2>
                   <p className="pre-wrap">{j.qualifications}</p>
