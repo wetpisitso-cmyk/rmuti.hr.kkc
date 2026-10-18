@@ -343,7 +343,12 @@ export default function Review() {
                 </form>
               )}
             {auth.can("payments") &&
-              d.payments.map((p) => (
+              [...d.payments]
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                .filter((p, index, all) =>
+                  p.status === "confirmed" ||
+                  (a.payment_status !== "confirmed" && index === 0))
+                .map((p) => (
                 <section className="panel" key={p.id}>
                   <h2>ตรวจหลักฐานชำระเงิน</h2>
                   <p>
@@ -361,7 +366,7 @@ export default function Review() {
                   <div className="mt-3">
                     <PreviewButton path={p.slip_path} />
                   </div>
-                  {p.status === "pending" && (
+                  {p.status === "pending" && a.payment_status !== "confirmed" && (
                     <form
                       onSubmit={(e) => payment(e, p.id)}
                       className="stack mt-4"
