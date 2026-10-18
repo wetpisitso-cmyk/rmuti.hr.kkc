@@ -7,6 +7,7 @@ import { supabase } from "../lib/supabase";
 import { useCatalog } from "../hooks/useCatalog";
 import { getApplication, saveDraft, rpc, rows } from "../services/api";
 import { DocumentUpload, CopyCertificationNotice } from "../components/DocumentUpload";
+import PaymentBankDetails from "../components/PaymentBankDetails";
 import {
   Field,
   Select,
@@ -503,6 +504,7 @@ export default function ApplicationWizard() {
                 <div className="stack">
                   <Notice>ต้องแนบสลิปและบันทึกหลักฐานชำระเงินให้เรียบร้อยก่อนกดถัดไป เจ้าหน้าที่จะตรวจสอบภายหลัง</Notice>
                   <div className="subpanel"><strong>ค่าธรรมเนียม {money(Number(job.fee_amount))}</strong><p className="pre-wrap">{job.payment_instructions}</p></div>
+                  <PaymentBankDetails />
                   <DocumentUpload id={appId} requirement={{key:"payment",label:"สลิปชำระเงิน",required:true}} document={paymentDoc} maxMb={job.max_file_mb}/>
                   <Field label="ยอดชำระ (บาท)" value={String(job.fee_amount)} readOnly />
                   <ThaiDateField label="วันเวลาชำระ (พ.ศ. เวลาไทย)" withTime value={paidAt} onChange={setPaidAt} required />
