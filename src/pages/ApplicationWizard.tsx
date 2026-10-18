@@ -67,6 +67,16 @@ export default function ApplicationWizard() {
     phone: auth.profile?.phone || "",
     address: "",
     national_id: "",
+    english_name: "",
+    gender: "",
+    nationality: "",
+    ethnicity: "",
+    religion: "",
+    marital_status: "",
+    line_id: "",
+    registered_address: "",
+    military_status: "",
+    skills: "",
   });
   const [education, setEducation] = useState<Education[]>([emptyEducation()]),
     [experience, setExperience] = useState<Experience[]>([]);
@@ -360,6 +370,40 @@ export default function ApplicationWizard() {
                       required
                       maxLength={2000}
                     />
+                  </div>
+                  <Field label="ชื่อ–นามสกุลภาษาอังกฤษ" value={personal.english_name || ""}
+                    onChange={e=>update("english_name",e.target.value)} maxLength={200} placeholder="เช่น SOMCHAI JAIDEE" />
+                  <Select label="เพศ" value={personal.gender || ""} onChange={e=>update("gender",e.target.value)}>
+                    <option value="">เลือก / ไม่ระบุ</option>
+                    <option value="ชาย">ชาย</option><option value="หญิง">หญิง</option>
+                    <option value="อื่น ๆ">อื่น ๆ</option><option value="ไม่ประสงค์ระบุ">ไม่ประสงค์ระบุ</option>
+                  </Select>
+                  <Field label="สัญชาติ" value={personal.nationality || ""}
+                    onChange={e=>update("nationality",e.target.value)} maxLength={100} placeholder="เช่น ไทย" />
+                  <Field label="เชื้อชาติ (ไม่บังคับ)" value={personal.ethnicity || ""}
+                    onChange={e=>update("ethnicity",e.target.value)} maxLength={100} />
+                  <Field label="ศาสนา (ไม่บังคับ)" value={personal.religion || ""}
+                    onChange={e=>update("religion",e.target.value)} maxLength={100} />
+                  <Select label="สถานภาพ" value={personal.marital_status || ""}
+                    onChange={e=>update("marital_status",e.target.value)}>
+                    <option value="">เลือก / ไม่ระบุ</option>
+                    <option value="โสด">โสด</option><option value="สมรส">สมรส</option>
+                    <option value="หย่า">หย่า</option><option value="หม้าย">หม้าย</option>
+                    <option value="อื่น ๆ">อื่น ๆ</option>
+                  </Select>
+                  <Field label="LINE ID (ไม่บังคับ)" value={personal.line_id || ""}
+                    onChange={e=>update("line_id",e.target.value)} maxLength={100} />
+                  <div className="col-span-full">
+                    <Textarea label="ที่อยู่ตามทะเบียนบ้าน" value={personal.registered_address || ""}
+                      onChange={e=>update("registered_address",e.target.value)} maxLength={2000} />
+                  </div>
+                  <Field label="สถานะการเกณฑ์ทหาร (ถ้ามี)" value={personal.military_status || ""}
+                    onChange={e=>update("military_status",e.target.value)} maxLength={200}
+                    placeholder="เช่น ผ่านการเกณฑ์ทหาร / ได้รับการยกเว้น / ไม่เกี่ยวข้อง" />
+                  <div className="col-span-full">
+                    <Textarea label="ความรู้ความสามารถพิเศษ (ไม่บังคับ)" value={personal.skills || ""}
+                      onChange={e=>update("skills",e.target.value)} maxLength={2000}
+                      placeholder="เช่น โปรแกรมคอมพิวเตอร์ ภาษาอังกฤษ งานบริการ หรือทักษะอื่น ๆ" />
                   </div>
                   {job?.require_national_id && (
                     <Field
