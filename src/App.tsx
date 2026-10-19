@@ -27,6 +27,7 @@ const Review = lazy(() => import("./pages/staff/Review"));
 const Exams = lazy(() => import("./pages/staff/Exams"));
 const Publish = lazy(() => import("./pages/staff/Publish"));
 const Users = lazy(() => import("./pages/staff/Users"));
+const TestAccounts = lazy(() => import("./pages/staff/TestAccounts"));
 const Settings = lazy(() => import("./pages/staff/Settings"));
 export default function App() {
   if (!configured)
@@ -96,6 +97,7 @@ export default function App() {
                 <Route element={<Guard permission="admin" />}>
                   <Route path="guide" element={<AdminGuide />} />
                   <Route path="users" element={<Users />} />
+                  <Route path="test-accounts" element={<TestAccounts />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
               </Route>
