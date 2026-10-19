@@ -1,9 +1,6 @@
 import { backend, corsFor, json } from "../_shared/helpers.ts";
-import { deleteR2 } from "../_shared/r2.ts";
-import { cleanupProvider } from "../_shared/storage-paths.ts";
 
-// Drain the existing durable file-cleanup queue after an Admin deletes
-// an application. Legacy Supabase objects and new R2 objects are supported.
+// Drain Supabase Storage cleanup queue only, verifying every object path.
 Deno.serve(async (req) => {
   let cors:Record<string,string>={};
   try{
@@ -23,17 +20,10 @@ Deno.serve(async (req) => {
     if(queueError)return json({error:"QUEUE_FAILED"},500,cors);
     let cleaned=0,failed=0;
     for(const item of items||[]){
-      const provider=cleanupProvider(item);
-      if(!provider){failed++;continue;}
+      if(item.bucket!=="application-files" || !new RegExp("^[0-9a-f-]{36}/"+item.application_id+"/[0-9a-f-]{36}\\.(pdf|jpg|png)$").test(item.path)){failed++;continue;}
       try{
-        if(provider==="r2"){
-          // Even when new R2 writes are disabled, old R2 files still require cleanup.
-          // Deletion fails safely if the R2 secrets have been removed.
-          await deleteR2(item.path);
-        }else{
-          const {error}=await admin.storage.from("application-files").remove([item.path]);
-          if(error){failed++;continue;}
-        }
+        const {error}=await admin.storage.from("application-files").remove([item.path]);
+        if(error){failed++;continue;}
         const {error}=await admin.from("application_file_cleanup_queue")
           .delete().eq("bucket",item.bucket).eq("path",item.path);
         if(error)failed++;else cleaned++;

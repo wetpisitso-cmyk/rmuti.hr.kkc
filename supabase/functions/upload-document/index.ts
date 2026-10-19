@@ -1,10 +1,7 @@
 import { backend, corsFor, json, sniff } from "../_shared/helpers.ts";
-import { r2Enabled, r2Config, uploadR2, deleteR2 } from "../_shared/r2.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.117.3";
 
-// Preserve the original authenticated upload path and its validation.
-// New uploads go to private R2 only when R2_ENABLED=true and secrets are valid.
-// Otherwise keep Supabase Storage so the live system remains operational.
+// Uploads use private Supabase Storage exclusively.
 Deno.serve(async (req) => {
   let cors: Record<string,string> = {};
   try {
@@ -22,14 +19,6 @@ Deno.serve(async (req) => {
     if(rateError || !rate) return json({error:"RATE_LIMITED"},429,cors);
     if(Number(req.headers.get("content-length")||0)>4*1048576)
       return json({error:"FILE_TOO_LARGE"},413,cors);
-
-    // Fail closed: never silently fall back if R2 is explicitly enabled but misconfigured.
-    if(r2Enabled()) {
-      // Do not allow R2 writes until reviewed R2 deletion and retention workflow is live.
-      if(Deno.env.get("R2_CLEANUP_READY")!=="true")
-        return json({error:"R2_CLEANUP_NOT_ENABLED"},503,cors);
-      try {r2Config()}catch{return json({error:"R2_NOT_CONFIGURED"},503,cors);}
-    }
 
     const form=await req.formData();
     const id=String(form.get("application_id")||"");
@@ -52,34 +41,20 @@ Deno.serve(async (req) => {
     if(!mime || file.type!==mime || (type==="photo" && mime==="application/pdf"))
       return json({error:"INVALID_FILE"},400,cors);
     const ext=mime==="application/pdf"?"pdf":mime==="image/png"?"png":"jpg";
-    const useR2=r2Enabled();
-    const path=(useR2?"r2/":"")+user.id+"/"+id+"/"+crypto.randomUUID()+"."+ext;
-    if(useR2) {
-      try {
-        await uploadR2(path,bytes,mime);
-      }catch {
-        return json({error:"R2_UPLOAD_FAILED"},502,cors);
-      }
-    } else {
-      const {error}=await admin.storage.from("application-files")
-        .upload(path,bytes,{contentType:mime,upsert:false});
-      if(error) return json({error:"UPLOAD_FAILED"},500,cors);
-    }
-    const rpc=useR2?"complete_r2_upload":"complete_upload";
-    const {data,error}=await admin.rpc(rpc,{
+    const path=user.id+"/"+id+"/"+crypto.randomUUID()+"."+ext;
+    const {error:uploadError}=await admin.storage.from("application-files").upload(path,bytes,{contentType:mime,upsert:false});
+    if(uploadError)return json({error:"UPLOAD_FAILED"},500,cors);
+    const {data,error}=await admin.rpc("complete_upload",{
       p_user:user.id,p_id:id,p_type:type,p_path:path,
       p_name:file.name,p_mime:mime,p_size:file.size
     });
     if(error) {
       // Roll back only the fresh object, never the applicant's existing file.
-      try {
-        if(useR2) await deleteR2(path);
-        else await admin.storage.from("application-files").remove([path]);
-      } catch { /* preserve original failure code */ }
+      try { await admin.storage.from("application-files").remove([path]); } catch { /* preserve failure */ }
       return json({error:error.message},409,cors);
     }
     // Previous revisions and signed application snapshots remain private/readable.
-    return json({document_id:data.document_id,provider:useR2?"r2":"supabase"},200,cors);
+    return json({document_id:data.document_id,provider:"supabase"},200,cors);
   }catch {
     return json({error:"UPLOAD_FAILED"},500,cors);
   }

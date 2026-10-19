@@ -98,16 +98,6 @@ export const staffList = (
     p_sort: sort,
   });
 export async function signedFile(path: string) {
-  if (path.startsWith("r2/")) {
-    // Private R2 documents require server authorization, just like legacy
-    // Supabase private objects. URLs expire 120 seconds after issuance.
-    const { data, error } = await supabase.functions.invoke("document-url", {
-      body: { path },
-    });
-    if (error || typeof data?.url !== "string" || !data.url.startsWith("https://"))
-      throw new Error("R2_PREVIEW_FAILED");
-    return data.url as string;
-  }
   const { data, error } = await supabase.storage
     .from("application-files")
     .createSignedUrl(path, 120);
