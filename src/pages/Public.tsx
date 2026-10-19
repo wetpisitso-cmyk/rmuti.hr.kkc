@@ -160,10 +160,34 @@ export function Home() {
           </div>
         </div>
       </div>
-      <div className="container home-stats-strip" aria-label="สรุปตำแหน่งเปิดรับสมัคร">
-        <div className="home-stat-pill"><span className="home-stat-icon orange"><BriefcaseBusiness size={22}/></span><div><strong>{numberTH(open.length)}</strong><small>ตำแหน่งที่เปิดรับ</small></div><ChevronRight size={16}/></div>
-        <div className="home-stat-pill"><span className="home-stat-icon navy"><Users size={22}/></span><div><strong>{numberTH(open.reduce((sum, j) => sum + j.vacancies, 0))}</strong><small>อัตราที่เปิดรับ</small></div><ChevronRight size={16}/></div>
-        <div className="home-stat-pill"><span className="home-stat-icon green"><CalendarDays size={22}/></span><div><strong>{open.length ? "เปิดรับสมัครอยู่" : "ตรวจสอบรอบรับสมัคร"}</strong><small>{open.length ? "สมัครได้ตามช่วงเวลาที่ประกาศ" : "ติดตามประกาศใหม่"}</small></div></div>
+      <div className="container home-stats-strip" aria-label="สรุปข้อมูลการเปิดรับสมัคร">
+        <a className="home-stat-pill home-stat-positions" href="#positions" aria-label={`ดูตำแหน่งที่เปิดรับสมัครทั้งหมด ${numberTH(open.length)} ตำแหน่ง`}>
+          <span className="home-stat-icon orange" aria-hidden="true"><BriefcaseBusiness size={28} /></span>
+          <span className="home-stat-body">
+            <span className="home-stat-kicker">ตำแหน่งที่เปิดรับสมัคร</span>
+            <span className="home-stat-value"><strong className="home-stat-number">{numberTH(open.length)}</strong><span className="home-stat-unit">ตำแหน่ง</span></span>
+            <small className="home-stat-caption">ดูรายละเอียดตำแหน่งงานทั้งหมด</small>
+          </span>
+          <span className="home-stat-arrow" aria-hidden="true"><ArrowRight size={19} /></span>
+        </a>
+        <a className="home-stat-pill home-stat-vacancies" href="#positions" aria-label={`ดูจำนวนอัตราที่เปิดรับทั้งหมด ${numberTH(open.reduce((sum, j) => sum + j.vacancies, 0))} อัตรา`}>
+          <span className="home-stat-icon navy" aria-hidden="true"><Users size={28} /></span>
+          <span className="home-stat-body">
+            <span className="home-stat-kicker">จำนวนอัตราที่เปิดรับ</span>
+            <span className="home-stat-value"><strong className="home-stat-number">{numberTH(open.reduce((sum, j) => sum + j.vacancies, 0))}</strong><span className="home-stat-unit">อัตรา</span></span>
+            <small className="home-stat-caption">ตรวจสอบอัตราว่างและคุณสมบัติ</small>
+          </span>
+          <span className="home-stat-arrow" aria-hidden="true"><ArrowRight size={19} /></span>
+        </a>
+        <a className={`home-stat-pill home-stat-status ${open.length ? "is-open" : "is-closed"}`} href="#positions" aria-label={open.length ? "สถานะเปิดรับสมัครอยู่ ดูตำแหน่งที่เปิดรับ" : "ตรวจสอบประกาศรับสมัครล่าสุด"}>
+          <span className="home-stat-icon green" aria-hidden="true"><CalendarDays size={28} /></span>
+          <span className="home-stat-body">
+            <span className="home-stat-kicker">สถานะการรับสมัคร</span>
+            <strong className="home-stat-status-text">{open.length ? "เปิดรับสมัครอยู่" : "ยังไม่เปิดรับสมัคร"}</strong>
+            <small className="home-stat-status-note"><span className="home-stat-status-dot" aria-hidden="true" />{open.length ? "สมัครได้ตามช่วงเวลาที่ประกาศ" : "ติดตามกำหนดการครั้งถัดไป"}</small>
+          </span>
+          <span className="home-stat-arrow" aria-hidden="true"><ArrowRight size={19} /></span>
+        </a>
       </div>
       <div className="home-feature-strip">
         <div className="container home-feature-grid">
