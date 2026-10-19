@@ -268,3 +268,55 @@
 @media(max-width:400px){
  .header .header-brand>.header-crest{height:47px!important;max-height:47px!important;max-width:42px!important}
 }
+
+
+/* High-contrast recruitment summary: overrides generic small text rules. */
+.rmuti-apple-home .home-stats-strip{max-width:1240px;gap:18px;margin-top:-39px;align-items:stretch}
+.rmuti-apple-home .home-stat-pill{
+ position:relative;display:flex;align-items:center;gap:18px;min-height:152px;
+ padding:24px 26px;overflow:hidden;text-decoration:none;
+ border-radius:24px;isolation:isolate;
+ box-shadow:0 16px 35px rgba(10,32,66,.18);
+ transition:transform .2s ease,box-shadow .2s ease;
+}
+.rmuti-apple-home .home-stat-pill::before{content:"";position:absolute;width:160px;height:160px;right:-55px;top:-95px;border-radius:50%;background:rgba(255,255,255,.11);pointer-events:none;z-index:-1}
+.rmuti-apple-home .home-stat-pill:hover{transform:translateY(-4px);box-shadow:0 24px 42px rgba(10,32,66,.23)}
+.rmuti-apple-home .home-stat-pill:focus-visible{outline:4px solid #fcb66b;outline-offset:4px}
+.rmuti-apple-home .home-stat-positions{background:linear-gradient(125deg,#ff9b37 0%,#f47721 52%,#e96109 100%);color:#fff;border-color:#ffca8d}
+.rmuti-apple-home .home-stat-vacancies{background:linear-gradient(125deg,#295f9e 0%,#154577 52%,#102d55 100%);color:#fff;border-color:#6c92c6}
+.rmuti-apple-home .home-stat-status.is-open{background:linear-gradient(125deg,#f4fffa 0%,#e9faf0 100%);color:#0c6440;border:1px solid #9bdabb;box-shadow:0 16px 35px rgba(15,97,59,.12)}
+.rmuti-apple-home .home-stat-status.is-closed{background:linear-gradient(125deg,#f8fbff,#e7edf5);color:#102d55;border:1px solid #b8c9dc}
+.rmuti-apple-home .home-stat-pill .home-stat-body{display:flex;flex:1;flex-direction:column;justify-content:center;min-width:0;gap:4px}
+.rmuti-apple-home .home-stat-pill .home-stat-kicker{font-size:14px;font-weight:800;letter-spacing:.015em;color:inherit}
+.rmuti-apple-home .home-stat-pill .home-stat-value{display:flex;align-items:baseline;gap:10px;line-height:1.1}
+.rmuti-apple-home .home-stat-pill .home-stat-number{font-size:clamp(38px,4vw,54px);font-weight:900;line-height:1.08;color:#fff;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.rmuti-apple-home .home-stat-pill .home-stat-unit{font-size:16px;font-weight:800;color:inherit}
+.rmuti-apple-home .home-stat-pill .home-stat-caption,
+.rmuti-apple-home .home-stat-pill .home-stat-status-note{display:flex;align-items:center;gap:8px;font-size:12px!important;font-weight:700!important;line-height:1.5;color:rgba(255,255,255,.94)!important;opacity:1}
+.rmuti-apple-home .home-stat-status .home-stat-status-note{color:#256849!important}
+.rmuti-apple-home .home-stat-status.is-closed .home-stat-status-note{color:#49607a!important}
+.rmuti-apple-home .home-stat-pill .home-stat-status-text{font-size:clamp(20px,2vw,27px);line-height:1.3;font-weight:900;white-space:normal;color:inherit}
+.rmuti-apple-home .home-stat-pill .home-stat-icon{width:60px;height:60px;flex:0 0 60px;border-radius:18px;background:rgba(255,255,255,.2);color:#fff}
+.rmuti-apple-home .home-stat-status .home-stat-icon{background:#d9f2e4;color:#128353}
+.rmuti-apple-home .home-stat-status.is-closed .home-stat-icon{background:#dfeaf6;color:#275580}
+.rmuti-apple-home .home-stat-pill .home-stat-arrow{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border-radius:50%;background:rgba(255,255,255,.16);color:inherit}
+.rmuti-apple-home .home-stat-status .home-stat-arrow{background:#d9f2e4}
+.rmuti-apple-home .home-stat-status.is-closed .home-stat-arrow{background:#dfeaf6}
+.rmuti-apple-home .home-stat-status-dot{width:9px;height:9px;flex-shrink:0;border-radius:50%;background:#13a268;box-shadow:0 0 0 4px rgba(19,162,104,.14)}
+.rmuti-apple-home .home-stat-status.is-closed .home-stat-status-dot{background:#8c9cae;box-shadow:0 0 0 4px rgba(140,156,174,.15)}
+@media(max-width:1000px){
+ .rmuti-apple-home .home-stats-strip{gap:12px}
+ .rmuti-apple-home .home-stat-pill{padding:18px;min-height:134px;gap:12px}
+ .rmuti-apple-home .home-stat-pill .home-stat-icon{width:46px;height:46px;flex-basis:46px}
+ .rmuti-apple-home .home-stat-pill .home-stat-arrow{width:28px;height:28px;flex-basis:28px}
+}
+@media(max-width:800px){
+ .rmuti-apple-home .home-stat-pill{flex-direction:row;align-items:center}
+}
+@media(max-width:590px){
+ .rmuti-apple-home .home-stats-strip{gap:12px;margin-top:-20px}
+ .rmuti-apple-home .home-stat-pill{min-height:114px;padding:18px 19px;border-radius:19px;gap:15px}
+ .rmuti-apple-home .home-stat-pill .home-stat-number{font-size:42px}
+ .rmuti-apple-home .home-stat-pill .home-stat-icon{width:53px;height:53px;flex-basis:53px}
+ .rmuti-apple-home .home-stat-pill .home-stat-kicker{font-size:13px}
+}
