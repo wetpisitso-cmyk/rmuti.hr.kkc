@@ -388,3 +388,116 @@ button {
   .payment-bank-qr{max-width:100%;}
   .payment-bank-qr-link{padding:8px;}
 }
+
+
+/* RMUTI KKC | Announcement listing & detail: distinctive orange/navy frames.
+   The banner itself is preserved: only its container/border is styled. */
+.announcement-full-card {
+  position: relative;
+  overflow: hidden;
+  border: 3px solid transparent;
+  border-radius: 24px;
+  background:
+    linear-gradient(145deg, #ffffff 0%, #fcfdff 100%) padding-box,
+    linear-gradient(130deg, #f47721 0%, #ffa451 25%, #225e99 63%, #102d55 100%) border-box;
+  box-shadow: 0 15px 35px rgba(16, 45, 85, .11);
+  padding: clamp(17px, 2.4vw, 30px);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.announcement-full-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #f47721, #ffb96d 38%, #194d86 70%, #102d55);
+  pointer-events: none;
+}
+
+.announcement-full-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 48px rgba(16, 45, 85, .15);
+}
+
+.announcement-full-card .announcement-full-banner {
+  display: block;
+  width: 100%;
+  max-height: 490px;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  padding: 7px;
+  background: linear-gradient(135deg, #fff7ef, #eef5ff);
+  border: 2px solid #d6e5f7;
+  border-radius: 19px;
+  box-shadow: 0 7px 19px rgba(16, 45, 85, .09);
+  margin-bottom: 23px;
+}
+
+.announcement-full-card > h2 a,
+.announcement-full-card > h1 {
+  color: #102d55;
+  text-decoration: none;
+}
+
+.announcement-full-card > h2 a:hover {
+  color: #dc6514;
+}
+
+.announcement-full-card .pre-wrap {
+  color: #334d70;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+
+.announcement-full-card .btn.outline {
+  border: 2px solid #184b83;
+  border-radius: 12px;
+  background: #fff;
+  color: #102d55;
+  font-weight: 800;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.announcement-full-card .btn.outline:hover {
+  background: #f47721;
+  border-color: #f47721;
+  color: #fff;
+}
+
+.announcement-full-card :is(a, button):focus-visible {
+  outline: 3px solid #f47721;
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .announcement-full-card {
+    border-width: 2px;
+    border-radius: 19px;
+    padding: 16px;
+  }
+
+  .announcement-full-card .announcement-full-banner {
+    max-height: 290px;
+    padding: 4px;
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .announcement-full-card,
+  .announcement-full-card .btn.outline {
+    transition: none;
+  }
+}
+
+@media print {
+  .announcement-full-card {
+    border: 1px solid #aebed0;
+    background: #fff;
+    box-shadow: none;
+    transform: none;
+  }
+  .announcement-full-card::before { display: none; }
+}
