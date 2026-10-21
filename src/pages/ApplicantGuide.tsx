@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { rows } from "../services/api";
+import { scrollToGuideSection } from "../lib/guide-scroll";
 
 type GuideItem = { number: string; title: string; detail: string; points: string[]; Icon: LucideIcon };
 const wizardSteps: GuideItem[] = [
@@ -78,7 +79,7 @@ export default function ApplicantGuide() {
       </header>
 
       <nav className="manual-topic-nav" aria-label="สารบัญคู่มือผู้สมัคร">
-        {toc.map(({id,name,Icon}) => <a href={"#"+id} key={id}><Icon size={17}/>{name}</a>)}
+        {toc.map(({id,name,Icon}) => <button type="button" onClick={() => scrollToGuideSection(id)} key={id}><Icon size={17}/>{name}</button>)}
       </nav>
 
       <section className="manual-info-banner" aria-label="เตรียมพร้อมก่อนสมัคร">
