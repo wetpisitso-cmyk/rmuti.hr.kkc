@@ -127,3 +127,10 @@
 @media(max-width:780px){.manual-topic-nav{position:static}.manual-route-grid,.manual-after-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.manual-topic-nav{gap:7px;padding:10px}.manual-topic-nav a{font-size:12px;padding:8px 9px}.manual-page .manual-framed-section{padding:19px 15px;border-radius:17px}.manual-route{padding:12px}}
 @media print{.manual-topic-nav{position:static;box-shadow:none}.manual-page .manual-framed-section{box-shadow:none;break-inside:auto}}
+
+/* Handbook section controls use buttons because HashRouter owns the URL hash. */
+.manual-topic-nav button{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid #e0e7f0;border-radius:10px;color:#1b3b61;font-size:13px;font-weight:750;background:#f8faff;font-family:inherit;cursor:pointer}
+.manual-topic-nav button:hover,.manual-topic-nav button:focus-visible{background:#fff0e4;color:#a94b0d;border-color:#f4caa7}
+.manual-page [id^="applicant-"],.manual-page [id^="admin-"]{scroll-margin-top:180px}
+@media(max-width:780px){.manual-page [id^="applicant-"],.manual-page [id^="admin-"]{scroll-margin-top:100px}}
+@media(max-width:600px){.manual-topic-nav button{font-size:12px;padding:8px 9px}}
