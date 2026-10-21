@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { scrollToGuideSection } from "../../lib/guide-scroll";
 import { ArrowRight, BookOpenCheck, BriefcaseBusiness, CalendarDays, ClipboardCheck, CreditCard, FileDown, FileSignature, FileText, LockKeyhole, Megaphone, Settings, ShieldCheck, Trash2, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -38,16 +39,16 @@ export default function AdminGuide(){
     <p>แนวทางใช้งานหลังบ้านตั้งแต่เปิดรอบรับสมัคร ตรวจเอกสาร ออกเลข รับรองใบสมัคร ไปจนถึงการเผยแพร่ผล</p>
     <div className="manual-hero-actions">
      <Link className="btn manual-light-btn" to="/staff"><ArrowRight size={18}/> กลับหน้าภาพรวม</Link>
-     <a className="btn manual-ghost-btn" href="#admin-workflow"><BookOpenCheck size={17}/> อ่านขั้นตอนการทำงาน</a>
+     <button type="button" className="btn manual-ghost-btn" onClick={() => scrollToGuideSection("admin-workflow")}><BookOpenCheck size={17}/> อ่านขั้นตอนการทำงาน</button>
     </div>
    </div>
    <div className="manual-hero-art" aria-hidden="true"><div className="manual-art-icon"><ShieldCheck size={76} strokeWidth={1.5}/></div><span className="manual-art-label"><LockKeyhole size={17}/> ADMIN ACCESS ONLY</span></div>
   </header>
   <nav className="manual-topic-nav" aria-label="สารบัญคู่มือผู้ดูแลระบบ">
-   <a href="#admin-menu"><Settings size={17}/> เมนูหลังบ้าน</a>
-   <a href="#admin-workflow"><ClipboardCheck size={17}/> ขั้นตอน Admin</a>
-   <a href="#admin-pdf"><FileSignature size={17}/> อนุมัติ PDF</a>
-   <a href="#admin-faq"><BookOpenCheck size={17}/> คำถามที่พบบ่อย</a>
+   <a type="button" onClick={() => scrollToGuideSection("admin-menu")}><Settings size={17}/> เมนูหลังบ้าน</a>
+   <a type="button" onClick={() => scrollToGuideSection("admin-workflow")}><ClipboardCheck size={17}/> ขั้นตอน Admin</a>
+   <a type="button" onClick={() => scrollToGuideSection("admin-pdf")}><FileSignature size={17}/> อนุมัติ PDF</a>
+   <a type="button" onClick={() => scrollToGuideSection("admin-faq")}><BookOpenCheck size={17}/> คำถามที่พบบ่อย</a>
   </nav>
   <section className="manual-info-banner admin-manual-info">
    <div><LockKeyhole size={23}/><span><strong>สิทธิ์เฉพาะ Admin</strong><small>เข้าสู่ระบบก่อนอ่านคู่มือ</small></span></div>
