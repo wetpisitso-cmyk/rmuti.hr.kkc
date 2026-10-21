@@ -45,10 +45,10 @@ export default function AdminGuide(){
    <div className="manual-hero-art" aria-hidden="true"><div className="manual-art-icon"><ShieldCheck size={76} strokeWidth={1.5}/></div><span className="manual-art-label"><LockKeyhole size={17}/> ADMIN ACCESS ONLY</span></div>
   </header>
   <nav className="manual-topic-nav" aria-label="สารบัญคู่มือผู้ดูแลระบบ">
-   <a type="button" onClick={() => scrollToGuideSection("admin-menu")}><Settings size={17}/> เมนูหลังบ้าน</a>
-   <a type="button" onClick={() => scrollToGuideSection("admin-workflow")}><ClipboardCheck size={17}/> ขั้นตอน Admin</a>
-   <a type="button" onClick={() => scrollToGuideSection("admin-pdf")}><FileSignature size={17}/> อนุมัติ PDF</a>
-   <a type="button" onClick={() => scrollToGuideSection("admin-faq")}><BookOpenCheck size={17}/> คำถามที่พบบ่อย</a>
+   <button type="button" onClick={() => scrollToGuideSection("admin-menu")}><Settings size={17}/> เมนูหลังบ้าน</button>
+   <button type="button" onClick={() => scrollToGuideSection("admin-workflow")}><ClipboardCheck size={17}/> ขั้นตอน Admin</button>
+   <button type="button" onClick={() => scrollToGuideSection("admin-pdf")}><FileSignature size={17}/> อนุมัติ PDF</button>
+   <button type="button" onClick={() => scrollToGuideSection("admin-faq")}><BookOpenCheck size={17}/> คำถามที่พบบ่อย</button>
   </nav>
   <section className="manual-info-banner admin-manual-info">
    <div><LockKeyhole size={23}/><span><strong>สิทธิ์เฉพาะ Admin</strong><small>เข้าสู่ระบบก่อนอ่านคู่มือ</small></span></div>
