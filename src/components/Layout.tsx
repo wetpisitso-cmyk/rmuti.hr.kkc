@@ -160,6 +160,7 @@ const links = [
   ["exams", "การสอบและคะแนน", ClipboardCheck, "exams"],
   ["publish", "ประกาศและเผยแพร่", Megaphone, "publish"],
   ["users", "บัญชีและสิทธิ์", Users, "admin"],
+  ["test-accounts", "บัญชีทดสอบ", Users, "admin"],
   ["settings", "ตั้งค่า / ประวัติ", Settings, "admin"],
   ["guide", "คู่มือการใช้งาน Admin", BookOpenCheck, "admin"],
 ] as const;
