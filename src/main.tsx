@@ -24,8 +24,10 @@ function freshUrl(preserveRoute: boolean) {
   return url.toString();
 }
 function reloadFresh() {
-  // Keep the applicant's current route, but request a new HTML entrypoint.
-  window.location.assign(freshUrl(true));
+  // Update URL within this tab before reloading, rather than navigating
+  // the in-app browser to a new URL (which can close embedded browser tabs).
+  window.history.replaceState(null, "", freshUrl(true));
+  window.location.reload();
 }
 function recoverChunkOnce() {
   if (!new URL(window.location.href).searchParams.has(FRESH_PARAM)) reloadFresh();
