@@ -22,6 +22,7 @@ import {
 } from "../../components/UI";
 import { statuses } from "../../types/models";
 import { AdminSignaturePad, type AdminSignature } from "../../components/AdminSignaturePad";
+import { AdminApplicantDetails } from "../../components/AdminApplicantDetails";
 export default function Review() {
   const { id } = useParams(),
     auth = useAuth(),
@@ -298,11 +299,10 @@ export default function Review() {
               <p>
                 {a.job_positions?.title} · {a.job_positions?.departments?.name}
               </p>
-              <p>
-                โทรศัพท์ {a.personal_data.phone} · วันเกิด{" "}
-                {dateTH(a.personal_data.birth_date)}
-              </p>
-              <p>ที่อยู่ {a.personal_data.address}</p>
+              <AdminApplicantDetails
+                person={a.snapshot?.personal || a.personal_data}
+                email={a.snapshot?.email}
+              />
               <h3 className="mt-4">การศึกษาและประสบการณ์</h3>
               {d.education.map((e, i) => (
                 <p key={i}>
