@@ -161,6 +161,7 @@ export default function Review() {
       });
       await refresh();
       setSuccess("บันทึกผลตรวจแล้ว");
+      if (actualNext === "eligible" || actualNext === "ineligible") setReviewStep(4);
     } catch (e) {
       setError(errorTH(e));
     } finally {
@@ -176,7 +177,7 @@ export default function Review() {
       await rpc("admin_assign_application_number", { p_id: id, p_number: assignedNumber.trim() });
       await refresh();
       await qc.invalidateQueries({ queryKey: ["my-applications"] });
-      setSuccess("บันทึกเลขผู้สมัครแล้ว โปรดตรวจผลคุณสมบัติและลงลายเซ็นรับรองก่อนอนุมัติดาวน์โหลด PDF");
+      setSuccess("บันทึกเลขผู้สมัครแล้ว โปรดลงลายเซ็นรับรองก่อนอนุมัติดาวน์โหลด PDF");
     } catch (e) { setError(errorTH(e)); }
     finally { setBusy(false); }
   };
@@ -357,6 +358,7 @@ export default function Review() {
               ["submitted", "under_review"].includes(a.status) && (
                 <form className="panel stack review-color-panel tone-green" hidden={reviewStep!==3} id="review-decision" onSubmit={submit}>
                   <h2>ผลตรวจคุณสมบัติ</h2>
+                  <Notice>เมื่อยืนยันผลผ่านคุณสมบัติแล้ว ระบบจะพาไปขั้นตอน 5 เพื่อออกเลขผู้สมัคร จากนั้นจึงลงลายเซ็นและอนุมัติ PDF ได้</Notice>
                   <Select
                     label="สถานะใหม่"
                     value={actualNext}
@@ -441,7 +443,7 @@ export default function Review() {
                   <CheckCircle2 size={18}/>
                   ขั้นตอนการออกใบสมัครฉบับสมบูรณ์: 1. บันทึกเลขผู้สมัคร → 2. เซ็นรับรอง → 3. กดอนุมัติให้ดาวน์โหลด PDF
                 </div>
-                {a.status !== "eligible" && <button type="button" className="btn outline mb-4" onClick={() => setReviewStep(3)}>ไปที่แท็บผลคุณสมบัติ เพื่อบันทึกให้ผ่านคุณสมบัติ</button>}
+                {a.status !== "eligible" && a.status !== "ineligible" && <button type="button" className="btn outline mb-4" onClick={() => setReviewStep(3)}>ไปที่แท็บผลคุณสมบัติ เพื่อบันทึกผลการพิจารณา</button>}
                 <AdminSignaturePad applicationId={id!} existing={signature.data || null}
                   eligible={signatureRequirements.length === 0} missingSteps={signatureRequirements} refresh={refresh} />
                 {auth.role === "admin" && a.submitted_at && (
