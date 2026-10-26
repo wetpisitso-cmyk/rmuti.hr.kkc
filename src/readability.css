@@ -501,3 +501,38 @@ button {
   }
   .announcement-full-card::before { display: none; }
 }
+
+
+/* Staff applicant review: show every submitted personal field without opening a PDF. */
+#review-personal .review-applicant-details { margin: 24px 0; }
+#review-personal .review-applicant-details > h3 {
+  font-size: 17px; font-weight: 850; color: #102d55; margin: 0 0 15px;
+}
+#review-personal .review-applicant-detail-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0;
+}
+#review-personal .review-applicant-detail {
+  min-width: 0; padding: 14px 16px; border-radius: 14px;
+  background: #f7faff; border: 1px solid #dbe6f5;
+}
+#review-personal .review-applicant-detail-wide { grid-column: 1 / -1; }
+#review-personal .review-applicant-detail dt {
+  color: #47617d; font-size: 12px; font-weight: 750; margin-bottom: 6px;
+}
+#review-personal .review-applicant-detail dd {
+  margin: 0; font-size: 14px; font-weight: 650; color: #102d55;
+  line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+#review-personal .review-applicant-detail dd.review-applicant-empty { color: #a45311; }
+#review-personal .review-applicant-missing {
+  padding: 12px 15px; border-radius: 12px; margin: 0 0 15px;
+  border: 1px solid #f3ce99; background: #fff7e9;
+  color: #7e3d12!important; font-size: 13px; line-height: 1.7; font-weight: 700;
+}
+@media (max-width: 640px) {
+  #review-personal .review-applicant-detail-grid { grid-template-columns: 1fr; gap: 10px; }
+  #review-personal .review-applicant-detail { padding: 12px 14px; }
+}
+@media print {
+  #review-personal .review-applicant-detail { background: #fff; border-color: #ddd; }
+}
