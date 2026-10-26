@@ -5,6 +5,8 @@ import { Guard } from "./components/Guard";
 import { State, Notice } from "./components/UI";
 import { configured } from "./lib/supabase";
 import { Home, JobDetail, Announcements, AnnouncementDetail, Results } from "./pages/Public";
+// Critical applicant flow should not depend on a delayed chunk on stale mobile tabs.
+import Wizard from "./pages/ApplicationWizard";
 const ApplicantGuide = lazy(() => import("./pages/ApplicantGuide"));
 const AdminGuide = lazy(() => import("./pages/staff/AdminGuide"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -13,7 +15,6 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Profile = lazy(() =>
   import("./pages/Dashboard").then((m) => ({ default: m.ProfilePage })),
 );
-const Wizard = lazy(() => import("./pages/ApplicationWizard"));
 const Application = lazy(() => import("./pages/ApplicationView"));
 const PaymentReceipt = lazy(() => import("./pages/PaymentReceipt"));
 const Print = lazy(() =>
