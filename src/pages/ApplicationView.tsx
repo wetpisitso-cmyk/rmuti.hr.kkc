@@ -186,7 +186,8 @@ export default function ApplicationView() {
                     วันเกิด {dateTH(a.personal_data.birth_date)} · โทรศัพท์{" "}
                     {a.personal_data.phone}
                   </p>
-                  <p>ที่อยู่ {a.personal_data.address}</p>
+                  <p>ชื่อ–นามสกุลภาษาอังกฤษ: {a.personal_data.english_name || "ไม่ได้ระบุในใบสมัครเดิม"}</p>
+                   <p>ที่อยู่ {a.personal_data.address}</p>
                   <h3 className="mt-5">การศึกษา</h3>
                   {d.education.map((e, i) => (
                     <p key={i}>
