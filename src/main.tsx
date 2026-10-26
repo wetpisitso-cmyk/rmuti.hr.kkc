@@ -27,10 +27,6 @@ function reloadFresh() {
   // Keep the applicant's current route, but request a new HTML entrypoint.
   window.location.assign(freshUrl(true));
 }
-function returnHome() {
-  // Drop a broken deep-link/hash route, without touching the login or database.
-  window.location.assign(freshUrl(false));
-}
 function recoverChunkOnce() {
   if (!new URL(window.location.href).searchParams.has(FRESH_PARAM)) reloadFresh();
 }
@@ -56,6 +52,12 @@ class ErrorBoundary extends Component<
   componentDidCatch(error: Error) {
     if (isStaleChunkError(error)) recoverChunkOnce();
   }
+  goHome = () => {
+    // Recover inside the current browser tab, even in embedded iPhone browsers.
+    // A full navigation can close some in-app browser windows.
+    window.location.hash = "#/";
+    this.setState({ failed: false, kind: "render" });
+  };
   render() {
     return this.state.failed ? (
       <div className="container section">
@@ -72,7 +74,7 @@ class ErrorBoundary extends Component<
           <button className="btn primary" onClick={reloadFresh}>
             โหลดเวอร์ชันล่าสุด
           </button>
-          <button className="btn outline" onClick={returnHome}>
+          <button className="btn outline" onClick={this.goHome}>
             กลับหน้าหลัก
           </button>
         </div>
