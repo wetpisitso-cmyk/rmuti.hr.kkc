@@ -1,0 +1,25 @@
+name: Diagnose published mobile render
+on:
+  pull_request:
+    paths:
+      - 'scripts/diagnose-render.cjs'
+      - '.github/workflows/diagnose-render.yml'
+      - 'src/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save --package-lock=false playwright@1.58.2
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Capture public browser render errors
+        run: node scripts/diagnose-render.cjs
