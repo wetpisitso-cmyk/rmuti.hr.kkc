@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   registrationSchema,
   passwordSchema,
+  personalSchema,
   validThaiID,
 } from "../src/validation/forms";
 import { csv, bangkokISO, bangkokInput, safeUrl } from "../src/lib/format";
@@ -36,6 +37,12 @@ describe("registration and privacy", () => {
     expect(validThaiID("123")).toBe(false);
     expect(validThaiID("1234567890123")).toBe(false);
   });
+});
+describe("applicant English name is required before submission", () => {
+  const personal = { prefix: "นางสาว", first_name: "ทดสอบ", last_name: "ระบบ", english_name: "TEST PERSON", birth_date: "2000-01-01", phone: "0800000000", address: "Khon Kaen" };
+  it("accepts complete English names", () => expect(personalSchema.safeParse(personal).success).toBe(true));
+  it("rejects missing English names", () => expect(personalSchema.safeParse({ ...personal, english_name: "" }).success).toBe(false));
+  it("rejects Thai-only names in the English field", () => expect(personalSchema.safeParse({ ...personal, english_name: "ทดสอบ ระบบ" }).success).toBe(false));
 });
 describe("export and timezone", () => {
   it("prevents spreadsheet formulas in exported text", () => {
