@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import { AuthProvider } from "./hooks/useAuth";
 import { initializeRecovery } from "./lib/supabase";
+import { safeClientError } from "./lib/client-diagnostics";
 import "./styles.css";
 import "./premium-theme.css";
 import "./campus-design.css";
@@ -42,14 +43,19 @@ window.addEventListener("vite:preloadError", (event) => {
 });
 class ErrorBoundary extends Component<
   { children: ReactNode },
-  { failed: boolean; kind: "asset" | "render" }
+  { failed: boolean; kind: "asset" | "render"; diagnostic: string }
 > {
-  state: { failed: boolean; kind: "asset" | "render" } = {
+  state: { failed: boolean; kind: "asset" | "render"; diagnostic: string } = {
     failed: false,
     kind: "render",
+    diagnostic: "",
   };
   static getDerivedStateFromError(error: Error) {
-    return { failed: true, kind: isStaleChunkError(error) ? "asset" : "render" };
+    return {
+      failed: true,
+      kind: isStaleChunkError(error) ? "asset" : "render",
+      diagnostic: safeClientError(error),
+    };
   }
   componentDidCatch(error: Error) {
     if (isStaleChunkError(error)) recoverChunkOnce();
@@ -58,7 +64,7 @@ class ErrorBoundary extends Component<
     // Recover inside the current browser tab, even in embedded iPhone browsers.
     // A full navigation can close some in-app browser windows.
     window.location.hash = "#/";
-    this.setState({ failed: false, kind: "render" });
+    this.setState({ failed: false, kind: "render", diagnostic: "" });
   };
   render() {
     return this.state.failed ? (
@@ -72,6 +78,15 @@ class ErrorBoundary extends Component<
         <p className="muted" role="status">
           รหัสข้อผิดพลาด: {this.state.kind === "asset" ? "ASSET_UPDATE" : "APP_RENDER"}
         </p>
+        {new URL(window.location.href).searchParams.get("rmuti_debug") === "1" && (
+          <div className="notice" role="status">
+            <strong>รายละเอียดสำหรับตรวจสอบ:</strong>
+            <code style={{ display: "block", overflowWrap: "anywhere" }}>
+              {this.state.diagnostic}
+            </code>
+            <small>รายละเอียดนี้แสดงเฉพาะบนอุปกรณ์ของคุณ ไม่ได้ส่งไปยังเซิร์ฟเวอร์</small>
+          </div>
+        )}
         <div className="flex gap-2 flex-wrap">
           <button className="btn primary" onClick={reloadFresh}>
             โหลดเวอร์ชันล่าสุด
