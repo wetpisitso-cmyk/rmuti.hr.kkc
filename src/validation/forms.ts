@@ -31,6 +31,10 @@ export const personalSchema = z.object({
   birth_date: z.string().min(1),
   phone: z.string().regex(/^[0-9+ -]{9,20}$/),
   address: z.string().trim().min(1),
+  gender: z.string().trim().min(1, "กรุณาเลือกเพศหรือไม่ประสงค์ระบุ"),
+  nationality: z.string().trim().min(1, "กรุณาระบุสัญชาติ"),
+  marital_status: z.string().trim().min(1, "กรุณาเลือกสถานภาพ"),
+  registered_address: z.string().trim().min(1, "กรุณากรอกที่อยู่ตามทะเบียนบ้าน"),
 });
 export function validThaiID(id: string) {
   if (!/^\d{13}$/.test(id)) return false;

@@ -39,10 +39,13 @@ describe("registration and privacy", () => {
   });
 });
 describe("applicant English name is required before submission", () => {
-  const personal = { prefix: "นางสาว", first_name: "ทดสอบ", last_name: "ระบบ", english_name: "TEST PERSON", birth_date: "2000-01-01", phone: "0800000000", address: "Khon Kaen" };
+  const personal = { prefix: "นางสาว", first_name: "ทดสอบ", last_name: "ระบบ", english_name: "TEST PERSON", birth_date: "2000-01-01", phone: "0800000000", address: "Khon Kaen", gender: "ไม่ประสงค์ระบุ", nationality: "ไทย", marital_status: "โสด", registered_address: "Khon Kaen" };
   it("accepts complete English names", () => expect(personalSchema.safeParse(personal).success).toBe(true));
   it("rejects missing English names", () => expect(personalSchema.safeParse({ ...personal, english_name: "" }).success).toBe(false));
   it("rejects Thai-only names in the English field", () => expect(personalSchema.safeParse({ ...personal, english_name: "ทดสอบ ระบบ" }).success).toBe(false));
+  for (const field of ["gender","nationality","marital_status","registered_address"] as const) {
+    it(`requires ${field}`, () => expect(personalSchema.safeParse({ ...personal, [field]: "" }).success).toBe(false));
+  }
 });
 describe("export and timezone", () => {
   it("prevents spreadsheet formulas in exported text", () => {
