@@ -27,6 +27,7 @@ export const personalSchema = z.object({
   prefix: z.string().min(1),
   first_name: z.string().trim().min(1),
   last_name: z.string().trim().min(1),
+  english_name: z.string().trim().min(3, "กรุณากรอกชื่อ–นามสกุลภาษาอังกฤษ").max(200).regex(/^[A-Za-z][A-Za-z .\x27-]*[A-Za-z]$/, "กรุณากรอกชื่อ–นามสกุลเป็นตัวอักษรภาษาอังกฤษ"),
   birth_date: z.string().min(1),
   phone: z.string().regex(/^[0-9+ -]{9,20}$/),
   address: z.string().trim().min(1),

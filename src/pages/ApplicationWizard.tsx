@@ -371,8 +371,8 @@ export default function ApplicationWizard() {
                       maxLength={2000}
                     />
                   </div>
-                  <Field label="ชื่อ–นามสกุลภาษาอังกฤษ" value={personal.english_name || ""}
-                    onChange={e=>update("english_name",e.target.value)} maxLength={200} placeholder="เช่น SOMCHAI JAIDEE" />
+                  <Field label="ชื่อ–นามสกุลภาษาอังกฤษ (บังคับ)" value={personal.english_name || ""}
+                    onChange={e=>update("english_name",e.target.value)} required maxLength={200} placeholder="เช่น SOMCHAI JAIDEE" />
                   <Select label="เพศ" value={personal.gender || ""} onChange={e=>update("gender",e.target.value)}>
                     <option value="">เลือก / ไม่ระบุ</option>
                     <option value="ชาย">ชาย</option><option value="หญิง">หญิง</option>
@@ -645,6 +645,7 @@ export default function ApplicationWizard() {
                       โทรศัพท์ {personal.phone} · อีเมล{" "}
                       {auth.session?.user.email}
                     </p>
+                    <p>ชื่อ–นามสกุลภาษาอังกฤษ: {personal.english_name || "ยังไม่ได้กรอก"}</p>
                     <p>ที่อยู่: {personal.address}</p>
                     <p>
                       การศึกษา:{" "}
