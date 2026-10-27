@@ -7,6 +7,7 @@ import {
   LogOut,
   LayoutDashboard,
   Files,
+  FileSpreadsheet,
   BriefcaseBusiness,
   Building2,
   CalendarDays,
@@ -154,6 +155,7 @@ export function Layout() {
 const links = [
   ["", "ภาพรวม", LayoutDashboard, ""],
   ["applications", "ตรวจใบสมัคร", Files, "review"],
+  ["roster", "รายชื่อผู้สมัคร / PDF / Excel", FileSpreadsheet, "reports"],
   ["jobs", "ตำแหน่งรับสมัคร", BriefcaseBusiness, "manage_jobs"],
   ["rounds", "รอบรับสมัคร", CalendarDays, "manage_jobs"],
   ["departments", "หน่วยงาน", Building2, "manage_jobs"],
