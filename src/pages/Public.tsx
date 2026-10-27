@@ -181,7 +181,7 @@ export function Home() {
             <small className="home-stat-caption">ดูรายละเอียดตำแหน่งงานทั้งหมด</small>
           </span>
           <span className="home-stat-arrow" aria-hidden="true"><ArrowRight size={19} /></span>
-        </a>
+        </button>
         <button type="button" className="home-stat-pill home-stat-vacancies" onClick={() => navigateStat("vacancies")} aria-label={`ดูจำนวนอัตราที่เปิดรับทั้งหมด ${numberTH(open.reduce((sum, j) => sum + j.vacancies, 0))} อัตรา`}>
           <span className="home-stat-icon navy" aria-hidden="true"><Users size={28} /></span>
           <span className="home-stat-body">
@@ -190,7 +190,7 @@ export function Home() {
             <small className="home-stat-caption">ตรวจสอบอัตราว่างและคุณสมบัติ</small>
           </span>
           <span className="home-stat-arrow" aria-hidden="true"><ArrowRight size={19} /></span>
-        </a>
+        </button>
         <button type="button" className={`home-stat-pill home-stat-status ${open.length ? "is-open" : "is-closed"}`} onClick={() => navigateStat("status")} aria-label={open.length ? "สถานะเปิดรับสมัครอยู่ ดูตำแหน่งที่เปิดรับ" : "ตรวจสอบประกาศรับสมัครล่าสุด"}>
           <span className="home-stat-icon green" aria-hidden="true"><CalendarDays size={28} /></span>
           <span className="home-stat-body">
@@ -199,7 +199,7 @@ export function Home() {
             <small className="home-stat-status-note"><span className="home-stat-status-dot" aria-hidden="true" />{open.length ? "สมัครได้ตามช่วงเวลาที่ประกาศ" : "ติดตามกำหนดการครั้งถัดไป"}</small>
           </span>
           <span className="home-stat-arrow" aria-hidden="true"><ArrowRight size={19} /></span>
-        </a>
+        </button>
       </div>
       <div className="home-feature-strip">
         <div className="container home-feature-grid">
