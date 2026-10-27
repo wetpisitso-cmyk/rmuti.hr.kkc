@@ -1,5 +1,6 @@
 import { PDFDocument } from "pdf-lib";
 import type { ExamCardRecord } from "./exam-card-data";
+import { layoutExamCardFields, wrapCardText } from "./exam-card-layout";
 type CardItem={card:ExamCardRecord;photo:string};
 const WIDTH=1240, HEIGHT=1754;
 const INSTRUCTIONS=[
@@ -12,36 +13,20 @@ async function imageFromData(url:string){
   const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error("INVALID_CARD_IMAGE"));img.src=url;
  });
 }
-function fitLines(ctx:CanvasRenderingContext2D,text:string,maxWidth:number){
- const out:string[]=[];let segment="";
- // Thai has no word separators. Intl.Segmenter improves wrapping and works in current Chrome/Safari.
- const pieces=typeof Intl.Segmenter==="function"
-  ?Array.from(new Intl.Segmenter("th",{granularity:"word"}).segment(text),x=>x.segment)
-  :Array.from(text);
- for(const piece of pieces){
-  if(segment&&ctx.measureText(segment+piece).width>maxWidth){out.push(segment);segment=piece.trimStart();}
-  else segment+=piece;
+function drawFitted(
+ ctx: CanvasRenderingContext2D,
+ text: string,
+ cx: number,
+ y: number,
+ maxWidth: number,
+ initialSize: number,
+ minSize: number,
+) {
+ for (let size=initialSize;size>=minSize;size--) {
+  ctx.font="bold "+size+"px Tahoma, 'Noto Sans Thai', sans-serif";
+  if(ctx.measureText(text).width<=maxWidth){ctx.fillText(text,cx,y);return;}
  }
- if(segment)out.push(segment);
- // Never allow an unbroken word or ID to overflow a printed card.
- const safe:string[]=[];
- for(const line of out){
-  let remaining=line;
-  while(remaining&&ctx.measureText(remaining).width>maxWidth){
-   let n=remaining.length;
-   while(n>1&&ctx.measureText(remaining.slice(0,n)).width>maxWidth)n--;
-   safe.push(remaining.slice(0,n));remaining=remaining.slice(n);
-  }
-  if(remaining)safe.push(remaining);
- }
- return safe;
-}
-function field(ctx:CanvasRenderingContext2D,label:string,value:string,y:number){
- ctx.font="bold 29px Tahoma, sans-serif";ctx.fillStyle="#173558";ctx.fillText(label,85,y);
- ctx.font="29px Tahoma, sans-serif";ctx.fillStyle="#172F4A";
- const lines=fitLines(ctx,value,y<610?590:750);
- lines.forEach((t,i)=>ctx.fillText(t,320,y+i*42));
- return y+Math.max(lines.length,1)*48+21;
+ throw new Error("CARD_TEXT_OVERFLOW");
 }
 function dateBE(date:string){
  const d=new Date(date);return Number.isFinite(d.valueOf())
@@ -58,37 +43,54 @@ async function makePage(item:CardItem):Promise<Uint8Array>{
   const ratio=Math.min(125/crest.naturalWidth,175/crest.naturalHeight);
   ctx.drawImage(crest,55,40,crest.naturalWidth*ratio,crest.naturalHeight*ratio);
  }catch{throw Error("UNIVERSITY_LOGO_MISSING");}
+ // Keep the university heading inside the page and to the right of the crest.
  ctx.textAlign="center";ctx.fillStyle="#fff";
- ctx.font="bold 37px Tahoma, sans-serif";
- ctx.fillText("มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน",WIDTH/2,100);
- ctx.font="bold 34px Tahoma, sans-serif";ctx.fillText("วิทยาเขตขอนแก่น",WIDTH/2,151);
- ctx.font="bold 40px Tahoma, sans-serif";ctx.fillText("บัตรประจำตัวผู้สมัครสอบ",WIDTH/2,220);
+ drawFitted(ctx,"มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน",715,100,870,38,25);
+ drawFitted(ctx,"วิทยาเขตขอนแก่น",715,151,870,35,27);
+ drawFitted(ctx,"บัตรประจำตัวผู้สมัครสอบ",715,219,870,42,30);
+
+ // Section label and portrait occupy separate fixed regions.
  ctx.textAlign="left";ctx.fillStyle="#102D55";
- ctx.font="bold 30px Tahoma, sans-serif";ctx.fillText(item.card.issue_label,90,329);
+ ctx.font="bold 30px Tahoma, 'Noto Sans Thai', sans-serif";
+ const roundLines=wrapCardText(item.card.issue_label||"ครั้งที่สอบ",1065,t=>ctx.measureText(t).width);
+ if(roundLines.length>1)throw Error("CARD_TEXT_OVERFLOW");
+ ctx.fillText(roundLines[0],85,329);
+
  const photo=await imageFromData(item.photo);
- const dx=937,dy=320,dw=205,dh=262;
- // Maintain proportions, crop at center.
+ const dx=955,dy=374,dw=225,dh=266;
  const ratio=Math.max(dw/photo.naturalWidth,dh/photo.naturalHeight);
  const sw=dw/ratio,sh=dh/ratio;
  ctx.drawImage(photo,(photo.naturalWidth-sw)/2,(photo.naturalHeight-sh)/2,sw,sh,dx,dy,dw,dh);
  ctx.strokeStyle="#9AAEC4";ctx.lineWidth=3;ctx.strokeRect(dx,dy,dw,dh);
- let y=402;
- y=field(ctx,"เลขที่ประจำตัวสอบ",item.card.exam_number,y);
- y=field(ctx,"ชื่อ–นามสกุล",item.card.name,y);
- y=field(ctx,"ตำแหน่งที่สมัคร",item.card.job_title,y);
- y=field(ctx,"สังกัดที่สมัคร",item.card.department,y);
- if(y>835)throw Error("CARD_TEXT_OVERFLOW");
- ctx.strokeStyle="#D8E1E9";ctx.beginPath();ctx.moveTo(80,875);ctx.lineTo(1160,875);ctx.stroke();
+
+ const layout=layoutExamCardFields({
+  examNumber:item.card.exam_number,
+  name:item.card.name,
+  jobTitle:item.card.job_title,
+  department:item.card.department,
+ },(value,size)=>{
+  ctx.font=""+size+"px Tahoma, 'Noto Sans Thai', sans-serif";
+  return ctx.measureText(value).width;
+ });
+ for(const field of layout.fields){
+  ctx.textAlign="left";ctx.fillStyle="#173558";
+  ctx.font="bold "+layout.fontSize+"px Tahoma, 'Noto Sans Thai', sans-serif";
+  ctx.fillText(field.label,field.x,field.labelY);
+  ctx.fillStyle="#172F4A";
+  ctx.font=""+layout.fontSize+"px Tahoma, 'Noto Sans Thai', sans-serif";
+  field.lines.forEach((line,i)=>ctx.fillText(line,field.x,field.valueYs[i]));
+ }
+ ctx.strokeStyle="#D8E1E9";ctx.beginPath();ctx.moveTo(80,1025);ctx.lineTo(1160,1025);ctx.stroke();
  const signature=await imageFromData(item.card.signature_png);
  const maxW=275,maxH=135,scale=Math.min(maxW/signature.naturalWidth,maxH/signature.naturalHeight);
  const x=970-signature.naturalWidth*scale/2;
- ctx.drawImage(signature,x,927,signature.naturalWidth*scale,signature.naturalHeight*scale);
+ ctx.drawImage(signature,x,1040,signature.naturalWidth*scale,signature.naturalHeight*scale);
  ctx.fillStyle="#1D3553";ctx.font="25px Tahoma, sans-serif";ctx.textAlign="center";
- ctx.fillText("____________________________",970,1090);
- ctx.font="bold 26px Tahoma, sans-serif";ctx.fillText("เจ้าหน้าที่ออกบัตรรับสมัคร",970,1135);
- ctx.font="23px Tahoma, sans-serif";ctx.fillText(item.card.signer_name,970,1172);
- ctx.textAlign="left";ctx.font="23px Tahoma, sans-serif";ctx.fillText("ออกบัตรวันที่ "+dateBE(item.card.issued_at),88,1140);
- const boxTop=1240,boxBottom=1660;
+ ctx.fillText("____________________________",970,1177);
+ ctx.font="bold 26px Tahoma, sans-serif";ctx.fillText("เจ้าหน้าที่ออกบัตรรับสมัคร",970,1210);
+ ctx.font="23px Tahoma, sans-serif";ctx.fillText(item.card.signer_name||"",970,1240);
+ ctx.textAlign="left";ctx.font="23px Tahoma, sans-serif";ctx.fillText("ออกบัตรวันที่ "+dateBE(item.card.issued_at),88,1210);
+ const boxTop=1275,boxBottom=1683;
  ctx.fillStyle="#FFF4E8";ctx.fillRect(75,boxTop,1090,boxBottom-boxTop);
  ctx.strokeStyle="#102D55";ctx.lineWidth=3;ctx.strokeRect(75,boxTop,1090,boxBottom-boxTop);
  ctx.fillStyle="#F47721";ctx.fillRect(75,boxTop,1090,55);
@@ -97,13 +99,13 @@ async function makePage(item:CardItem):Promise<Uint8Array>{
  ctx.textAlign="left";ctx.fillStyle="#1D3553";ctx.font="23px Tahoma, sans-serif";
  let py=boxTop+92;
  for (const rule of INSTRUCTIONS){
-  const lines=fitLines(ctx,rule,1012);
+  const lines=wrapCardText(rule,1012,t=>ctx.measureText(t).width);
   lines.forEach(line=>{ctx.fillText(line,113,py);py+=34;});
   py+=18;
  }
  if(py>boxBottom-18)throw Error("CARD_NOTICE_OVERFLOW");
  ctx.font="19px Tahoma, sans-serif";ctx.fillStyle="#667B92";ctx.textAlign="center";
- ctx.fillText("เอกสารจากระบบรับสมัครบุคลากรออนไลน์ · มทร.อีสาน วิทยาเขตขอนแก่น",WIDTH/2,1710);
+ ctx.fillText("เอกสารจากระบบรับสมัครบุคลากรออนไลน์ · มทร.อีสาน วิทยาเขตขอนแก่น",WIDTH/2,1725);
  return new Uint8Array(await (await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error("PNG_FAILED")),"image/png"))).arrayBuffer());
 }
 export async function makeExamCardPdf(items:CardItem[]):Promise<Blob>{
