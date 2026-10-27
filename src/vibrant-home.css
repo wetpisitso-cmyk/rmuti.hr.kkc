@@ -320,3 +320,8 @@
  .rmuti-apple-home .home-stat-pill .home-stat-icon{width:53px;height:53px;flex-basis:53px}
  .rmuti-apple-home .home-stat-pill .home-stat-kicker{font-size:13px}
 }
+
+/* Summary cards are actual buttons to avoid overriding React HashRouter hashes. */
+.rmuti-apple-home button.home-stat-pill{width:100%;font:inherit;text-align:left;cursor:pointer;appearance:none;-webkit-appearance:none}
+.rmuti-apple-home .home-openings-frame,.rmuti-apple-home .home-results-frame,.rmuti-apple-home .home-news-frame{scroll-margin-top:90px}
+@media(prefers-reduced-motion:reduce){.rmuti-apple-home .home-stat-pill{transition:none}}

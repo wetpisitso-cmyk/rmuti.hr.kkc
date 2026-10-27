@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getHomeStatDestination, type HomeStatAction } from "../lib/home-stat-navigation";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -90,7 +91,8 @@ export function Home() {
   const [category, setCategory] = useState("all"),
     [department, setDepartment] = useState(""),
     [employment, setEmployment] = useState(""),
-    [state, setState] = useState("all");
+    [state, setState] = useState("all"),
+    [vacanciesFirst, setVacanciesFirst] = useState(false);
   const list = (jobs.data || []).filter(
     (j) =>
       j.published &&
@@ -102,6 +104,7 @@ export function Home() {
       (category === "all" || j.category === category) &&
       (state === "all" || jobState(j) === state),
   );
+  const displayedJobs = vacanciesFirst ? [...list].sort((a, b) => b.vacancies - a.vacancies || a.title.localeCompare(b.title, "th")) : list;
   const news = useQuery({
     queryKey: ["announcements", "home"],
     queryFn: () => rows<Announcement>("announcements", "*", "created_at", 3),
@@ -110,6 +113,15 @@ export function Home() {
     (j) =>
       j.published && j.recruitment_rounds?.published && jobState(j) === "open",
   );
+  const navigateStat = (action: HomeStatAction) => {
+    const destination = getHomeStatDestination(action, open.length > 0);
+    setCategory("all");
+    setDepartment("");
+    setEmployment("");
+    setState(destination.filter);
+    setVacanciesFirst(destination.vacanciesFirst);
+    document.getElementById(destination.section)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   return (
     <div className="rmuti-apple-home">
       <div className="hero">
@@ -127,9 +139,9 @@ export function Home() {
             <p>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น</p>
             <p className="hero-support-copy">ร่วมเป็นส่วนหนึ่งในการขับเคลื่อนการศึกษา นวัตกรรม และพัฒนาสังคม ไปกับ มทร.อีสาน วิทยาเขตขอนแก่น</p>
             <div className="hero-actions">
-              <a href="#positions" className="btn primary">
+              <button type="button" onClick={() => navigateStat("positions")} className="btn primary">
                 <BriefcaseBusiness size={18} /> ดูตำแหน่งที่เปิดรับ <ArrowRight size={18} />
-              </a>
+              </button>
               <Link className="btn hero-outline" to="/login">
                 <UserRound size={18}/> เข้าสู่ระบบ
               </Link>
@@ -161,7 +173,7 @@ export function Home() {
         </div>
       </div>
       <div className="container home-stats-strip" aria-label="สรุปข้อมูลการเปิดรับสมัคร">
-        <a className="home-stat-pill home-stat-positions" href="#positions" aria-label={`ดูตำแหน่งที่เปิดรับสมัครทั้งหมด ${numberTH(open.length)} ตำแหน่ง`}>
+        <button type="button" className="home-stat-pill home-stat-positions" onClick={() => navigateStat("positions")} aria-label={`ดูตำแหน่งที่เปิดรับสมัครทั้งหมด ${numberTH(open.length)} ตำแหน่ง`}>
           <span className="home-stat-icon orange" aria-hidden="true"><BriefcaseBusiness size={28} /></span>
           <span className="home-stat-body">
             <span className="home-stat-kicker">ตำแหน่งที่เปิดรับสมัคร</span>
@@ -169,8 +181,8 @@ export function Home() {
             <small className="home-stat-caption">ดูรายละเอียดตำแหน่งงานทั้งหมด</small>
           </span>
           <span className="home-stat-arrow" aria-hidden="true"><ArrowRight size={19} /></span>
-        </a>
-        <a className="home-stat-pill home-stat-vacancies" href="#positions" aria-label={`ดูจำนวนอัตราที่เปิดรับทั้งหมด ${numberTH(open.reduce((sum, j) => sum + j.vacancies, 0))} อัตรา`}>
+        </button>
+        <button type="button" className="home-stat-pill home-stat-vacancies" onClick={() => navigateStat("vacancies")} aria-label={`ดูจำนวนอัตราที่เปิดรับทั้งหมด ${numberTH(open.reduce((sum, j) => sum + j.vacancies, 0))} อัตรา`}>
           <span className="home-stat-icon navy" aria-hidden="true"><Users size={28} /></span>
           <span className="home-stat-body">
             <span className="home-stat-kicker">จำนวนอัตราที่เปิดรับ</span>
@@ -178,8 +190,8 @@ export function Home() {
             <small className="home-stat-caption">ตรวจสอบอัตราว่างและคุณสมบัติ</small>
           </span>
           <span className="home-stat-arrow" aria-hidden="true"><ArrowRight size={19} /></span>
-        </a>
-        <a className={`home-stat-pill home-stat-status ${open.length ? "is-open" : "is-closed"}`} href="#positions" aria-label={open.length ? "สถานะเปิดรับสมัครอยู่ ดูตำแหน่งที่เปิดรับ" : "ตรวจสอบประกาศรับสมัครล่าสุด"}>
+        </button>
+        <button type="button" className={`home-stat-pill home-stat-status ${open.length ? "is-open" : "is-closed"}`} onClick={() => navigateStat("status")} aria-label={open.length ? "สถานะเปิดรับสมัครอยู่ ดูตำแหน่งที่เปิดรับ" : "ตรวจสอบประกาศรับสมัครล่าสุด"}>
           <span className="home-stat-icon green" aria-hidden="true"><CalendarDays size={28} /></span>
           <span className="home-stat-body">
             <span className="home-stat-kicker">สถานะการรับสมัคร</span>
@@ -187,7 +199,7 @@ export function Home() {
             <small className="home-stat-status-note"><span className="home-stat-status-dot" aria-hidden="true" />{open.length ? "สมัครได้ตามช่วงเวลาที่ประกาศ" : "ติดตามกำหนดการครั้งถัดไป"}</small>
           </span>
           <span className="home-stat-arrow" aria-hidden="true"><ArrowRight size={19} /></span>
-        </a>
+        </button>
       </div>
       <div className="home-feature-strip">
         <div className="container home-feature-grid">
@@ -266,20 +278,20 @@ export function Home() {
           </div>
         </div>
         </section>
-        <section className="home-content-frame home-results-frame" aria-label="รายการตำแหน่งรับสมัคร">
+        <section id="home-job-results" className="home-content-frame home-results-frame" aria-label="รายการตำแหน่งรับสมัคร">
           <div className="home-results-heading">
             <div><span className="eyebrow">AVAILABLE JOBS</span><h2>รายการตำแหน่งรับสมัคร</h2></div>
-            <span className="section-count" aria-live="polite">พบ {list.length} ตำแหน่ง</span>
+            <span className="section-count" aria-live="polite">พบ {displayedJobs.length} ตำแหน่ง</span>
           </div>
-        <State loading={jobs.isPending} error={jobs.error} empty={!list.length}>
+        <State loading={jobs.isPending} error={jobs.error} empty={!displayedJobs.length}>
           <div className="job-grid">
-            {list.map((j) => (
+            {displayedJobs.map((j) => (
               <JobCard key={j.id} job={j} />
             ))}
           </div>
         </State>
         </section>
-        <section className="home-content-frame home-news-frame" aria-label="ประกาศและข่าวสาร">
+        <section id="home-news-section" className="home-content-frame home-news-frame" aria-label="ประกาศและข่าวสาร">
         <Title
           eyebrow="LATEST NEWS"
           title="ประกาศและข่าวสาร"
