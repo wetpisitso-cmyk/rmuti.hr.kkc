@@ -23,13 +23,24 @@ function fitLines(ctx:CanvasRenderingContext2D,text:string,maxWidth:number){
   else segment+=piece;
  }
  if(segment)out.push(segment);
- return out;
+ // Never allow an unbroken word or ID to overflow a printed card.
+ const safe:string[]=[];
+ for(const line of out){
+  let remaining=line;
+  while(remaining&&ctx.measureText(remaining).width>maxWidth){
+   let n=remaining.length;
+   while(n>1&&ctx.measureText(remaining.slice(0,n)).width>maxWidth)n--;
+   safe.push(remaining.slice(0,n));remaining=remaining.slice(n);
+  }
+  if(remaining)safe.push(remaining);
+ }
+ return safe;
 }
 function field(ctx:CanvasRenderingContext2D,label:string,value:string,y:number){
  ctx.font="bold 29px Tahoma, sans-serif";ctx.fillStyle="#173558";ctx.fillText(label,85,y);
  ctx.font="29px Tahoma, sans-serif";ctx.fillStyle="#172F4A";
  const lines=fitLines(ctx,value,y<610?590:750);
- lines.slice(0,3).forEach((t,i)=>ctx.fillText(t,320,y+i*42));
+ lines.forEach((t,i)=>ctx.fillText(t,320,y+i*42));
  return y+Math.max(lines.length,1)*48+21;
 }
 function dateBE(date:string){
@@ -97,7 +108,7 @@ async function makePage(item:CardItem):Promise<Uint8Array>{
 }
 export async function makeExamCardPdf(items:CardItem[]):Promise<Blob>{
  if(items.length===0)throw Error("NO_CARDS");
- if(items.length>100)throw Error("BATCH_MAX_100");
+ if(items.length>20)throw Error("BATCH_MAX_20");
  await document.fonts.ready;
  const doc=await PDFDocument.create();doc.setTitle("บัตรประจำตัวผู้สมัครสอบ");
  for(const item of items){
@@ -110,6 +121,6 @@ export async function makeExamCardPdf(items:CardItem[]):Promise<Blob>{
 }
 export function downloadExamCard(blob:Blob,filename:string){
  const url=URL.createObjectURL(blob);const a=document.createElement("a");
- a.href=url;a.download=filename;a.click();
+ a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
  setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
