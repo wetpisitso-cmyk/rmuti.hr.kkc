@@ -441,17 +441,17 @@ export default function Review() {
               <>
                 <div className="notice">
                   <CheckCircle2 size={18}/>
-                  ขั้นตอนการออกใบสมัครฉบับสมบูรณ์: 1. บันทึกเลขผู้สมัคร → 2. เซ็นรับรอง → 3. กดอนุมัติให้ดาวน์โหลด PDF
+                  ขั้นตอนออก PDF ใบสมัคร (ไม่ใช่บัตรเข้าห้องสอบ): 1. บันทึกเลขใบสมัคร → 2. เซ็นรับรอง → 3. อนุมัติดาวน์โหลด PDF ใบสมัคร
                 </div>
                 {a.status !== "eligible" && a.status !== "ineligible" && <button type="button" className="btn outline mb-4" onClick={() => setReviewStep(3)}>ไปที่แท็บผลคุณสมบัติ เพื่อบันทึกผลการพิจารณา</button>}
                 <AdminSignaturePad applicationId={id!} existing={signature.data || null}
                   eligible={signatureRequirements.length === 0} missingSteps={signatureRequirements} refresh={refresh} />
                 {auth.role === "admin" && a.submitted_at && (
               <section className="panel stack review-color-panel tone-teal" hidden={reviewStep!==4} id="review-print-approval">
-                <h2>ขั้นตอนสุดท้าย: อนุมัติให้ผู้สมัครดาวน์โหลด PDF</h2>
-                <p className="muted">หลัง Admin ลงลายเซ็นรับรองสำเร็จแล้ว จึงกดอนุมัติ ผู้สมัครถึงจะดาวน์โหลดใบสมัครที่มีลายเซ็นได้</p>
+                <h2>ขั้นตอนสุดท้ายของใบสมัคร: อนุมัติดาวน์โหลด PDF ใบสมัคร</h2>
+                <p className="muted">ปุ่มนี้อนุมัติเฉพาะ PDF ใบสมัครที่มีลายเซ็นเท่านั้น ไม่ได้ออกบัตรประจำตัวผู้สมัครสอบ</p>
                 {finalPrintApproved ? (
-                  <Notice kind="success">ลงลายเซ็นและอนุมัติให้ดาวน์โหลด PDF เรียบร้อยแล้ว</Notice>
+                  <Notice kind="success">ใบสมัคร: ลงลายเซ็นและอนุมัติให้ดาวน์โหลด PDF เรียบร้อยแล้ว (ยังไม่ใช่บัตรสอบ)</Notice>
                 ) : signature.data ? (
                   <Notice kind="success">เซ็นรับรองเรียบร้อยแล้ว พร้อมให้ Admin ตรวจทานและอนุมัติดาวน์โหลดเป็นขั้นตอนสุดท้าย</Notice>
                 ) : (
@@ -459,8 +459,25 @@ export default function Review() {
                 )}
                 <button type="button" className="btn primary" disabled={busy || !a.application_number || !signature.data || signatureRequirements.length > 0 || finalPrintApproved}
                   onClick={() => void approvePrint()}>
-                  {finalPrintApproved ? "อนุมัติให้ดาวน์โหลดแล้ว" : "อนุมัติให้ผู้สมัครดาวน์โหลด PDF"}
+                  {finalPrintApproved ? "อนุมัติ PDF ใบสมัครแล้ว" : "อนุมัติให้ดาวน์โหลด PDF ใบสมัคร"}
                 </button>
+              </section>
+            )}
+            {a.status === "eligible" && finalPrintApproved && (
+              <section className="panel stack review-color-panel tone-teal" id="review-exam-card-next-step">
+                <h2>ขั้นตอนต่อไป: ออกบัตรประจำตัวผู้สมัครสอบ (แยกจาก PDF ใบสมัคร)</h2>
+                <p className="muted">
+                  ใบสมัครได้รับอนุมัติ PDF แล้ว แต่บัตรสอบยังต้องมีเลขประจำตัวสอบ
+                  กำหนดสอบที่เผยแพร่ รูปถ่าย และการอนุมัติออกบัตรจาก Admin อีกครั้ง
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Link className="btn outline" to="/staff/exams">
+                    1. กำหนดสอบ / ออกเลขประจำตัวสอบ
+                  </Link>
+                  <Link className="btn primary" to="/staff/exam-cards">
+                    2. ไปออกบัตรประจำตัวผู้สมัครสอบ A4
+                  </Link>
+                </div>
               </section>
             )}
 
