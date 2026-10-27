@@ -17,7 +17,7 @@ export interface ExamCardRecord {
 }
 export interface ExamCardListing {
  assignment_id:string;application_id:string;application_number:string|null;
- exam_number:string;applicant_name:string;job_title:string;department:string;
+ exam_number:string;applicant_name:string;job_id:string;job_title:string;department_id:string;department:string;
  round_id:string;round_name:string;year_be:number;issue_label:string;
  issued_at:string|null;revoked_at:string|null;has_photo:boolean;
  has_signature:boolean;schedule_published:boolean;status:string;
