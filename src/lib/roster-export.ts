@@ -32,14 +32,17 @@ export function rosterLines(rows: StaffRow[]): RosterLine[] {
   }));
 }
 export function rosterFilename(meta: RosterMeta, ext: "pdf" | "xlsx") {
-  const safe = (s: string) => s.replace(/[\\/:*?"<>|\u0000-\u001f\u007f]/g, "-")
-    .replace(/\s+/g, " ").trim().slice(0, 48);
+  const safe = (s: string) => Array.from(s).map(ch =>
+    ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127 || '\\/:*?"<>|'.includes(ch) ? "-" : ch
+  ).join("").replace(/\s+/g, " ").trim().slice(0, 48);
   return "รายชื่อผู้สมัคร_" + safe(meta.jobTitle) + "_" + safe(meta.department) +
     "_" + meta.yearBE + "." + ext;
 }
 function xmlText(s: string) {
-  return s.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "")
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+  return Array.from(s).filter(ch => {
+    const code = ch.charCodeAt(0);
+    return code >= 32 || code === 9 || code === 10 || code === 13;
+  }).join("").replace(/&/g, "&amp;").replace(/</g, "&lt;")
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }
 function makeCell(ref: string, value: string | number, style: number) {
