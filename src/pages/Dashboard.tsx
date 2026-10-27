@@ -12,6 +12,7 @@ import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
 import { dateTH } from "../lib/format";
 import { errorTH } from "../lib/errors";
+import { rpc } from "../services/api";
 import {
   Badge,
   Field,
@@ -39,6 +40,12 @@ export default function Dashboard() {
       if (r.error) throw r.error;
       return r.data as Application[];
     },
+  });
+  const examCards = useQuery({
+    queryKey: ["my-issued-exam-cards", a.session?.user.id],
+    enabled: !!a.session,
+    queryFn: () => rpc<{id:string;application_id:string}[]>("my_exam_cards"),
+    staleTime: 0,
   });
   const notifications = useQuery({
     queryKey: ["notifications", a.session?.user.id],
@@ -130,6 +137,12 @@ export default function Dashboard() {
                   </small>
                 )}
               </div>
+              {x.status === "eligible" && examCards.data?.filter(card => card.application_id === x.id).map(card => (
+                <Link key={card.id} className="btn outline" to={"/application/"+x.id+"/exam-card/"+card.id}>
+                  ตรวจสอบ / ดาวน์โหลดบัตรประจำตัวผู้สมัครสอบ
+                </Link>
+              ))}
+              {x.status === "eligible" && examCards.isSuccess && !examCards.data.some(card => card.application_id === x.id) && <small className="muted">บัตรสอบ: รอเจ้าหน้าที่อนุมัติออกบัตร</small>}
               <Link className="btn outline" to={`/application/${x.id}`}>
                 ดูใบสมัคร <ArrowRight size={17} />
               </Link>

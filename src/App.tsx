@@ -24,6 +24,8 @@ const Print = lazy(() =>
 );
 const StaffDashboard = lazy(() => import("./pages/staff/Dashboard"));
 const ApplicantRoster = lazy(() => import("./pages/staff/ApplicantRoster"));
+const ExamCards = lazy(() => import("./pages/staff/ExamCards"));
+const ExamCardApplicant = lazy(() => import("./pages/ExamCardApplicant"));
 const Catalog = lazy(() => import("./pages/staff/Catalog"));
 const Review = lazy(() => import("./pages/staff/Review"));
 const Exams = lazy(() => import("./pages/staff/Exams"));
@@ -66,6 +68,7 @@ export default function App() {
               <Route path="application/:id/print" element={<Print />} />
               <Route path="application/:id/receipt" element={<PaymentReceipt />} />
               <Route path="application/:id/exam" element={<Print exam />} />
+              <Route path="application/:id/exam-card/:assignmentId" element={<ExamCardApplicant />} />
             </Route>
             <Route element={<Guard staff />}>
               <Route path="staff" element={<StaffLayout />}>
@@ -94,6 +97,7 @@ export default function App() {
                 </Route>
                 <Route element={<Guard permission="exams" />}>
                   <Route path="exams" element={<Exams />} />
+                  <Route path="exam-cards" element={<ExamCards />} />
                 </Route>
                 <Route element={<Guard permission="publish" />}>
                   <Route path="publish" element={<Publish />} />
