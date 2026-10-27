@@ -32,7 +32,7 @@ export default function ExamCardApplicant(){
    {q.data?.card.application_id!==id?<Notice>ไม่พบข้อมูลบัตรสำหรับใบสมัครนี้</Notice>:
     <section className="panel stack">
      <h2>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น</h2>
-     <h3>{q.data.card.issue_label}</h3>
+     <h3>{q.data?.card.issue_label}</h3>
      <p><strong>เลขที่ประจำตัวสอบ:</strong> {q.data.card.exam_number}</p>
      <p><strong>ชื่อ–นามสกุล:</strong> {q.data.card.name}</p>
      <p><strong>ตำแหน่งที่สมัคร:</strong> {q.data.card.job_title}</p>
