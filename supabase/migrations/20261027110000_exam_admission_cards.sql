@@ -210,3 +210,31 @@ grant execute on function public.admin_exam_card_set_round(uuid,text),
  public.admin_exam_card_issue(uuid,boolean),public.admin_exam_card_revoke(uuid,text),
  public.exam_card_info(uuid),public.exam_card_list(uuid)
  to authenticated;
+
+create or replace function public.my_exam_cards()
+returns jsonb language plpgsql security definer set search_path='' as $$
+declare v_rows jsonb;
+begin
+  if auth.uid() is null then raise exception 'UNAUTHORIZED'; end if;
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'id',ea.id,'application_id',a.id)),'[]'::jsonb) into v_rows
+  from public.exam_card_issues ci
+  join public.exam_assignments ea on ea.id=ci.assignment_id
+  join public.exam_schedules sc on sc.id=ea.schedule_id
+  join public.applications a on a.id=ea.application_id and a.job_id=sc.job_id
+  join public.application_admin_signatures sig on sig.application_id=a.id
+  join public.application_print_approvals pa on pa.application_id=a.id
+  where a.user_id=auth.uid() and a.archived_at is null
+   and a.status::text='eligible' and ci.revoked_at is null
+   and sc.published is true and a.payment_status::text in ('confirmed','not_required')
+   and sig.application_number_at_signing=a.application_number
+   and sig.signed_snapshot_md5=md5(a.snapshot::text)
+   and pa.application_number_at_approval=a.application_number
+   and pa.approved_snapshot_md5=md5(a.snapshot::text)
+   and pa.approved_at>=sig.signed_at
+   and exists(select 1 from public.application_documents photo
+       where photo.application_id=a.id and photo.document_type='photo');
+  return v_rows;
+end $$;
+revoke all on function public.my_exam_cards() from public,anon;
+grant execute on function public.my_exam_cards() to authenticated;
