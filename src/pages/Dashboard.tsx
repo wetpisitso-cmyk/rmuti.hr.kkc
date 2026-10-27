@@ -40,6 +40,18 @@ export default function Dashboard() {
       return r.data as Application[];
     },
   });
+  const examCards = useQuery({
+    queryKey: ["my-exam-card-assignments", a.session?.user.id, q.data?.map(x=>x.id)],
+    enabled: !!a.session && !!q.data?.some(x=>x.status === "eligible"),
+    queryFn: async () => {
+      const ids = (q.data || []).filter(x=>x.status === "eligible").map(x=>x.id);
+      if (!ids.length) return [] as {id:string;application_id:string}[];
+      const r = await supabase.from("exam_assignments")
+        .select("id,application_id").in("application_id",ids);
+      if(r.error)throw r.error;
+      return r.data as {id:string;application_id:string}[];
+    },
+  });
   const notifications = useQuery({
     queryKey: ["notifications", a.session?.user.id],
     queryFn: async () => {
@@ -130,6 +142,11 @@ export default function Dashboard() {
                   </small>
                 )}
               </div>
+              {x.status === "eligible" && examCards.data?.filter(card => card.application_id === x.id).map(card => (
+                <Link key={card.id} className="btn outline" to={"/application/"+x.id+"/exam-card/"+card.id}>
+                  ตรวจสอบ / ดาวน์โหลดบัตรประจำตัวผู้สมัครสอบ
+                </Link>
+              ))}
               <Link className="btn outline" to={`/application/${x.id}`}>
                 ดูใบสมัคร <ArrowRight size={17} />
               </Link>
