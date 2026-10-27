@@ -31,6 +31,7 @@ export default function ExamCards() {
  }
  async function exportPdf(ids:string[],asPreview=false){
   await operate(async()=>{
+   if(ids.length>20)throw Error('BATCH_MAX_20');
    const cards=[];
    for(const id of ids) cards.push(await examCardForExport(id));
    const pdf=await makeExamCardPdf(cards);
@@ -86,8 +87,8 @@ export default function ExamCards() {
    <div className="flex justify-between flex-wrap gap-2">
     <h2>รายชื่อผู้มีสิทธิสอบ ({shown.length})</h2>
     <button className="btn outline" type="button"
-     disabled={!!busy||selected.length===0||selected.length>100}
-     onClick={()=>void exportPdf(selected)}>ดาวน์โหลด PDF รวม ({selected.length})</button>
+     disabled={!!busy||selected.length===0||selected.length>20}
+     onClick={()=>void exportPdf(selected)}>ดาวน์โหลด PDF รวม ({selected.length}/20)</button>
    </div>
    <State loading={records.isPending} error={records.error} empty={!shown.length}>
     <div className="table-wrap"><table><thead><tr>
