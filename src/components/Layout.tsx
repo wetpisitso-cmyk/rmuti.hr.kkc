@@ -160,6 +160,7 @@ const links = [
   ["rounds", "รอบรับสมัคร", CalendarDays, "manage_jobs"],
   ["departments", "หน่วยงาน", Building2, "manage_jobs"],
   ["exams", "การสอบและคะแนน", ClipboardCheck, "exams"],
+  ["exam-cards", "จัดการบัตรประจำตัวผู้สมัครสอบ", FileSpreadsheet, "exams"],
   ["publish", "ประกาศและเผยแพร่", Megaphone, "publish"],
   ["users", "บัญชีและสิทธิ์", Users, "admin"],
   ["settings", "ตั้งค่า / ประวัติ", Settings, "admin"],
