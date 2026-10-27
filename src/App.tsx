@@ -23,6 +23,7 @@ const Print = lazy(() =>
   })),
 );
 const StaffDashboard = lazy(() => import("./pages/staff/Dashboard"));
+const ApplicantRoster = lazy(() => import("./pages/staff/ApplicantRoster"));
 const Catalog = lazy(() => import("./pages/staff/Catalog"));
 const Review = lazy(() => import("./pages/staff/Review"));
 const Exams = lazy(() => import("./pages/staff/Exams"));
@@ -73,6 +74,9 @@ export default function App() {
                   path="applications"
                   element={<StaffDashboard listOnly />}
                 />
+                <Route element={<Guard permission="reports" />}>
+                  <Route path="roster" element={<ApplicantRoster />} />
+                </Route>
                 <Route path="applications/:id" element={<Review />} />
                 <Route element={<Guard permission="manage_jobs" />}>
                   <Route
