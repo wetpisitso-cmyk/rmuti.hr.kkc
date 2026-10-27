@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -13,7 +13,8 @@ export default function ExamCards() {
  const [year,setYear]=useState(""),[round,setRound]=useState(""),[job,setJob]=useState(""),[department,setDepartment]=useState(""),[label,setLabel]=useState("ครั้งที่ 40 / 2569");
  const [busy,setBusy]=useState(""),[error,setError]=useState(""),[success,setSuccess]=useState("");
  const [selected,setSelected]=useState<string[]>([]);
- const [preview,setPreview]=useState<Blob|null>(null);
+ const [previewUrl,setPreviewUrl]=useState<string|null>(null);
+ useEffect(()=>()=>{if(previewUrl)URL.revokeObjectURL(previewUrl);},[previewUrl]);
  const records=useQuery({queryKey:["exam-card-list",round],enabled:auth.can("exams"),
   queryFn:()=>rpc<ExamCardListing[]>("exam_card_list",{p_round:round||null})});
  const shown=(records.data||[]).filter(r=>(!year||String(r.year_be)===year)&&(!job||r.job_id===job)&&(!department||r.department_id===department));
@@ -28,7 +29,7 @@ export default function ExamCards() {
    for(const id of ids) cards.push(await examCardForExport(id));
    const pdf=await makeExamCardPdf(cards);
    const safe=ids.length===1?cards[0].card.exam_number.replace(/[^a-zA-Z0-9ก-๙_-]/g,"-"):"batch-"+ids.length;
-   if(asPreview)setPreview(pdf);
+   if(asPreview)setPreviewUrl(URL.createObjectURL(pdf));
    else downloadExamCard(pdf,"ExamCard_"+safe+".pdf");
   },"pdf");
  }
@@ -60,11 +61,11 @@ export default function ExamCards() {
    </div>}
    <p className="muted">ต้องมีสถานะผ่านคุณสมบัติ กำหนดสอบเผยแพร่ รูปถ่าย ลายเซ็นเจ้าหน้าที่ และการอนุมัติ PDF เดิมครบก่อนออกบัตรสอบ</p>
   </section>
-  {preview&&<section className="panel stack">
+  {previewUrl&&<section className="panel stack">
     <h2>ตัวอย่างบัตรสอบ A4</h2>
     <p className="muted">ตรวจสอบรายละเอียดก่อนดาวน์โหลดหรือพิมพ์</p>
-    <iframe title="ตัวอย่างบัตรประจำตัวผู้สมัครสอบ" src={URL.createObjectURL(preview)} style={{width:"100%",height:660,border:"1px solid #ddd"}} />
-    <button className="btn outline small" type="button" onClick={()=>setPreview(null)}>ปิดตัวอย่าง</button>
+    <iframe title="ตัวอย่างบัตรประจำตัวผู้สมัครสอบ" src={previewUrl} style={{width:"100%",height:660,border:"1px solid #ddd"}} />
+    <button className="btn outline small" type="button" onClick={()=>setPreviewUrl(null)}>ปิดตัวอย่าง</button>
    </section>}
   <section className="panel stack">
    <div className="flex justify-between flex-wrap gap-2">
