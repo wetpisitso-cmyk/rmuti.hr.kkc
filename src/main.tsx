@@ -78,15 +78,13 @@ class ErrorBoundary extends Component<
         <p className="muted" role="status">
           รหัสข้อผิดพลาด: {this.state.kind === "asset" ? "ASSET_UPDATE" : "APP_RENDER"}
         </p>
-        {new URL(window.location.href).searchParams.get("rmuti_debug") === "1" && (
-          <div className="notice" role="status">
-            <strong>รายละเอียดสำหรับตรวจสอบ:</strong>
-            <code style={{ display: "block", overflowWrap: "anywhere" }}>
-              {this.state.diagnostic}
-            </code>
-            <small>รายละเอียดนี้แสดงเฉพาะบนอุปกรณ์ของคุณ ไม่ได้ส่งไปยังเซิร์ฟเวอร์</small>
-          </div>
-        )}
+        <div className="notice" role="status">
+          <strong>รายละเอียดข้อผิดพลาดสำหรับเจ้าหน้าที่:</strong>
+          <code style={{ display: "block", overflowWrap: "anywhere" }}>
+            {this.state.diagnostic || "Unknown client render error"}
+          </code>
+          <small>ข้อความนี้แสดงบนอุปกรณ์เท่านั้น ไม่ได้ส่งข้อมูลไปยังเซิร์ฟเวอร์</small>
+        </div>
         <div className="flex gap-2 flex-wrap">
           <button className="btn primary" onClick={reloadFresh}>
             โหลดเวอร์ชันล่าสุด
