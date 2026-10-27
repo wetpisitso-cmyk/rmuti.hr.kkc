@@ -19,10 +19,10 @@ export default function ExamCards() {
  useEffect(()=>()=>{if(previewUrl)URL.revokeObjectURL(previewUrl);},[previewUrl]);
  const records=useQuery({queryKey:["exam-card-list",round],enabled:auth.can("exams"),
   queryFn:()=>rpc<ExamCardListing[]>("exam_card_list",{p_round:round||null})});
- const rulesApproved=roundStatus.data?.rules_approved===true;
  const roundStatus=useQuery({queryKey:["exam-card-round-status",round],enabled:!!round&&auth.can("exams"),
   queryFn:()=>rpc<{issue_label:string;rules_approved:boolean}>("exam_card_round_status",{p_round:round})});
  useEffect(()=>{if(roundStatus.data?.issue_label)setLabel(roundStatus.data.issue_label);},[roundStatus.data?.issue_label]);
+ const rulesApproved=roundStatus.data?.rules_approved===true;
  const shown=(records.data||[]).filter(r=>(!year||String(r.year_be)===year)&&(!job||r.job_id===job)&&(!department||r.department_id===department));
  async function operate(fn:()=>Promise<unknown>,name:string) {
   setBusy(name);setError("");setSuccess("");
