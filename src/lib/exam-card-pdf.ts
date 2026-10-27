@@ -42,6 +42,11 @@ async function makePage(item:CardItem):Promise<Uint8Array>{
  ctx.fillStyle="#fff";ctx.fillRect(0,0,WIDTH,HEIGHT);
  ctx.fillStyle="#102D55";ctx.fillRect(0,0,WIDTH,265);
  ctx.fillStyle="#F47721";ctx.fillRect(0,260,WIDTH,8);
+ // Reuse the original unmodified university crest already shipped with the portal.
+ try {const crest=await imageFromData(import.meta.env.BASE_URL+"logo.png");
+  const ratio=Math.min(125/crest.naturalWidth,175/crest.naturalHeight);
+  ctx.drawImage(crest,55,40,crest.naturalWidth*ratio,crest.naturalHeight*ratio);
+ }catch{throw Error("UNIVERSITY_LOGO_MISSING");}
  ctx.textAlign="center";ctx.fillStyle="#fff";
  ctx.font="bold 37px Tahoma, sans-serif";
  ctx.fillText("มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน",WIDTH/2,100);
