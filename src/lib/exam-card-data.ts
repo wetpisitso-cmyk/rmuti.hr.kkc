@@ -19,7 +19,7 @@ export interface ExamCardListing {
  assignment_id:string;application_id:string;application_number:string|null;
  exam_number:string;applicant_name:string;job_id:string;job_title:string;department_id:string;department:string;
  round_id:string;round_name:string;year_be:number;issue_label:string;
- issued_at:string|null;revoked_at:string|null;rules_approved:boolean;has_photo:boolean;
+ issued_at:string|null;revoked_at:string|null;card_current:boolean;rules_approved:boolean;has_photo:boolean;
  has_signature:boolean;schedule_published:boolean;status:string;
 }
 export async function fetchExamCard(assignmentId:string):Promise<ExamCardRecord>{
