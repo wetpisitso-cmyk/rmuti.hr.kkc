@@ -28,7 +28,7 @@ function fitLines(ctx:CanvasRenderingContext2D,text:string,maxWidth:number){
 function field(ctx:CanvasRenderingContext2D,label:string,value:string,y:number){
  ctx.font="bold 29px Tahoma, sans-serif";ctx.fillStyle="#173558";ctx.fillText(label,85,y);
  ctx.font="29px Tahoma, sans-serif";ctx.fillStyle="#172F4A";
- const lines=fitLines(ctx,value,750);
+ const lines=fitLines(ctx,value,y<610?590:750);
  lines.slice(0,3).forEach((t,i)=>ctx.fillText(t,320,y+i*42));
  return y+Math.max(lines.length,1)*48+21;
 }
