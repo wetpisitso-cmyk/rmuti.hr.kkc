@@ -12,6 +12,7 @@ import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
 import { dateTH } from "../lib/format";
 import { errorTH } from "../lib/errors";
+import { rpc } from "../services/api";
 import {
   Badge,
   Field,
@@ -41,16 +42,10 @@ export default function Dashboard() {
     },
   });
   const examCards = useQuery({
-    queryKey: ["my-exam-card-assignments", a.session?.user.id, q.data?.map(x=>x.id)],
-    enabled: !!a.session && !!q.data?.some(x=>x.status === "eligible"),
-    queryFn: async () => {
-      const ids = (q.data || []).filter(x=>x.status === "eligible").map(x=>x.id);
-      if (!ids.length) return [] as {id:string;application_id:string}[];
-      const r = await supabase.from("exam_assignments")
-        .select("id,application_id").in("application_id",ids);
-      if(r.error)throw r.error;
-      return r.data as {id:string;application_id:string}[];
-    },
+    queryKey: ["my-issued-exam-cards", a.session?.user.id],
+    enabled: !!a.session,
+    queryFn: () => rpc<{id:string;application_id:string}[]>("my_exam_cards"),
+    staleTime: 0,
   });
   const notifications = useQuery({
     queryKey: ["notifications", a.session?.user.id],
@@ -147,6 +142,7 @@ export default function Dashboard() {
                   ตรวจสอบ / ดาวน์โหลดบัตรประจำตัวผู้สมัครสอบ
                 </Link>
               ))}
+              {x.status === "eligible" && examCards.isSuccess && !examCards.data.some(card => card.application_id === x.id) && <small className="muted">บัตรสอบ: รอเจ้าหน้าที่อนุมัติออกบัตร</small>}
               <Link className="btn outline" to={`/application/${x.id}`}>
                 ดูใบสมัคร <ArrowRight size={17} />
               </Link>
