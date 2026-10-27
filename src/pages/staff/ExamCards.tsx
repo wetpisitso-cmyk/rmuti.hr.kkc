@@ -13,6 +13,7 @@ export default function ExamCards() {
  const [year,setYear]=useState(""),[round,setRound]=useState(""),[job,setJob]=useState(""),[department,setDepartment]=useState(""),[label,setLabel]=useState("ครั้งที่ 40 / 2569");
  const [busy,setBusy]=useState(""),[error,setError]=useState(""),[success,setSuccess]=useState("");
  const [selected,setSelected]=useState<string[]>([]);
+ const [preview,setPreview]=useState<Blob|null>(null);
  const records=useQuery({queryKey:["exam-card-list",round],enabled:auth.can("exams"),
   queryFn:()=>rpc<ExamCardListing[]>("exam_card_list",{p_round:round||null})});
  const shown=(records.data||[]).filter(r=>(!year||String(r.year_be)===year)&&(!job||r.job_id===job)&&(!department||r.department_id===department));
@@ -21,13 +22,14 @@ export default function ExamCards() {
   try {await fn();await qc.invalidateQueries({queryKey:["exam-card-list"]});setSuccess("ดำเนินการเรียบร้อย");}
   catch(e){setError(errorTH(e));}finally{setBusy("");}
  }
- async function exportPdf(ids:string[]){
+ async function exportPdf(ids:string[],asPreview=false){
   await operate(async()=>{
    const cards=[];
    for(const id of ids) cards.push(await examCardForExport(id));
    const pdf=await makeExamCardPdf(cards);
    const safe=ids.length===1?cards[0].card.exam_number.replace(/[^a-zA-Z0-9ก-๙_-]/g,"-"):"batch-"+ids.length;
-   downloadExamCard(pdf,"ExamCard_"+safe+".pdf");
+   if(asPreview)setPreview(pdf);
+   else downloadExamCard(pdf,"ExamCard_"+safe+".pdf");
   },"pdf");
  }
  if(!auth.can("exams"))return <Notice kind="error">ไม่มีสิทธิ์จัดการบัตรสอบ</Notice>;
@@ -58,6 +60,12 @@ export default function ExamCards() {
    </div>}
    <p className="muted">ต้องมีสถานะผ่านคุณสมบัติ กำหนดสอบเผยแพร่ รูปถ่าย ลายเซ็นเจ้าหน้าที่ และการอนุมัติ PDF เดิมครบก่อนออกบัตรสอบ</p>
   </section>
+  {preview&&<section className="panel stack">
+    <h2>ตัวอย่างบัตรสอบ A4</h2>
+    <p className="muted">ตรวจสอบรายละเอียดก่อนดาวน์โหลดหรือพิมพ์</p>
+    <iframe title="ตัวอย่างบัตรประจำตัวผู้สมัครสอบ" src={URL.createObjectURL(preview)} style={{width:"100%",height:660,border:"1px solid #ddd"}} />
+    <button className="btn outline small" type="button" onClick={()=>setPreview(null)}>ปิดตัวอย่าง</button>
+   </section>}
   <section className="panel stack">
    <div className="flex justify-between flex-wrap gap-2">
     <h2>รายชื่อผู้มีสิทธิสอบ ({shown.length})</h2>
@@ -81,6 +89,8 @@ export default function ExamCards() {
       <td><div className="flex gap-2 flex-wrap">
        {active&&<button type="button" className="btn outline small" disabled={!!busy}
         onClick={()=>void exportPdf([r.assignment_id])}>ดาวน์โหลด PDF</button>}
+       {active&&<button type="button" className="btn outline small" disabled={!!busy}
+        onClick={()=>void exportPdf([r.assignment_id],true)}>ดูตัวอย่าง</button>}
        {auth.role==="admin"&&!active&&<button type="button" className="btn primary small" disabled={!ready||!!busy}
         onClick={()=>{if(window.confirm("ยืนยันออกบัตรสอบ?"))void operate(
          ()=>rpc("admin_exam_card_issue",{p_assignment:r.assignment_id,p_confirm:true}),"issue");}}>อนุมัติออกบัตร</button>}
