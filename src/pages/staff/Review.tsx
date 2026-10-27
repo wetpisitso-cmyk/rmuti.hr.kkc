@@ -23,6 +23,7 @@ import {
 import { statuses } from "../../types/models";
 import { AdminSignaturePad, type AdminSignature } from "../../components/AdminSignaturePad";
 import { AdminApplicantDetails } from "../../components/AdminApplicantDetails";
+import ExamCardApprovalStep from "../../components/staff/ExamCardApprovalStep";
 export default function Review() {
   const { id } = useParams(),
     auth = useAuth(),
@@ -463,22 +464,8 @@ export default function Review() {
                 </button>
               </section>
             )}
-            {a.status === "eligible" && finalPrintApproved && (
-              <section className="panel stack review-color-panel tone-teal" id="review-exam-card-next-step">
-                <h2>ขั้นตอนต่อไป: ออกบัตรประจำตัวผู้สมัครสอบ (แยกจาก PDF ใบสมัคร)</h2>
-                <p className="muted">
-                  ใบสมัครได้รับอนุมัติ PDF แล้ว แต่บัตรสอบยังต้องมีเลขประจำตัวสอบ
-                  กำหนดสอบที่เผยแพร่ รูปถ่าย และการอนุมัติออกบัตรจาก Admin อีกครั้ง
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  <Link className="btn outline" to="/staff/exams">
-                    1. กำหนดสอบ / ออกเลขประจำตัวสอบ
-                  </Link>
-                  <Link className="btn primary" to="/staff/exam-cards">
-                    2. ไปออกบัตรประจำตัวผู้สมัครสอบ A4
-                  </Link>
-                </div>
-              </section>
+            {a.status === "eligible" && finalPrintApproved && id && (
+              <ExamCardApprovalStep applicationId={id} enabled={reviewStep === 4} />
             )}
 
               </>
