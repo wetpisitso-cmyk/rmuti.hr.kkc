@@ -93,7 +93,8 @@ export default function ExamCards() {
     <div className="table-wrap"><table><thead><tr>
      <th>เลือก</th><th>ชื่อ–สกุล</th><th>ตำแหน่ง / สังกัด</th><th>เลขประจำตัวสอบ</th><th>สถานะ</th><th>ดำเนินการ</th>
     </tr></thead><tbody>{shown.map(r=>{
-     const active=!!r.issued_at&&!r.revoked_at&&r.schedule_published;
+     const active=!!r.card_current&&r.schedule_published;
+     const stale=!!r.issued_at&&!r.revoked_at&&!r.card_current;
      const ready=r.has_photo&&r.has_signature&&r.schedule_published&&r.rules_approved;
      return <tr key={r.assignment_id}>
       <td><input type="checkbox" disabled={!active||!!busy} aria-label={"เลือกรายชื่อ "+r.applicant_name}
@@ -101,7 +102,7 @@ export default function ExamCards() {
         ? [...xs,r.assignment_id]:xs.filter(x=>x!==r.assignment_id))}/></td>
       <td>{r.applicant_name}</td><td>{r.job_title}<small>{r.department} · {r.round_name}</small></td>
       <td>{r.exam_number}</td>
-      <td>{active?"ออกบัตรแล้ว":r.revoked_at?"ยกเลิก":"รอออกบัตร"}</td>
+      <td>{stale?"ข้อมูลบัตรเปลี่ยน ต้องยกเลิกและออกใหม่":active?"ออกบัตรแล้ว":r.revoked_at?"ยกเลิก":"รอออกบัตร"}</td>
       <td><div className="flex gap-2 flex-wrap">
        {active&&<button type="button" className="btn outline small" disabled={!!busy}
         onClick={()=>void exportPdf([r.assignment_id])}>ดาวน์โหลด PDF</button>}
@@ -113,7 +114,7 @@ export default function ExamCards() {
        {auth.role==="admin"&&<button type="button" className="btn outline small" disabled={!!busy}
         onClick={()=>void operate(async()=>{setHistoryFor(r.assignment_id);setHistory(await rpc("admin_exam_card_history",{p_assignment:r.assignment_id}));},"history")}>
         ประวัติ</button>}
-       {auth.role==="admin"&&active&&<button type="button" className="btn danger small" disabled={!!busy}
+       {auth.role==="admin"&&(active||stale)&&<button type="button" className="btn danger small" disabled={!!busy}
         onClick={()=>{const reason=window.prompt("เหตุผลที่ยกเลิกบัตรสอบ (อย่างน้อย 5 ตัวอักษร)");
          if(reason&&reason.trim().length>=5&&window.confirm("ยืนยันยกเลิกบัตร?"))void operate(
          ()=>rpc("admin_exam_card_revoke",{p_assignment:r.assignment_id,p_reason:reason}),"revoke");}}>ยกเลิกบัตร</button>}
