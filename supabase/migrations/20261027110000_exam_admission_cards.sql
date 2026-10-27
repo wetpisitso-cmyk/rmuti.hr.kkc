@@ -171,7 +171,7 @@ begin
       a.application_number,ea.exam_number,
       concat_ws(' ',a.personal_data->>'prefix',a.personal_data->>'first_name',
         a.personal_data->>'last_name') as applicant_name,
-      j.title as job_title,d.name as department,
+      j.id as job_id,j.title as job_title,d.id as department_id,d.name as department,
       r.id as round_id,r.name as round_name,r.year_be,
       coalesce(cfg.issue_label,'ครั้งที่ 40 / 2569') as issue_label,
       s.published as schedule_published,
