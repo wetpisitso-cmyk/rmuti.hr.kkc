@@ -136,7 +136,7 @@ begin
   where ea.id=p_assignment;
   if not found then raise exception 'CARD_NOT_FOUND'; end if;
   if auth.uid() is null then raise exception 'UNAUTHORIZED'; end if;
-  if not(v.user_id=auth.uid() or private.is_staff())
+  if not(v.user_id=auth.uid() or private.can('exams'))
   then raise exception 'FORBIDDEN'; end if;
   if v.status::text<>'eligible' or v.archived_at is not null
      or v.issued_at is null or v.revoked_at is not null
@@ -164,7 +164,7 @@ create or replace function public.exam_card_list(p_round uuid default null)
 returns jsonb language plpgsql security definer set search_path='' as $$
 declare v_rows jsonb;
 begin
-  if not private.is_staff() then raise exception 'FORBIDDEN'; end if;
+  if not private.can('exams') then raise exception 'FORBIDDEN'; end if;
   select coalesce(jsonb_agg(to_jsonb(t)),'[]'::jsonb) into v_rows
   from (
     select ea.id as assignment_id,a.id as application_id,
