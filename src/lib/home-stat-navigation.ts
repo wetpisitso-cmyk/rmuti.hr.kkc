@@ -15,7 +15,7 @@ export function getHomeStatDestination(
   hasOpenJobs: boolean,
 ): HomeStatDestination {
   if (action === "vacancies") {
-    return { section: "home-job-results", filter: "all", vacanciesFirst: true };
+    return { section: "home-job-results", filter: hasOpenJobs ? "open" : "all", vacanciesFirst: true };
   }
   if (action === "status") {
     return hasOpenJobs
