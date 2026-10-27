@@ -33,10 +33,10 @@ export default function ExamCardApplicant(){
     <section className="panel stack">
      <h2>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น</h2>
      <h3>{q.data?.card.issue_label}</h3>
-     <p><strong>เลขที่ประจำตัวสอบ:</strong> {q.data.card.exam_number}</p>
-     <p><strong>ชื่อ–นามสกุล:</strong> {q.data.card.name}</p>
-     <p><strong>ตำแหน่งที่สมัคร:</strong> {q.data.card.job_title}</p>
-     <p><strong>สังกัดที่สมัคร:</strong> {q.data.card.department}</p>
+     <p><strong>เลขที่ประจำตัวสอบ:</strong> {q.data?.card.exam_number}</p>
+     <p><strong>ชื่อ–นามสกุล:</strong> {q.data?.card.name}</p>
+     <p><strong>ตำแหน่งที่สมัคร:</strong> {q.data?.card.job_title}</p>
+     <p><strong>สังกัดที่สมัคร:</strong> {q.data?.card.department}</p>
      <p className="muted">บัตรมีรูปถ่าย ลายเซ็นเจ้าหน้าที่ และข้อปฏิบัติสำหรับเข้าสอบในเอกสาร PDF A4</p>
      <button type="button" className="btn primary" disabled={busy} onClick={()=>void download()}>
       {busy?"กำลังสร้างบัตรสอบ…":"ดาวน์โหลดบัตรสอบ PDF (A4)"}
