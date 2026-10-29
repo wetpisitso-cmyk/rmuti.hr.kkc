@@ -13,7 +13,7 @@ BEGIN
   v_limits := private.check_upload(p_id,p_type,p_user);
   IF p_size<=0 OR p_size>(v_limits->>'max_bytes')::integer
     OR p_path NOT LIKE p_user::text||'/'||p_id::text||'/b2/%'
-    OR p_path !~ '^[0-9a-f-]{36}/[0-9a-f-]{36}/b2/[0-9a-f-]{36}\\.(pdf|jpg|png)$'
+    OR p_path !~ '^[0-9a-f-]{36}/[0-9a-f-]{36}/b2/[0-9a-f-]{36}[.](pdf|jpg|png)$'
     OR p_mime NOT IN ('application/pdf','image/jpeg','image/png')
     OR (p_type='photo' AND p_mime='application/pdf')
     THEN RAISE EXCEPTION 'INVALID_FILE';
