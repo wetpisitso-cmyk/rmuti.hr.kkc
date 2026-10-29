@@ -1,7 +1,8 @@
 import { backend, corsFor, json, sniff } from "../_shared/helpers.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.117.3";
+import { b2Enabled, uploadB2, removeB2 } from "../_shared/b2.ts";
 
-// Uploads use private Supabase Storage exclusively.
+// Supabase remains default. B2 opt-in is enabled only after SQL, read proxy and secrets are verified.
 Deno.serve(async (req) => {
   let cors: Record<string,string> = {};
   try {
@@ -41,20 +42,28 @@ Deno.serve(async (req) => {
     if(!mime || file.type!==mime || (type==="photo" && mime==="application/pdf"))
       return json({error:"INVALID_FILE"},400,cors);
     const ext=mime==="application/pdf"?"pdf":mime==="image/png"?"png":"jpg";
-    const path=user.id+"/"+id+"/"+crypto.randomUUID()+"."+ext;
-    const {error:uploadError}=await admin.storage.from("application-files").upload(path,bytes,{contentType:mime,upsert:false});
-    if(uploadError)return json({error:"UPLOAD_FAILED"},500,cors);
-    const {data,error}=await admin.rpc("complete_upload",{
+    const usingB2=b2Enabled();
+    const path=user.id+"/"+id+"/"+(usingB2?"b2/":"")+crypto.randomUUID()+"."+ext;
+    if(usingB2){
+      try { await uploadB2(path,bytes,mime); }
+      catch { return json({error:"UPLOAD_FAILED"},502,cors); }
+    } else {
+      const {error:uploadError}=await admin.storage.from("application-files").upload(path,bytes,{contentType:mime,upsert:false});
+      if(uploadError)return json({error:"UPLOAD_FAILED"},500,cors);
+    }
+    const {data,error}=await admin.rpc(usingB2?"complete_b2_upload":"complete_upload",{
       p_user:user.id,p_id:id,p_type:type,p_path:path,
       p_name:file.name,p_mime:mime,p_size:file.size
     });
     if(error) {
-      // Roll back only the fresh object, never the applicant's existing file.
-      try { await admin.storage.from("application-files").remove([path]); } catch { /* preserve failure */ }
+      // Roll back only the just-uploaded object, NEVER the old document or revision.
+      try {
+        if(usingB2) await removeB2(path);
+        else await admin.storage.from("application-files").remove([path]);
+      } catch { /* alert/log externally if orphan cleanup fails */ }
       return json({error:error.message},409,cors);
     }
-    // Previous revisions and signed application snapshots remain private/readable.
-    return json({document_id:data.document_id,provider:"supabase"},200,cors);
+    return json({document_id:data.document_id,provider:usingB2?"b2":"supabase"},200,cors);
   }catch {
     return json({error:"UPLOAD_FAILED"},500,cors);
   }
