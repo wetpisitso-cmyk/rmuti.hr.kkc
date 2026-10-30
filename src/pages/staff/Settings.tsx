@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { rows, rpc } from "../../services/api";
 import { dateTH } from "../../lib/format";
-import { supabase } from "../../lib/supabase";
+import { supabase, supabaseUrl, publishableKey } from "../../lib/supabase";
 import { paymentQrUrl } from "../../components/PaymentBankDetails";
 import { errorTH } from "../../lib/errors";
 import {
@@ -24,6 +24,34 @@ export default function Settings() {
     [paymentBusy, setPaymentBusy] = useState(false),
     [paymentError, setPaymentError] = useState(""),
     [paymentSuccess, setPaymentSuccess] = useState("");
+  const [driveBusy, setDriveBusy] = useState(false);
+  const [driveResult, setDriveResult] = useState("");
+  const [driveError, setDriveError] = useState("");
+  const checkDrive = async () => {
+    setDriveBusy(true); setDriveResult(""); setDriveError("");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("UNAUTHORIZED");
+      const response = await fetch(`${supabaseUrl}/functions/v1/check-drive-connection`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: publishableKey,
+          "Content-Type": "application/json",
+        },
+        body: "{}",
+      });
+      const status = await response.json();
+      if (!response.ok || !status.connected) {
+        throw new Error(status.error || (status.folder_status === "no_write_access"
+          ? "GDRIVE_FOLDER_WRITE_DENIED" : "GDRIVE_CONNECTION_FAILED"));
+      }
+      setDriveResult("เชื่อมต่อ Service Account และมีสิทธิ์สร้างไฟล์ใน Google Drive ของมหาวิทยาลัยแล้ว (ยังไม่ได้ทดสอบอัปโหลด)");
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "GDRIVE_CONNECTION_FAILED";
+      setDriveError("ตรวจสอบ Google Drive ไม่ผ่าน: " + code);
+    } finally { setDriveBusy(false); }
+  };
   const qc = useQueryClient();
   const q = useQuery({
     queryKey: ["settings"],
@@ -246,6 +274,15 @@ export default function Settings() {
           {payment?.qr_path && <label className="checkbox"><input type="checkbox" name="remove_qr" /> ไม่แสดง QR Code เดิม (คงข้อมูลบัญชีไว้)</label>}
           <button type="submit" className="btn primary" disabled={paymentBusy}>{paymentBusy ? "กำลังบันทึก…" : "บันทึกข้อมูลรับชำระเงิน"}</button>
         </form>
+      </section>
+      <section className="panel stack">
+        <h2>ตรวจสอบ Google Drive ของมหาวิทยาลัย</h2>
+        <p className="muted">ตรวจเฉพาะ Service Account และสิทธิ์โฟลเดอร์ โดยไม่อัปโหลดหรือเปิดเผยเอกสารผู้สมัคร ระบบรับสมัครยังใช้ Supabase Storage จนกว่าจะผ่านการทดสอบและเปิดใช้งานโดยผู้ดูแล</p>
+        <button type="button" className="btn outline" disabled={driveBusy} onClick={() => void checkDrive()}>
+          {driveBusy ? "กำลังตรวจสอบ…" : "ตรวจการเชื่อมต่อ Google Drive"}
+        </button>
+        {driveResult && <Notice kind="success">{driveResult}</Notice>}
+        {driveError && <Notice kind="error">{driveError}</Notice>}
       </section>
       <section className="panel">
         <h2>คิวอีเมลล่าสุด</h2>
