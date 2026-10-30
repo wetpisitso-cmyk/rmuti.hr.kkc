@@ -38,10 +38,11 @@ Only after administrator approval, set:
 GDRIVE_FOLDER_ID=1knVGEw4ha1s5MxLz00aUfYWYAR_mmG76
 GDRIVE_SERVICE_ACCOUNT_JSON=<private JSON key; store securely in Supabase only>
 GDRIVE_ENABLED=false
+GDRIVE_ROLLOUT_READY=false
 B2_ENABLED=false
 ```
 
-The `GDRIVE_ENABLED` flag stays **false** until authentication, access
+The `GDRIVE_ENABLED` and `GDRIVE_ROLLOUT_READY` flags stay **false** until authentication, access
 control, upload/read and rollback tests are successful.
 
 ## Deployment sequence
@@ -58,8 +59,8 @@ control, upload/read and rollback tests are successful.
    JPG, PNG, PDF; applicant and HR permitted; unrelated applicant denied;
    edit/re-submit; old Supabase objects still readable; rollback on
    metadata failure; uploaded file parent matches the approved folder.
-6. After tests and university approval, enable new uploads by setting
-   `GDRIVE_ENABLED=true`. Leave `B2_ENABLED=false`.
+6. After tests and university approval, enable new uploads only after both `GDRIVE_ENABLED=true` and
+   `GDRIVE_ROLLOUT_READY=true`. Leave `B2_ENABLED=false`.
 7. To roll back, switch `GDRIVE_ENABLED=false` to resume **new** uploads
    to Supabase. Old Drive documents still need a working read proxy.
 8. Migration of historical files is a separate backup, data-integrity,
