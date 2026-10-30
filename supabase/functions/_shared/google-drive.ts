@@ -11,7 +11,9 @@ type Credentials = { client_email: string; private_key: string; type: string };
 let cachedToken: { token: string; expires: number } | null = null;
 
 export function driveEnabled(): boolean {
-  return Deno.env.get("GDRIVE_ENABLED") === "true";
+  // Deliberate two-step rollout: regular secret alone cannot switch production.
+  return Deno.env.get("GDRIVE_ENABLED") === "true" &&
+    Deno.env.get("GDRIVE_ROLLOUT_READY") === "true";
 }
 
 export function parseDrivePath(path: string) {
@@ -123,8 +125,13 @@ export async function uploadDrive(data: Uint8Array, mime: string, ext: string): 
 
 export async function deleteDrive(fileId: string): Promise<void> {
   if (!new RegExp("^" + GOOGLE_ID + "$").test(fileId)) throw new Error("INVALID_DRIVE_FILE_ID");
-  const result = await api(DRIVE_API + "/" + encodeURIComponent(fileId) + "?supportsAllDrives=true", {
-    method: "DELETE",
+  // A content manager can trash their own document; permanent deletion may
+  // require manager privileges, so avoid requiring that permission for rollback.
+  const result = await api(DRIVE_API + "/" + encodeURIComponent(fileId) +
+    "?supportsAllDrives=true&fields=id,trashed", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ trashed: true }),
   });
   if (!result.ok && result.status !== 404) throw new Error("GDRIVE_DELETE_FAILED");
 }
@@ -148,4 +155,24 @@ export async function readDrive(path: string): Promise<Uint8Array> {
   const bytes = new Uint8Array(await result.arrayBuffer());
   if (bytes.byteLength < 1 || bytes.byteLength > 3 * 1048576) throw new Error("GDRIVE_FILE_INVALID");
   return bytes;
+}
+
+// Connection check has NO write side effects. Invoke only after server-side
+// admin authentication; this method never returns OAuth tokens or secrets.
+export async function checkDriveFolderAccess(): Promise<"ready" | "no_write_access"> {
+  const id = folderId();
+  const result = await api(
+    DRIVE_API + "/" + encodeURIComponent(id) +
+    "?supportsAllDrives=true&fields=id,name,mimeType,driveId,capabilities/canAddChildren,trashed",
+  );
+  if (!result.ok) {
+    // Do not disclose Google API response bodies, which may include identifiers.
+    if (result.status === 403 || result.status === 404) throw new Error("GDRIVE_FOLDER_ACCESS_DENIED");
+    throw new Error("GDRIVE_CONNECTION_FAILED");
+  }
+  const meta = await result.json();
+  if (meta.id !== id || meta.mimeType !== "application/vnd.google-apps.folder" ||
+      meta.driveId !== "0AL0COkD40qUIUk9PVA" || meta.trashed === true)
+    throw new Error("GDRIVE_FOLDER_MISMATCH");
+  return meta.capabilities?.canAddChildren === true ? "ready" : "no_write_access";
 }
