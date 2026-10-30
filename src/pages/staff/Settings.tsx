@@ -52,6 +52,39 @@ export default function Settings() {
       setDriveError("ตรวจสอบ Google Drive ไม่ผ่าน: " + code);
     } finally { setDriveBusy(false); }
   };
+  const [testDriveBusy, setTestDriveBusy] = useState(false);
+  const [testDriveMessage, setTestDriveMessage] = useState("");
+  const [testDriveError, setTestDriveError] = useState("");
+  const testDriveStorage = async () => {
+    setTestDriveBusy(true);
+    setTestDriveMessage(""); setTestDriveError("");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("UNAUTHORIZED");
+      const response = await fetch(`${supabaseUrl}/functions/v1/test-drive-storage`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: publishableKey,
+          "Content-Type": "application/json",
+        },
+        body: "{}",
+      });
+      const status = await response.json();
+      if (!response.ok || !status.ok) {
+        const explanation = [
+          status.error || "GDRIVE_SMOKE_FAILED",
+          status.uploaded ? "อัปโหลดแล้ว" : "ยังอัปโหลดไม่ได้",
+          status.read_back ? "อ่านกลับได้" : "ยังอ่านกลับไม่ได้",
+          status.moved_to_trash ? "ย้ายไฟล์ทดสอบลงถังขยะแล้ว" : "โปรดตรวจไฟล์ทดสอบที่อาจค้างใน Drive",
+        ].join(" · ");
+        throw new Error(explanation);
+      }
+      setTestDriveMessage("ผ่าน: อัปโหลดรูปตัวอย่าง อ่านกลับและย้ายลงถังขยะสำเร็จ (ไม่ใช้ข้อมูลผู้สมัคร)");
+    } catch (e) {
+      setTestDriveError(e instanceof Error ? e.message : "GDRIVE_SMOKE_FAILED");
+    } finally { setTestDriveBusy(false); }
+  };
   const qc = useQueryClient();
   const q = useQuery({
     queryKey: ["settings"],
@@ -281,6 +314,12 @@ export default function Settings() {
         <button type="button" className="btn outline" disabled={driveBusy} onClick={() => void checkDrive()}>
           {driveBusy ? "กำลังตรวจสอบ…" : "ตรวจการเชื่อมต่อ Google Drive"}
         </button>
+        <p className="muted">การทดสอบต่อไปจะสร้างภาพตัวอย่าง 1 พิกเซลในโฟลเดอร์ที่กำหนด อ่านกลับเพื่อตรวจความถูกต้อง แล้วย้ายไฟล์ทดสอบลงถังขยะ โดยไม่แตะข้อมูลผู้สมัคร</p>
+        <button type="button" className="btn outline" disabled={testDriveBusy} onClick={() => void testDriveStorage()}>
+          {testDriveBusy ? "กำลังทดสอบอัปโหลด…" : "ทดสอบอัปโหลดและอ่านไฟล์ Google Drive"}
+        </button>
+        {testDriveMessage && <Notice kind="success">{testDriveMessage}</Notice>}
+        {testDriveError && <Notice kind="error">ทดสอบไม่ผ่าน: {testDriveError}</Notice>}
         {driveResult && <Notice kind="success">{driveResult}</Notice>}
         {driveError && <Notice kind="error">{driveError}</Notice>}
       </section>
