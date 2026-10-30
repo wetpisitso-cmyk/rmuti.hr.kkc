@@ -38,6 +38,10 @@ describe("recruitment applicant roster", () => {
     expect(xml).not.toContain("<f>");
     expect(xml).toContain('t="inlineStr"');
     expect(xml).toContain("0099");
+    // Excel must see autoFilter before mergeCells in worksheet schema order.
+    expect(xml.indexOf("<autoFilter ")).toBeGreaterThan(xml.indexOf("</sheetData>"));
+    expect(xml.indexOf("<mergeCells ")).toBeGreaterThan(xml.indexOf("<autoFilter "));
+    expect(xml.indexOf("<pageMargins ")).toBeGreaterThan(xml.indexOf("</mergeCells>"));
   });
   it("produces valid ZIP header and Excel MIME type", async () => {
     const blob = buildRosterXlsx(rosterLines([record("หนึ่งทอง", "0100")]), meta);
