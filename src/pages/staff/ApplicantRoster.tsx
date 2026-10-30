@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Download, FileSpreadsheet, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -45,6 +45,12 @@ export default function ApplicantRoster() {
   const [working, setWorking] = useState<"pdf" | "xlsx" | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [readyExcel, setReadyExcel] = useState<{ url: string; name: string } | null>(null);
+  // Browsers can block an automatic download after the asynchronous database call.
+  // Keep an explicit clickable link and release the object URL when it is replaced.
+  useEffect(() => () => {
+    if (readyExcel) URL.revokeObjectURL(readyExcel.url);
+  }, [readyExcel]);
   const rounds = useMemo(() => catalog.rounds.data?.filter(r => !year || String(r.year_be) === year) || [],
     [catalog.rounds.data, year]);
   const jobs = useMemo(() => catalog.jobs.data?.filter(j => (!year || String(j.recruitment_rounds?.year_be) === year) &&
@@ -65,7 +71,7 @@ export default function ApplicantRoster() {
   });
   async function exportList(format: "pdf" | "xlsx") {
     if (!selectedJob || !canExport || working) return;
-    setWorking(format); setError(""); setSuccess("");
+    setWorking(format); setError(""); setSuccess(""); setReadyExcel(null);
     try {
       // Retrieve the complete list through the RLS-aware staff_list RPC,
       // rather than exporting only the currently visible page.
@@ -73,8 +79,15 @@ export default function ApplicantRoster() {
       const lines = rosterLines(rows);
       const meta = createMeta();
       const blob = format === "xlsx" ? buildRosterXlsx(lines, meta) : await buildRosterPdf(lines, meta);
-      saveRosterFile(blob, rosterFilename(meta, format));
-      setSuccess("สร้างไฟล์รายชื่อ " + lines.length + " รายการแล้ว");
+      const filename = rosterFilename(meta, format);
+      if (format === "xlsx") {
+        // Separate object URL: the auto-download helper revokes its URL after 60s.
+        setReadyExcel({ url: URL.createObjectURL(blob), name: filename });
+      }
+      saveRosterFile(blob, filename);
+      setSuccess(format === "xlsx"
+        ? "สร้างไฟล์ Excel " + lines.length + " รายการแล้ว หากไม่ดาวน์โหลดอัตโนมัติ ให้กดลิงก์ด้านล่าง"
+        : "สร้างไฟล์รายชื่อ " + lines.length + " รายการแล้ว");
     } catch (e) {
       setError(e instanceof Error && e.message.startsWith("รายชื่อเกิน") ? e.message : errorTH(e));
     } finally {
@@ -135,6 +148,15 @@ export default function ApplicantRoster() {
             </button>
           </div>
         </div>
+        {readyExcel && (
+          <div className="notice success no-print" role="status">
+            <strong>ไฟล์ Excel พร้อมดาวน์โหลดแล้ว</strong>
+            <p>หากเบราว์เซอร์ไม่เริ่มดาวน์โหลด ให้แตะปุ่มนี้โดยตรง</p>
+            <a className="btn outline small" href={readyExcel.url} download={readyExcel.name}>
+              <FileSpreadsheet size={17} /> ดาวน์โหลดไฟล์ Excel ที่สร้างแล้ว
+            </a>
+          </div>
+        )}
         <State loading={roster.isPending} error={roster.error} empty={!roster.data?.rows?.length}>
           <div className="table-wrap">
             <table>
