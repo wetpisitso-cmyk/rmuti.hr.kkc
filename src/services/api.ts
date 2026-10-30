@@ -98,6 +98,29 @@ export const staffList = (
     p_sort: sort,
   });
 export async function signedFile(path: string) {
+  // A private Drive document can only be read by a logged-in applicant
+  // who owns it or an authorized staff member (verified via RLS on server).
+  if (/^[0-9a-f-]{36}\\/[0-9a-f-]{36}\\/gdrive\\/[A-Za-z0-9_-]{10,200}\\.(pdf|jpg|png)$/i.test(path)) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("UNAUTHORIZED");
+    const response = await fetch(`${supabaseUrl}/functions/v1/read-drive-document`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: publishableKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ path }),
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      const reason = await response.json().catch(() => ({}));
+      throw new Error(reason.error || "FILE_DOWNLOAD_FAILED");
+    }
+    const url = URL.createObjectURL(await response.blob());
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
+    return url;
+  }
   // B2 files are private. Download through an authenticated RLS-checked Edge
   // Function; never expose B2 credentials or unauthenticated object URLs.
   if (/^[0-9a-f-]{36}\/[0-9a-f-]{36}\/b2\/[0-9a-f-]{36}\.(pdf|jpg|png)$/i.test(path)) {
