@@ -100,7 +100,7 @@ export const staffList = (
 export async function signedFile(path: string) {
   // A private Drive document can only be read by a logged-in applicant
   // who owns it or an authorized staff member (verified via RLS on server).
-  if (/^[0-9a-f-]{36}\\/[0-9a-f-]{36}\\/gdrive\\/[A-Za-z0-9_-]{10,200}\\.(pdf|jpg|png)$/i.test(path)) {
+  if (/^[0-9a-f-]{36}\/[0-9a-f-]{36}\/gdrive\/[A-Za-z0-9_-]{10,200}\.(pdf|jpg|png)$/i.test(path)) {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("UNAUTHORIZED");
     const response = await fetch(`${supabaseUrl}/functions/v1/read-drive-document`, {
