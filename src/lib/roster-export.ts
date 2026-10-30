@@ -80,9 +80,12 @@ export function rosterSheetXml(lines: RosterLine[], meta: RosterMeta) {
     '<col min="5" max="5" width="24" customWidth="1"/>' +
     '<col min="6" max="6" width="28" customWidth="1"/>' +
     '</cols><sheetData>' + rows.join("") + '</sheetData>' +
+    // SpreadsheetML requires autoFilter BEFORE mergeCells. Inverting them
+    // makes desktop Excel show "We found a problem with some content" and
+    // offer to repair the downloaded workbook.
+    '<autoFilter ref="A6:F' + Math.max(7, lines.length + 6) + '"/>' +
     '<mergeCells count="4"><mergeCell ref="A1:F1"/><mergeCell ref="A2:F2"/>' +
     '<mergeCell ref="A3:F3"/><mergeCell ref="A4:F4"/></mergeCells>' +
-    '<autoFilter ref="A6:F' + Math.max(7, lines.length + 6) + '"/>' +
     '<pageMargins left="0.35" right="0.35" top="0.5" bottom="0.5" header="0.2" footer="0.2"/>' +
     '<pageSetup orientation="landscape" paperSize="9"/></worksheet>';
 }
