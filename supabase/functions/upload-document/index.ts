@@ -1,9 +1,9 @@
 import { backend, corsFor, json, sniff } from "../_shared/helpers.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.117.3";
-import { b2Enabled, uploadB2, removeB2 } from "../_shared/b2.ts";
-import { driveEnabled, uploadDrive, deleteDrive, drivePath } from "../_shared/google-drive.ts";
+import { uploadDrive, deleteDrive, drivePath } from "../_shared/google-drive.ts";
 
-// Supabase remains default. B2 opt-in is enabled only after SQL, read proxy and secrets are verified.
+// Storage destination is set by a service-role-only database setting. Google Drive
+// remains private and is used for NEW applicant uploads when enabled by admin.
 Deno.serve(async (req) => {
   let cors: Record<string,string> = {};
   try {
@@ -43,13 +43,20 @@ Deno.serve(async (req) => {
     if(!mime || file.type!==mime || (type==="photo" && mime==="application/pdf"))
       return json({error:"INVALID_FILE"},400,cors);
     const ext=mime==="application/pdf"?"pdf":mime==="image/png"?"png":"jpg";
-    const usingDrive = driveEnabled();
-    const usingB2 = !usingDrive && b2Enabled();
+    // Server-authoritative destination: never trust a client-supplied provider.
+    // A missing configuration MUST fail closed, not silently fill Supabase.
+    const { data: storageConfig, error: storageConfigError } = await admin
+      .from("document_storage_config")
+      .select("provider").eq("key", "applicant_uploads").single();
+    if (storageConfigError || !storageConfig ||
+        !["supabase", "gdrive"].includes(storageConfig.provider))
+      return json({error:"STORAGE_CONFIGURATION_FAILED"},503,cors);
+    const usingDrive = storageConfig.provider === "gdrive";
     let driveFileId: string | null = null;
     let path: string;
     if (usingDrive) {
-      // Upload only through the authenticated server. Store a short opaque
-      // reference in the DB, never a public Drive URL or credential.
+      // Credentials and the Google Drive file never enter the browser.
+      // Fail visibly if the Drive write fails; do not silently duplicate PII.
       try {
         driveFileId = await uploadDrive(bytes, mime, ext);
         path = drivePath(user.id, id, driveFileId, ext);
@@ -57,18 +64,12 @@ Deno.serve(async (req) => {
         return json({error:"GDRIVE_UPLOAD_FAILED"},502,cors);
       }
     } else {
-      path = user.id+"/"+id+"/"+(usingB2?"b2/":"")+crypto.randomUUID()+"."+ext;
-      if(usingB2){
-        try { await uploadB2(path,bytes,mime); }
-        catch { return json({error:"UPLOAD_FAILED"},502,cors); }
-      } else {
-        const {error:uploadError}=await admin.storage.from("application-files")
-          .upload(path,bytes,{contentType:mime,upsert:false});
-        if(uploadError)return json({error:"UPLOAD_FAILED"},500,cors);
-      }
+      path = user.id+"/"+id+"/"+crypto.randomUUID()+"."+ext;
+      const {error:uploadError}=await admin.storage.from("application-files")
+        .upload(path,bytes,{contentType:mime,upsert:false});
+      if(uploadError)return json({error:"UPLOAD_FAILED"},500,cors);
     }
-    const rpcName = usingDrive ? "complete_gdrive_upload" :
-      usingB2 ? "complete_b2_upload" : "complete_upload";
+    const rpcName = usingDrive ? "complete_gdrive_upload" : "complete_upload";
     const {data,error}=await admin.rpc(rpcName,{
       p_user:user.id,p_id:id,p_type:type,p_path:path,
       p_name:file.name,p_mime:mime,p_size:file.size
@@ -77,13 +78,12 @@ Deno.serve(async (req) => {
       // Roll back only a new object. Do NOT delete the prior document/version.
       try {
         if(usingDrive && driveFileId) await deleteDrive(driveFileId);
-        else if(usingB2) await removeB2(path);
         else await admin.storage.from("application-files").remove([path]);
       } catch { /* log orphan for administrator cleanup */ }
       return json({error:error.message},409,cors);
     }
     return json({document_id:data.document_id,provider:
-      usingDrive?"gdrive":usingB2?"b2":"supabase"},200,cors);
+      usingDrive?"gdrive":"supabase"},200,cors);
   }catch {
     return json({error:"UPLOAD_FAILED"},500,cors);
   }
