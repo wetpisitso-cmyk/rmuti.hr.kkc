@@ -132,6 +132,65 @@ export default function Settings() {
       setLegacyTestBusy(false);
     }
   };
+  const [cleanupBusy, setCleanupBusy] = useState(false);
+  const [cleanupReport, setCleanupReport] = useState<{ready:boolean;total:number;verified:number;remaining:number;removed:number}|null>(null);
+  const [cleanupError, setCleanupError] = useState("");
+  const [cleanupMessage, setCleanupMessage] = useState("");
+  const [cleanupApplicantTested, setCleanupApplicantTested] = useState(false);
+  const [cleanupUnderstands, setCleanupUnderstands] = useState(false);
+  const [cleanupPhrase, setCleanupPhrase] = useState("");
+  const verifiedCleanup = async (mode: "preview" | "delete_five") => {
+    setCleanupBusy(true);
+    setCleanupError("");
+    setCleanupMessage("");
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (!session || sessionError) throw new Error("กรุณาเข้าสู่ระบบแอดมินใหม่");
+      const deleteMode = mode === "delete_five";
+      if (deleteMode && (!cleanupReport?.ready || !cleanupApplicantTested || !cleanupUnderstands || cleanupPhrase !== "ลบ 5 ไฟล์")) {
+        throw new Error("กรุณาตรวจสอบและยืนยันเงื่อนไขให้ครบก่อนลบ");
+      }
+      if (deleteMode && !window.confirm("ลบถาวรเฉพาะต้นฉบับ Supabase ที่ตรวจ SHA-256 กับ Google Drive ผ่าน ไม่เกิน 5 ไฟล์? ไฟล์ที่ลบแล้วกู้คืนจาก Supabase ไม่ได้")) {
+        return;
+      }
+      const body = deleteMode ? {
+        mode: "delete_five",
+        confirmation: "DELETE_FIVE_VERIFIED_ORIGINALS",
+        applicant_tested: true,
+        permanent_delete_acknowledged: true,
+      } : { mode: "preview" };
+      let response = await fetch(`${supabaseUrl}/functions/v1/admin-delete-verified-storage-originals`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, apikey: publishableKey, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (response.status === 401) {
+        const refreshed = await supabase.auth.refreshSession();
+        if (refreshed.error || !refreshed.data.session) throw new Error("เซสชันแอดมินหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+        response = await fetch(`${supabaseUrl}/functions/v1/admin-delete-verified-storage-originals`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${refreshed.data.session.access_token}`, apikey: publishableKey, "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      }
+      const result = await response.json().catch(() => ({error:"CLEANUP_RESPONSE_INVALID"}));
+      if (typeof result.total === "number" && typeof result.verified === "number" && typeof result.remaining === "number" && typeof result.removed === "number") {
+        setCleanupReport({ready:!!result.ready,total:result.total,verified:result.verified,remaining:result.remaining,removed:result.removed});
+      }
+      if (!response.ok || !result.ok) throw new Error(result.error || "CLEANUP_CHECK_FAILED");
+      if (deleteMode) {
+        setCleanupMessage(`ลบต้นฉบับแล้ว ${result.removed_in_batch ?? 0} ไฟล์ในชุดนี้ · คืนพื้นที่ประมาณ ${((result.bytes_freed_in_batch || 0)/1e6).toFixed(2)} MB · เหลือ ${result.remaining} ไฟล์`);
+        setCleanupPhrase("");
+        setCleanupUnderstands(false);
+      } else {
+        setCleanupMessage("ตรวจความพร้อมสำเร็จ: ยังไม่มีการลบไฟล์ในขั้นตอนนี้");
+      }
+    } catch (err) {
+      setCleanupError(err instanceof Error ? err.message : "CLEANUP_CHECK_FAILED");
+    } finally {
+      setCleanupBusy(false);
+    }
+  };
   const [backupBusy,setBackupBusy] = useState(false);
   const [backupReport,setBackupReport] = useState("");
   const [backupError,setBackupError] = useState("");
@@ -440,7 +499,25 @@ export default function Settings() {
         </button>
         {legacyTestResult && <Notice kind="success">{legacyTestResult}</Notice>}
         {legacyTestError && <Notice kind="error">ทดสอบไม่ผ่าน: {legacyTestError}</Notice>}
-        <p className="muted">ยังไม่เปิดให้ลบต้นฉบับอัตโนมัติ จนกว่าทดสอบเอกสาร ประวัติ ใบสมัคร PDF และสำเนากู้คืนครบ</p>
+        <hr />
+        <h3>คืนพื้นที่ Supabase Storage จากไฟล์ที่สำรองและตรวจสอบแล้ว</h3>
+        <p className="muted">ลบเฉพาะต้นฉบับใน application-files ที่มีสำเนาตรวจ SHA-256 ผ่านครบเท่านั้น ไม่ลบข้อมูลผู้สมัคร ไม่ลบไฟล์ Google Drive และไม่แตะไฟล์ 12 รายการที่อยู่นอกชุดสำรองหลัก</p>
+        <button type="button" className="btn outline" disabled={cleanupBusy} onClick={() => void verifiedCleanup("preview")}>
+          {cleanupBusy ? "กำลังตรวจสอบ…" : "1. ตรวจสอบจำนวนไฟล์ที่พร้อมลบ (ไม่ลบจริง)"}
+        </button>
+        {cleanupReport && <div className="stack gap-1">
+          <p><strong>สำรองผ่าน {cleanupReport.verified} / {cleanupReport.total} ไฟล์</strong> · ลบต้นฉบับแล้ว {cleanupReport.removed} · คงเหลือ {cleanupReport.remaining} ไฟล์</p>
+          {!cleanupReport.ready && <Notice kind="error">ยังไม่พร้อมลบ: จำนวนไฟล์สำรองหรือประวัติการลบไม่ถูกต้อง</Notice>}
+          {cleanupReport.ready && cleanupReport.remaining > 0 && <>
+            <label className="checkbox"><input type="checkbox" checked={cleanupApplicantTested} onChange={e=>setCleanupApplicantTested(e.target.checked)}/> ยืนยันว่าทดสอบผ่านบัญชีผู้สมัครจริง เปิดเอกสารเก่า ประวัติ ใบสมัคร PDF และดาวน์โหลดครบแล้ว</label>
+            <label className="checkbox"><input type="checkbox" checked={cleanupUnderstands} onChange={e=>setCleanupUnderstands(e.target.checked)}/> เข้าใจว่าการลบ Supabase Storage เป็นการลบถาวร และตรวจสอบสำเนากู้คืนแล้ว</label>
+            <label className="field"><span>เพื่ออนุญาตให้ลบทีละ 5 ไฟล์ พิมพ์: ลบ 5 ไฟล์</span><input value={cleanupPhrase} onChange={e=>setCleanupPhrase(e.target.value)} placeholder="ลบ 5 ไฟล์" autoComplete="off" /></label>
+            <button type="button" className="btn outline" disabled={cleanupBusy || !cleanupApplicantTested || !cleanupUnderstands || cleanupPhrase !== "ลบ 5 ไฟล์"} onClick={() => void verifiedCleanup("delete_five")}>2. ยืนยันลบต้นฉบับใน Supabase ไม่เกิน 5 ไฟล์ (ลบถาวร)</button>
+            <p className="muted">ระบบอ่านสำเนา Google Drive และต้นฉบับ Supabase ใหม่ เพื่อตรวจ SHA-256 ก่อนลบจริงทุกไฟล์ หากพบปัญหาจะหยุดทันที โปรดตรวจสอบว่าเปิดเอกสารบนเว็บไซต์ได้หลังลบแต่ละชุด</p>
+          </>}
+        </div>}
+        {cleanupMessage && <Notice kind="success">{cleanupMessage}</Notice>}
+        {cleanupError && <Notice kind="error">ตรวจสอบ/ลบไม่สำเร็จ: {cleanupError}</Notice>}
       </section>
       <section className="panel">
         <h2>คิวอีเมลล่าสุด</h2>
