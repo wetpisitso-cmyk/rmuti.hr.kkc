@@ -91,25 +91,49 @@ export default function Settings() {
   const backupStopRef = useRef(false);
   const startDriveBackup = async () => {
     setBackupBusy(true); setBackupReport(""); setBackupError("");
-    backupStopRef.current=false;
-    let batches=0, checked=0, failed=0;
+    backupStopRef.current = false;
+    let batches = 0, checked = 0, failed = 0;
+    const requestBatch = (token: string) => fetch(`${supabaseUrl}/functions/v1/admin-backup-drive-documents`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        apikey: publishableKey,
+        "Content-Type": "application/json",
+      },
+      body: "{}",
+    });
     try {
-      const {data:{session}}=await supabase.auth.getSession();
-      if(!session) throw new Error("กรุณาเข้าสู่ระบบ Admin อีกครั้ง");
-      for(let round=0;round<300 && !backupStopRef.current;round++){
-        const response=await fetch(`${supabaseUrl}/functions/v1/admin-backup-drive-documents`,{
-          method:"POST",
-          headers:{Authorization:`Bearer ${session.access_token}`,apikey:publishableKey,"Content-Type":"application/json"},
-          body:"{}",
-        });
-        const result=await response.json();
-        if(!response.ok||!result.ok) throw new Error(result.error||"BACKUP_BATCH_FAILED");
-        batches++; checked+=result.verified||0; failed+=result.failed||0;
-        setBackupReport(`ตรวจสอบสำเร็จในรอบนี้ ${checked} ไฟล์ · ผิดพลาด ${failed} · เหลือ ${result.remaining??"ไม่ทราบ"} · ทำงาน ${batches} ชุด`);
-        if(result.remaining===0 || result.processed===0 || (result.verified===0 && result.failed>0)) break;
+      for (let round = 0; round < 300 && !backupStopRef.current; round++) {
+        // Obtain the current session for EACH batch; never cache a JWT over a long migration.
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session) throw new Error("เซสชันแอดมินหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง");
+        let response = await requestBatch(session.access_token);
+        // Supabase can reject an expired JWT at the gateway before the function executes.
+        // Refresh once, then retry the same idempotent batch; verified manifest rows are skipped.
+        if (response.status === 401) {
+          const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshError || !refreshed.session) {
+            throw new Error("เซสชันแอดมินหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง");
+          }
+          response = await requestBatch(refreshed.session.access_token);
+        }
+        const result = await response.json().catch(() => ({ error: "BACKUP_RESPONSE_INVALID" }));
+        if (!response.ok || !result.ok) {
+          throw new Error(response.status === 401
+            ? "เซสชันแอดมินหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง"
+            : (result.error || "BACKUP_BATCH_FAILED"));
+        }
+        batches++;
+        checked += result.verified || 0;
+        failed += result.failed || 0;
+        setBackupReport(`สำรองตรวจสอบผ่านเพิ่ม ${checked} ไฟล์ · รวมสำรองแล้ว ${result.remaining == null ? "ไม่ทราบ" : 1406 - result.remaining} จาก 1,406 ไฟล์ · ผิดพลาด ${failed} · เหลือ ${result.remaining ?? "ไม่ทราบ"} · ทำงาน ${batches} ชุด`);
+        if (result.remaining === 0 || result.processed === 0 || (result.verified === 0 && result.failed > 0)) break;
       }
-    } catch(err) {setBackupError(err instanceof Error?err.message:"BACKUP_BATCH_FAILED");}
-    finally {setBackupBusy(false);}
+    } catch (err) {
+      setBackupError(err instanceof Error ? err.message : "BACKUP_BATCH_FAILED");
+    } finally {
+      setBackupBusy(false);
+    }
   };
   const qc = useQueryClient();
   const q = useQuery({
