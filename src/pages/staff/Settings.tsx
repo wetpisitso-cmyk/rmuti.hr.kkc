@@ -85,6 +85,53 @@ export default function Settings() {
       setTestDriveError(e instanceof Error ? e.message : "GDRIVE_SMOKE_FAILED");
     } finally { setTestDriveBusy(false); }
   };
+  const [legacyTestBusy, setLegacyTestBusy] = useState(false);
+  const [legacyTestResult, setLegacyTestResult] = useState("");
+  const [legacyTestError, setLegacyTestError] = useState("");
+  const testLegacyDriveReads = async () => {
+    setLegacyTestBusy(true);
+    setLegacyTestResult("");
+    setLegacyTestError("");
+    try {
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      if (authError || !session) throw new Error("กรุณาเข้าสู่ระบบแอดมินใหม่");
+      const { data: samples, error: queryError } = await supabase
+        .from("application_documents")
+        .select("storage_path")
+        .not("storage_path", "like", "%/gdrive/%")
+        .limit(3);
+      if (queryError) throw queryError;
+      if (!samples || samples.length < 3) throw new Error("ไม่พบเอกสารเก่าสำหรับทดสอบครบ 3 รายการ");
+      for (const sample of samples) {
+        const { data: { session: active } } = await supabase.auth.getSession();
+        if (!active) throw new Error("กรุณาเข้าสู่ระบบแอดมินใหม่");
+        const response = await fetch(`${supabaseUrl}/functions/v1/read-drive-document`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${active.access_token}`,
+            apikey: publishableKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ path: sample.storage_path }),
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          const e = await response.json().catch(() => ({}));
+          throw new Error(`เปิดเอกสารจาก Drive ไม่ผ่าน: ${e.error || response.status}`);
+        }
+        const contentType = response.headers.get("content-type") || "";
+        const bytes = await response.arrayBuffer();
+        if (!/^(application\/pdf|image\/jpeg|image\/png)/.test(contentType) || bytes.byteLength === 0) {
+          throw new Error("รูปแบบข้อมูลจาก Drive ไม่ถูกต้อง");
+        }
+      }
+      setLegacyTestResult("ผ่าน: เปิดเอกสารเก่าผ่าน Google Drive สำเร็จ 3/3 ไฟล์ (ยังไม่ลบไฟล์ Supabase)");
+    } catch (e) {
+      setLegacyTestError(e instanceof Error ? e.message : "LEGACY_DRIVE_READ_FAILED");
+    } finally {
+      setLegacyTestBusy(false);
+    }
+  };
   const [backupBusy,setBackupBusy] = useState(false);
   const [backupReport,setBackupReport] = useState("");
   const [backupError,setBackupError] = useState("");
@@ -385,6 +432,15 @@ export default function Settings() {
         </div>
         {backupReport && <Notice kind="success">{backupReport}</Notice>}
         {backupError && <Notice kind="error">หยุดการสำรอง: {backupError} — ต้นฉบับใน Supabase ยังอยู่</Notice>}
+        <hr />
+        <h3>ตรวจสอบก่อนคืนพื้นที่ Supabase Storage</h3>
+        <p className="muted">ทดสอบเปิดเอกสารเก่า 3 ไฟล์ผ่าน Google Drive โดยใช้สิทธิ์แอดมินจริง ไม่แก้ข้อมูลผู้สมัคร ไม่ลบไฟล์ และไม่เปลี่ยนลิงก์ย้อนหลัง</p>
+        <button type="button" className="btn outline" disabled={legacyTestBusy || backupBusy} onClick={() => void testLegacyDriveReads()}>
+          {legacyTestBusy ? "กำลังทดสอบอ่านไฟล์…" : "ทดสอบเปิดเอกสารเก่าจาก Google Drive"}
+        </button>
+        {legacyTestResult && <Notice kind="success">{legacyTestResult}</Notice>}
+        {legacyTestError && <Notice kind="error">ทดสอบไม่ผ่าน: {legacyTestError}</Notice>}
+        <p className="muted">ยังไม่เปิดให้ลบต้นฉบับอัตโนมัติ จนกว่าทดสอบเอกสาร ประวัติ ใบสมัคร PDF และสำเนากู้คืนครบ</p>
       </section>
       <section className="panel">
         <h2>คิวอีเมลล่าสุด</h2>
