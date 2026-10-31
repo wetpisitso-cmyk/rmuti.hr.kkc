@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { rows, rpc } from "../../services/api";
 import { dateTH } from "../../lib/format";
@@ -84,6 +84,32 @@ export default function Settings() {
     } catch (e) {
       setTestDriveError(e instanceof Error ? e.message : "GDRIVE_SMOKE_FAILED");
     } finally { setTestDriveBusy(false); }
+  };
+  const [backupBusy,setBackupBusy] = useState(false);
+  const [backupReport,setBackupReport] = useState("");
+  const [backupError,setBackupError] = useState("");
+  const backupStopRef = useRef(false);
+  const startDriveBackup = async () => {
+    setBackupBusy(true); setBackupReport(""); setBackupError("");
+    backupStopRef.current=false;
+    let batches=0, checked=0, failed=0;
+    try {
+      const {data:{session}}=await supabase.auth.getSession();
+      if(!session) throw new Error("กรุณาเข้าสู่ระบบ Admin อีกครั้ง");
+      for(let round=0;round<300 && !backupStopRef.current;round++){
+        const response=await fetch(`${supabaseUrl}/functions/v1/admin-backup-drive-documents`,{
+          method:"POST",
+          headers:{Authorization:`Bearer ${session.access_token}`,apikey:publishableKey,"Content-Type":"application/json"},
+          body:"{}",
+        });
+        const result=await response.json();
+        if(!response.ok||!result.ok) throw new Error(result.error||"BACKUP_BATCH_FAILED");
+        batches++; checked+=result.verified||0; failed+=result.failed||0;
+        setBackupReport(`ตรวจสอบสำเร็จในรอบนี้ ${checked} ไฟล์ · ผิดพลาด ${failed} · เหลือ ${result.remaining??"ไม่ทราบ"} · ทำงาน ${batches} ชุด`);
+        if(result.remaining===0 || result.processed===0 || (result.verified===0 && result.failed>0)) break;
+      }
+    } catch(err) {setBackupError(err instanceof Error?err.message:"BACKUP_BATCH_FAILED");}
+    finally {setBackupBusy(false);}
   };
   const qc = useQueryClient();
   const q = useQuery({
@@ -322,6 +348,19 @@ export default function Settings() {
         {testDriveError && <Notice kind="error">ทดสอบไม่ผ่าน: {testDriveError}</Notice>}
         {driveResult && <Notice kind="success">{driveResult}</Notice>}
         {driveError && <Notice kind="error">{driveError}</Notice>}
+      </section>
+      <section className="panel stack">
+        <h2>สำรองไฟล์ Supabase ไป Google Drive</h2>
+        <p className="muted">คัดลอกเอกสารเก่าไป Google Drive ทีละ 5 ไฟล์ ตรวจ SHA-256 จากการอ่านกลับ บันทึกผลใน Supabase โดยไม่ลบต้นฉบับหรือเปลี่ยนไฟล์ที่ระบบผู้สมัครอ้างอิง</p>
+        <p className="muted">ระหว่างสำรองให้เปิดหน้านี้ค้างไว้ การปิดหน้าจะหยุดสั่งงานชุดใหม่ แต่ชุดที่เริ่มไปแล้วสามารถตรวจสอบได้ในฐานข้อมูล</p>
+        <div className="flex gap-2 flex-wrap">
+          <button type="button" className="btn primary" disabled={backupBusy} onClick={()=>void startDriveBackup()}>
+            {backupBusy?"กำลังสำรองและตรวจสอบ…":"เริ่มสำรองเอกสารไป Google Drive"}
+          </button>
+          {backupBusy && <button type="button" className="btn outline" onClick={()=>{backupStopRef.current=true;}}>หยุดหลังจบชุดปัจจุบัน</button>}
+        </div>
+        {backupReport && <Notice kind="success">{backupReport}</Notice>}
+        {backupError && <Notice kind="error">หยุดการสำรอง: {backupError} — ต้นฉบับใน Supabase ยังอยู่</Notice>}
       </section>
       <section className="panel">
         <h2>คิวอีเมลล่าสุด</h2>
