@@ -170,6 +170,7 @@ export default function ApplicationView() {
                   ) : a.submitted_at ? (
                     <Notice>ได้รับใบสมัครแล้ว อยู่ระหว่างรอเจ้าหน้าที่ตรวจสอบและกำหนดเลขผู้สมัคร</Notice>
                   ) : null}
+                  {a.position_order != null && <p className="muted">ลำดับการสมัครของตำแหน่งนี้ <strong>({a.position_order})</strong> · ยืนยันส่ง {dateTH(a.submitted_at, true)}</p>}
                   {a.public_message && (
                     <Notice>
                       {a.public_message}

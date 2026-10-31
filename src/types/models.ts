@@ -129,6 +129,8 @@ export interface Application {
     documents: AppDocument[];
   } | null;
   application_number: string | null;
+  /** Immutable order per job position, separate from official application number. */
+  position_order?: number | null;
   payment_status: string;
   public_message: string;
   correction_deadline: string | null;
@@ -179,6 +181,7 @@ export interface StaffRow {
   status: AppStatus;
   payment_status: string;
   application_number: string | null;
+  position_order?: number | null;
   personal_data: Personal;
   created_at: string;
   submitted_at: string | null;

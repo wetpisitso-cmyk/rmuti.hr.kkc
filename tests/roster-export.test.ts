@@ -28,7 +28,14 @@ describe("recruitment applicant roster", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].name).toContain("หนึ่งทอง");
     expect(rows[0].applicationNumber).toBe("รอออกเลข");
+    expect(rows[0].order).toBe("(1)");
     expect(Object.keys(rows[0])).toEqual(["order", "applicationNumber", "name", "status", "payment", "submitted"]);
+  });
+  it("keeps position order separate from official number in reports", () => {
+    const [line] = rosterLines([{ ...record("ผู้สมัคร", "HR-2569-001"), position_order: 42 }]);
+    expect(line.order).toBe("(42)");
+    expect(line.applicationNumber).toBe("HR-2569-001");
+    expect(rosterSheetXml([line], meta)).toContain("(42)");
   });
   it("generates XML-escaped inline strings instead of spreadsheet formulas", () => {
     const lines = rosterLines([record("=HYPERLINK(\"https://example.com\") & <test>", "0099")]);

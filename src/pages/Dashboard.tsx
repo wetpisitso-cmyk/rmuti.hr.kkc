@@ -128,6 +128,7 @@ export default function Dashboard() {
                   {x.application_number || (x.submitted_at ? "รอเจ้าหน้าที่ออกเลขผู้สมัคร" : "ยังไม่ได้ส่งใบสมัคร")} · บันทึกล่าสุด{" "}
                   {dateTH(x.updated_at, true)}
                 </p>
+                {x.position_order != null && <p className="muted">ลำดับการสมัครตามตำแหน่งนี้ <strong>({x.position_order})</strong> · นับจากเวลาส่งใบสมัคร</p>}
                 {x.public_message && (
                   <p className="public-message">{x.public_message}</p>
                 )}

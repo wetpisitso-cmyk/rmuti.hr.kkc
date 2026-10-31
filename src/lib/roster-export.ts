@@ -10,7 +10,7 @@ export interface RosterMeta {
   generatedAt: string;
 }
 export interface RosterLine {
-  order: number;
+  order: string;
   applicationNumber: string;
   name: string;
   status: string;
@@ -22,7 +22,7 @@ export interface RosterLine {
 // permissions can open the report page. Never export ID, address or phone.
 export function rosterLines(rows: StaffRow[]): RosterLine[] {
   return rows.map((r, index) => ({
-    order: index + 1,
+    order: r.position_order && r.position_order > 0 ? `(${r.position_order})` : `(${index + 1})`,
     applicationNumber: r.application_number || "รอออกเลข",
     name: [r.personal_data?.prefix, r.personal_data?.first_name, r.personal_data?.last_name]
       .filter(Boolean).join(" ").trim() || "ไม่ระบุชื่อ",

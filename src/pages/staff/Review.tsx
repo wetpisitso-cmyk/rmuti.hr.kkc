@@ -257,6 +257,7 @@ export default function Review() {
                   <span className="eyebrow">APPLICATION REVIEW</span>
                   <h2>{a.personal_data.prefix}{a.personal_data.first_name} {a.personal_data.last_name}</h2>
                   <p>{a.application_number || "รอ Admin กำหนดเลขผู้สมัคร"}</p>
+                   {a.position_order != null && <p className="muted">ลำดับสมัครตามเวลาส่งใบสมัครของตำแหน่งนี้ <strong>({a.position_order})</strong> · {dateTH(a.submitted_at, true)}</p>}
                 </div>
                 <div className="review-status-tags">
                   <Badge status={a.status} />
@@ -326,6 +327,7 @@ export default function Review() {
             {auth.role === "admin" && a.submitted_at && (
               <form className="panel stack review-color-panel tone-teal" hidden={reviewStep!==4} onSubmit={assignNumber}>
                 <h2>ออกเลขผู้สมัครโดย Admin</h2>
+                {a.position_order != null && <p>ลำดับการสมัครของตำแหน่งนี้ <strong>({a.position_order})</strong> (แยกจากเลขผู้สมัครทางราชการ)</p>}
                 <Notice>กำหนดเลขได้เองทั้งภาษาไทย ภาษาอังกฤษ ตัวเลขและเครื่องหมาย เช่น รับสมัคร/๒๕๖๙/๑ หรือ HR-2569-A1 โดยห้ามซ้ำกับใบสมัครอื่น</Notice>
                 <Field label="เลขผู้สมัคร (กรอกเอง)" value={assignedNumber}
                   onChange={e => setAssignedNumber(e.target.value)}

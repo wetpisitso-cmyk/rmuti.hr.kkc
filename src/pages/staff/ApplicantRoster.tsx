@@ -22,7 +22,7 @@ async function allForJob(job: string): Promise<StaffRow[]> {
   let page = 0;
   let total = 0;
   do {
-    const result = await staffList({ job }, page++, 100, "number");
+    const result = await staffList({ job }, page++, 100, "submission_order");
     if (!Number.isSafeInteger(result.count) || result.count > MAX_ROWS) {
       throw new Error("รายชื่อเกิน 5,000 รายการ กรุณาติดต่อผู้ดูแลระบบเพื่อจัดทำรายงานขนาดใหญ่");
     }
@@ -59,7 +59,7 @@ export default function ApplicantRoster() {
   const canExport = auth.can("reports");
   const roster = useQuery({
     queryKey: ["applicant-roster", jobId, page],
-    queryFn: () => staffList({ job: jobId }, page, PAGE_SIZE, "number"),
+    queryFn: () => staffList({ job: jobId }, page, PAGE_SIZE, "submission_order"),
     enabled: canExport && !!jobId,
   });
   const createMeta = (): RosterMeta => ({
@@ -161,12 +161,12 @@ export default function ApplicantRoster() {
           <div className="table-wrap">
             <table>
               <thead><tr>
-                <th>ลำดับ</th><th>เลขผู้สมัคร</th><th>ชื่อ–นามสกุล</th>
+                <th>ลำดับตามเวลาสมัคร</th><th>เลขผู้สมัครทางการ</th><th>ชื่อ–นามสกุล</th>
                 <th>สถานะ</th><th>ชำระเงิน</th><th>วันที่ส่ง</th>
               </tr></thead>
               <tbody>{rosterLines(roster.data?.rows || []).map((r, i) =>
                 <tr key={roster.data?.rows[i]?.id || i}>
-                  <td>{page * PAGE_SIZE + r.order}</td>
+                  <td>{r.order}</td>
                   <td>{r.applicationNumber}</td>
                   <td>{r.name}</td>
                   <td>{r.status}</td>
@@ -185,7 +185,7 @@ export default function ApplicantRoster() {
             disabled={roster.isPending || (page+1)*PAGE_SIZE >= (roster.data?.count || 0)}
             onClick={() => setPage(p => p+1)}>ถัดไป</button>
         </div>
-        <p className="muted">รายชื่อจะเรียงตามเลขผู้สมัคร โดยผู้ที่ยังไม่ออกเลขแสดงว่า “รอออกเลข” และไม่ถูกรวมกับรายการฉบับร่าง</p>
+        <p className="muted">เรียงตามเวลายืนยันส่งใบสมัคร (1), (2), (3) … แยกตามตำแหน่ง ไม่รวมแบบร่าง · เลขที่ออกแล้วจะไม่ถูกนำกลับมาใช้ แม้ถอนใบสมัครหรือย้ายเข้าคลังสำรอง</p>
       </section>
     </>}
     <Link className="btn outline small" to="/staff/applications"><Download size={16} /> กลับรายการใบสมัคร</Link>

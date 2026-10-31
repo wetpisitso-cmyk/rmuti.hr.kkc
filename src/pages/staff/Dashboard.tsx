@@ -91,6 +91,7 @@ export default function StaffDashboard({
       } while (all.length < total);
       downloadCSV(
         all.map((x) => ({
+          ลำดับสมัครตามตำแหน่ง: x.position_order ? `(${x.position_order})` : "",
           เลขผู้สมัคร: x.application_number,
           ชื่อ: x.personal_data.first_name,
           นามสกุล: x.personal_data.last_name,
@@ -334,7 +335,8 @@ export default function StaffDashboard({
             }}
           >
             <option value="created">รายการใหม่ก่อน</option>
-            <option value="number">เลขผู้สมัคร</option>
+            <option value="submission_order">ลำดับส่งใบสมัครตามตำแหน่ง (1), (2), ...</option>
+            <option value="number">เลขผู้สมัครทางการ</option>
             <option value="status">สถานะ</option>
           </Select>
         </div>
@@ -359,6 +361,7 @@ export default function StaffDashboard({
                   <tr key={r.id}>
                     <td>
                       <strong>{r.application_number || (r.submitted_at ? "รอออกเลขผู้สมัคร" : "แบบร่าง")}</strong>
+                      {r.position_order != null && <small>ลำดับสมัครตามตำแหน่ง ({r.position_order}) · {dateTH(r.submitted_at, true)}</small>}
                       <small>
                         {r.personal_data.first_name} {r.personal_data.last_name}
                       </small>
