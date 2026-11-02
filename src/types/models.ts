@@ -183,6 +183,7 @@ export interface StaffRow {
   payment_status: string;
   application_number: string | null;
   position_order?: number | null;
+  display_position_order?: number | null;
   personal_data: Personal;
   created_at: string;
   submitted_at: string | null;
