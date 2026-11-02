@@ -131,6 +131,7 @@ export interface Application {
   application_number: string | null;
   /** Immutable order per job position, separate from official application number. */
   position_order?: number | null;
+  display_position_order?: number | null;
   payment_status: string;
   public_message: string;
   correction_deadline: string | null;

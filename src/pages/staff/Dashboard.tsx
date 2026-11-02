@@ -91,7 +91,7 @@ export default function StaffDashboard({
       } while (all.length < total);
       downloadCSV(
         all.map((x) => ({
-          ลำดับสมัครตามตำแหน่ง: x.position_order ? `(${x.position_order})` : "",
+          ลำดับสมัครตามตำแหน่ง: (x.display_position_order ?? x.position_order) ? `(${x.display_position_order ?? x.position_order})` : "",
           เลขผู้สมัคร: x.application_number,
           ชื่อ: x.personal_data.first_name,
           นามสกุล: x.personal_data.last_name,
@@ -133,6 +133,22 @@ export default function StaffDashboard({
       await Promise.all([q.refetch(),...(listOnly?[]:[dashboard.refetch()]),archived.refetch()]);
     }catch(e){setError(errorTH(e));}
     finally{setDeletingId(null);}
+  };
+  const editDisplayOrder=async(id:string, previous:number|null|undefined)=>{
+    if(a.role!=="admin")return;
+    const input=window.prompt("แก้เลขลำดับในตำแหน่ง (1, 2, 3...) ห้ามเลขซ้ำ",String(previous??1));
+    if(input===null)return;
+    const value=Number(input.trim());
+    if(!/^[1-9][0-9]*$/.test(input.trim())||!Number.isSafeInteger(value)||value>1000000){
+      setError("กรุณากรอกเลขลำดับจำนวนเต็ม 1 ถึง 1,000,000");return;
+    }
+    if(!window.confirm("ยืนยันเปลี่ยนเลขลำดับเป็น ("+value+") โดยไม่แก้เลขผู้สมัครทางราชการ?"))return;
+    setDeletingId(id);setError("");setSuccess("");
+    try{
+      await rpc("admin_set_display_position_order",{p_id:id,p_number:value});
+      setSuccess("บันทึกเลขลำดับ ("+value+") เรียบร้อย");
+      await Promise.all([q.refetch(),...(listOnly?[]:[dashboard.refetch()])]);
+    }catch(e){setError(errorTH(e));}finally{setDeletingId(null);}
   };
   const restoreApplication=async(id:string)=>{
     if(!window.confirm("กู้คืนใบสมัครนี้กลับสู่รายการหลัก?"))return;
@@ -361,7 +377,7 @@ export default function StaffDashboard({
                   <tr key={r.id}>
                     <td>
                       <strong>{r.application_number || (r.submitted_at ? "รอออกเลขผู้สมัคร" : "แบบร่าง")}</strong>
-                      {r.position_order != null && <small>ลำดับสมัครตามตำแหน่ง ({r.position_order}) · {dateTH(r.submitted_at, true)}</small>}
+                      {(r.display_position_order ?? r.position_order) != null && <small>ลำดับในตำแหน่ง ({r.display_position_order ?? r.position_order}) · {dateTH(r.submitted_at, true)}</small>}
                       <small>
                         {r.personal_data.first_name} {r.personal_data.last_name}
                       </small>
@@ -385,6 +401,7 @@ export default function StaffDashboard({
                           ตรวจใบสมัคร <ArrowRight size={14} />
                         </Link>
                         {a.role === "admin" && <ApplicantDocumentsDownload applicationId={r.id} compact />}
+                        {a.role === "admin" && <button type="button" className="btn small outline" disabled={deletingId !== null} onClick={() => void editDisplayOrder(r.id,r.display_position_order ?? r.position_order)}>แก้ลำดับ ({r.display_position_order ?? r.position_order ?? "–"})</button>}
                         {a.role === "admin" && (
                           <button
                             type="button"

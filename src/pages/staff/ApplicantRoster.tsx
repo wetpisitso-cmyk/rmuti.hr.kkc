@@ -161,7 +161,7 @@ export default function ApplicantRoster() {
           <div className="table-wrap">
             <table>
               <thead><tr>
-                <th>ลำดับตามเวลาสมัคร</th><th>เลขผู้สมัครทางการ</th><th>ชื่อ–นามสกุล</th>
+                <th>ลำดับผู้สมัครที่แสดง</th><th>เลขผู้สมัครทางการ</th><th>ชื่อ–นามสกุล</th>
                 <th>สถานะ</th><th>ชำระเงิน</th><th>วันที่ส่ง</th>
               </tr></thead>
               <tbody>{rosterLines(roster.data?.rows || []).map((r, i) =>
