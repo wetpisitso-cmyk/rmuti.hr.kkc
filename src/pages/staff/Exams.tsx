@@ -19,14 +19,16 @@ export default function Exams() {
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [success, setSuccess] = useState(""),
-    [selectedApp, setSelectedApp] = useState("");
+    [selectedApp, setSelectedApp] = useState(""),
+    [applicantSearch, setApplicantSearch] = useState(""),
+    [searchOpen, setSearchOpen] = useState(false);
   const qc = useQueryClient();
   const eligible = useQuery({
     queryKey: ["eligible-applications"],
     queryFn: async () => {
       const r = await supabase
         .from("applications")
-        .select("id,job_id,application_number,personal_data")
+        .select("id,job_id,application_number,personal_data,job_positions(title)")
         .eq("status", "eligible")
         .limit(1000);
       if (r.error) throw r.error;
@@ -48,9 +50,34 @@ export default function Exams() {
       ),
     enabled: tab !== "schedule",
   });
+  const applicantLabel = (item: NonNullable<typeof eligible.data>[number]) =>
+    [item.application_number || "รอออกเลข", "—",
+      item.personal_data?.prefix || "", item.personal_data?.first_name || "",
+      item.personal_data?.last_name || ""].filter(Boolean).join(" ").trim();
+  const normalizedSearch = applicantSearch.toLocaleLowerCase("th-TH").replace(/\\s+/g, " ").trim();
+  const matchingApplicants = (eligible.data || []).filter(item => {
+    const name = [
+      item.personal_data?.prefix || "", item.personal_data?.first_name || "",
+      item.personal_data?.last_name || "",
+    ].join(" ");
+    const title = item.job_positions?.title || "";
+    const value = [name, item.application_number || "", title].join(" ")
+      .toLocaleLowerCase("th-TH").replace(/\\s+/g, " ");
+    return normalizedSearch === "" || normalizedSearch.split(" ").every(word => value.includes(word));
+  });
+  const selectApplicant = (item: NonNullable<typeof eligible.data>[number]) => {
+    setSelectedApp(item.id);
+    setApplicantSearch(applicantLabel(item));
+    setSearchOpen(false);
+  };
   const score = existing.data?.find((x) => x.application_id === selectedApp);
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!selectedApp || !eligible.data?.some(item => item.id === selectedApp)) {
+      setError("กรุณาพิมพ์ค้นหาและเลือกรายชื่อผู้สมัครจากผลการค้นหาก่อนบันทึก");
+      setSearchOpen(true);
+      return;
+    }
     setBusy(true);
     setError("");
     const form = e.currentTarget;
@@ -64,6 +91,8 @@ export default function Exams() {
       setSuccess("บันทึกข้อมูลแล้ว ผลคะแนนยังเป็นร่างจนกว่าจะเผยแพร่");
       form.reset();
       setSelectedApp("");
+      setApplicantSearch("");
+      setSearchOpen(false);
     } catch (e) {
       setError(errorTH(e));
     } finally {
@@ -103,21 +132,93 @@ export default function Exams() {
             error={eligible.error || schedules.error}
           >
             <form className="panel stack" onSubmit={submit}>
-              <Select
-                label="ผู้สมัครที่ผ่านคุณสมบัติ"
-                name="application_id"
-                value={selectedApp}
-                onChange={(e) => setSelectedApp(e.target.value)}
-                required
-              >
-                <option value="">เลือกผู้สมัคร</option>
-                {eligible.data?.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.application_number} — {a.personal_data.first_name}{" "}
-                    {a.personal_data.last_name}
-                  </option>
-                ))}
-              </Select>
+              <div className="field" style={{ position: "relative" }}>
+                <label htmlFor="exam-applicant-search">
+                  ผู้สมัครที่ผ่านคุณสมบัติ <b className="text-orange-500">*</b>
+                </label>
+                <input
+                  id="exam-applicant-search"
+                  type="search"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded={searchOpen}
+                  aria-controls="exam-applicant-matches"
+                  autoComplete="off"
+                  placeholder="พิมพ์ชื่อ–สกุล เลขผู้สมัคร หรือตำแหน่ง..."
+                  value={applicantSearch}
+                  onFocus={() => setSearchOpen(true)}
+                  onChange={(e) => {
+                    setApplicantSearch(e.target.value);
+                    setSelectedApp("");
+                    setSearchOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") setSearchOpen(false);
+                    if (e.key === "Enter" && searchOpen && matchingApplicants.length === 1) {
+                      e.preventDefault();
+                      selectApplicant(matchingApplicants[0]);
+                    } else if (e.key === "Enter" && searchOpen && !selectedApp) {
+                      e.preventDefault();
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node | null)) {
+                      setSearchOpen(false);
+                    }
+                  }}
+                />
+                <input type="hidden" name="application_id" value={selectedApp} />
+                {selectedApp && <small style={{ color: "var(--success, #16783f)" }}>
+                  เลือกผู้สมัครแล้ว ✓ — สามารถบันทึกเลขประจำตัวสอบได้
+                </small>}
+                {searchOpen && <div
+                  id="exam-applicant-matches"
+                  role="listbox"
+                  aria-label="ผลการค้นหาผู้สมัคร"
+                  style={{
+                    background: "var(--surface, #fff)",
+                    border: "1px solid #cad6e5",
+                    borderRadius: 10,
+                    maxHeight: 280,
+                    overflowY: "auto",
+                    marginTop: 6,
+                    boxShadow: "0 8px 22px rgba(0,0,0,.1)",
+                  }}
+                >
+                  {matchingApplicants.slice(0, 40).map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      role="option"
+                      aria-selected={item.id === selectedApp}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: "10px 12px",
+                        border: 0,
+                        borderBottom: "1px solid #edf0f4",
+                        textAlign: "left",
+                        background: item.id === selectedApp ? "#e8f2ff" : "transparent",
+                        color: "inherit",
+                        cursor: "pointer",
+                      }}
+                      onMouseDown={event => event.preventDefault()}
+                      onClick={() => selectApplicant(item)}
+                    >
+                      <strong>{applicantLabel(item)}</strong>
+                      <small style={{ display: "block", opacity: .75 }}>
+                        {item.job_positions?.title || "ไม่ระบุตำแหน่ง"}
+                      </small>
+                    </button>
+                  ))}
+                  {matchingApplicants.length === 0 && <p className="muted" style={{ padding: 12 }}>
+                    ไม่พบผู้สมัครที่ตรงกับคำค้นหา
+                  </p>}
+                  {matchingApplicants.length > 40 && <p className="muted" style={{ padding: 10 }}>
+                    พบ {matchingApplicants.length} รายชื่อ แสดง 40 รายการแรก กรุณาพิมพ์ให้เจาะจงขึ้น
+                  </p>}
+                </div>}
+              </div>
               {tab === "assign" ? (
                 <>
                   <Select label="กำหนดสอบ" name="schedule_id" required>
