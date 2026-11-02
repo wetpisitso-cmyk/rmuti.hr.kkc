@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { signedFile, uploadDocument } from "../services/api";
 import { errorTH } from "../lib/errors";
 import type { AppDocument, DocRequirement } from "../types/models";
+import { documentAccept, documentFormatLabel, validateDocumentUploadFile } from "../lib/document-file-policy";
 export function PreviewButton({
   path,
   label = "ดูเอกสาร",
@@ -86,6 +87,11 @@ export function DocumentUpload({
   const upload = async (f: File) => {
     setFile(f);
     setError("");
+    const policyError = validateDocumentUploadFile(requirement.key, f);
+    if (policyError) {
+      setError(policyError);
+      return;
+    }
     if (f.size > uploadLimitMb * 1048576) {
       setError(`ไฟล์ต้องไม่เกิน ${uploadLimitMb} MB`);
       return;
@@ -115,7 +121,7 @@ export function DocumentUpload({
         <small>
           {document
             ? document.file_name
-            : `${requirement.key === "photo" ? "JPG / PNG" : "PDF / JPG / PNG"} ไม่เกิน ${maxMb} MB`}
+            : `${documentFormatLabel(requirement.key)} ไม่เกิน ${uploadLimitMb} MB`}
         </small>
         {requirement.key !== "photo" && requirement.key !== "payment" && (
           <small className="copy-cert-inline">✍ เซ็นสำเนาถูกต้องก่อนอัปโหลด</small>
@@ -141,11 +147,7 @@ export function DocumentUpload({
           <input
             className="sr-only"
             type="file"
-            accept={
-              requirement.key === "photo"
-                ? "image/jpeg,image/png"
-                : "application/pdf,image/jpeg,image/png"
-            }
+            accept={documentAccept(requirement.key)}
             disabled={busy || disabled}
             onChange={(e) => {
               if (e.target.files?.[0]) void upload(e.target.files[0]);

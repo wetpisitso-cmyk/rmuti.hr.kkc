@@ -1,4 +1,5 @@
 import { supabase, publishableKey, supabaseUrl } from "../lib/supabase";
+import { validateDocumentUploadFile } from "../lib/document-file-policy";
 import type {
   Application,
   AppDocument,
@@ -175,6 +176,8 @@ export async function uploadDocument(
   file: File,
   onProgress: (n: number) => void,
 ) {
+  const policyError = validateDocumentUploadFile(type, file);
+  if (policyError) throw new Error(policyError);
   const {
     data: { session },
   } = await supabase.auth.getSession();

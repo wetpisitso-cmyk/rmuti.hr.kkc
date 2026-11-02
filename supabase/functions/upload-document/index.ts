@@ -40,8 +40,14 @@ Deno.serve(async (req) => {
       return json({error:"FILE_TOO_LARGE"},400,cors);
     const bytes=new Uint8Array(await file.arrayBuffer());
     const mime=sniff(bytes);
-    if(!mime || file.type!==mime || (type==="photo" && mime==="application/pdf"))
+    if(!mime || file.type!==mime)
       return json({error:"INVALID_FILE"},400,cors);
+    // Apply to NEW/REPLACEMENT uploads only. Existing applicant document
+    // rows and their historical files stay readable in any old format.
+    if(type==="photo" && mime!=="image/jpeg" && mime!=="image/png")
+      return json({error:"PHOTO_IMAGE_ONLY"},400,cors);
+    if(type!=="photo" && type!=="payment" && mime!=="application/pdf")
+      return json({error:"PDF_ONLY_REQUIRED"},400,cors);
     const ext=mime==="application/pdf"?"pdf":mime==="image/png"?"png":"jpg";
     // Server-authoritative destination: never trust a client-supplied provider.
     // A missing configuration MUST fail closed, not silently fill Supabase.
