@@ -50,6 +50,10 @@ export default function Exams() {
       ),
     enabled: tab !== "schedule",
   });
+  const applicantJobTitle = (item: NonNullable<typeof eligible.data>[number]): string => {
+    const joined = item.job_positions;
+    return Array.isArray(joined) ? joined[0]?.title || "" : (joined as { title?: string } | null)?.title || "";
+  };
   const applicantLabel = (item: NonNullable<typeof eligible.data>[number]) =>
     [item.application_number || "รอออกเลข", "—",
       item.personal_data?.prefix || "", item.personal_data?.first_name || "",
@@ -60,7 +64,7 @@ export default function Exams() {
       item.personal_data?.prefix || "", item.personal_data?.first_name || "",
       item.personal_data?.last_name || "",
     ].join(" ");
-    const title = item.job_positions?.title || "";
+    const title = applicantJobTitle(item);
     const value = [name, item.application_number || "", title].join(" ")
       .toLocaleLowerCase("th-TH").replace(/\s+/g, " ");
     return normalizedSearch === "" || normalizedSearch.split(" ").every(word => value.includes(word));
@@ -207,7 +211,7 @@ export default function Exams() {
                     >
                       <strong>{applicantLabel(item)}</strong>
                       <small style={{ display: "block", opacity: .75 }}>
-                        {item.job_positions?.title || "ไม่ระบุตำแหน่ง"}
+                        {applicantJobTitle(item) || "ไม่ระบุตำแหน่ง"}
                       </small>
                     </button>
                   ))}
