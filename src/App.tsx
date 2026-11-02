@@ -24,6 +24,7 @@ const Print = lazy(() =>
 );
 const StaffDashboard = lazy(() => import("./pages/staff/Dashboard"));
 const ApplicantRoster = lazy(() => import("./pages/staff/ApplicantRoster"));
+const PaymentSlips = lazy(() => import("./pages/staff/PaymentSlips"));
 const ExamCards = lazy(() => import("./pages/staff/ExamCards"));
 const ExamCardApplicant = lazy(() => import("./pages/ExamCardApplicant"));
 const Catalog = lazy(() => import("./pages/staff/Catalog"));
@@ -79,6 +80,7 @@ export default function App() {
                 />
                 <Route element={<Guard permission="reports" />}>
                   <Route path="roster" element={<ApplicantRoster />} />
+                  <Route path="payment-slips" element={<PaymentSlips />} />
                 </Route>
                 <Route path="applications/:id" element={<Review />} />
                 <Route element={<Guard permission="manage_jobs" />}>
