@@ -54,7 +54,7 @@ export default function Exams() {
     [item.application_number || "รอออกเลข", "—",
       item.personal_data?.prefix || "", item.personal_data?.first_name || "",
       item.personal_data?.last_name || ""].filter(Boolean).join(" ").trim();
-  const normalizedSearch = applicantSearch.toLocaleLowerCase("th-TH").replace(/\\s+/g, " ").trim();
+  const normalizedSearch = applicantSearch.toLocaleLowerCase("th-TH").replace(/\s+/g, " ").trim();
   const matchingApplicants = (eligible.data || []).filter(item => {
     const name = [
       item.personal_data?.prefix || "", item.personal_data?.first_name || "",
@@ -62,7 +62,7 @@ export default function Exams() {
     ].join(" ");
     const title = item.job_positions?.title || "";
     const value = [name, item.application_number || "", title].join(" ")
-      .toLocaleLowerCase("th-TH").replace(/\\s+/g, " ");
+      .toLocaleLowerCase("th-TH").replace(/\s+/g, " ");
     return normalizedSearch === "" || normalizedSearch.split(" ").every(word => value.includes(word));
   });
   const selectApplicant = (item: NonNullable<typeof eligible.data>[number]) => {
