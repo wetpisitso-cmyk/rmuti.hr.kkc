@@ -6,9 +6,11 @@ import { signedFile } from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
 import { useCatalog } from "../../hooks/useCatalog";
 import { Select, Title, Notice } from "../../components/UI";
+import { sortSlipsByApplicantOrder, applicantOrderLabel } from "../../lib/payment-slip-order";
 
-type App = { id:string; application_number:string|null; personal_data:{
-  prefix?:string; first_name?:string; last_name?:string } };
+type App = { id:string; application_number:string|null;
+  position_order:number|null; display_position_order:number|null; submitted_at:string|null;
+  personal_data:{prefix?:string;first_name?:string;last_name?:string} };
 type Slip = { id:string; application_id:string; slip_path:string; paid_at:string|null };
 const A4:[number,number]=[595.28,841.89];
 
@@ -16,7 +18,7 @@ async function getSlips(jobId:string) {
   const apps:App[]=[];
   for(let start=0;start<5000;start+=500) {
     const {data,error}=await supabase.from("applications")
-      .select("id,application_number,personal_data")
+      .select("id,application_number,personal_data,position_order,display_position_order,submitted_at")
       .eq("job_id",jobId).is("archived_at",null).not("submitted_at","is",null)
       .order("id").range(start,start+499);
     if(error)throw error;
@@ -35,11 +37,13 @@ async function getSlips(jobId:string) {
     if(error)throw error;
     slips.push(...(data||[]).filter(x=>x.slip_path));
   }
-  slips.sort((a,b)=>a.application_id.localeCompare(b.application_id)||a.id.localeCompare(b.id));
-  if(slips.length>500)throw Error("มีสลิปมากกว่า 500 รายการ กรุณาแบ่งกลุ่มก่อนส่งออก");
-  return {slips,candidates};
+  // Match the same visible (1), (2), (3) numbering shown in the active
+  // applicant roster. Do not sort by UUID, payment ID, or official number.
+  const ordered=sortSlipsByApplicantOrder(slips,candidates);
+  if(ordered.length>500)throw Error("มีสลิปมากกว่า 500 รายการ กรุณาแบ่งกลุ่มก่อนส่งออก");
+  return {slips:ordered,candidates};
 }
-function labelPng(title:string,name:string,number:string,index:number,total:number){
+function labelPng(title:string,name:string,number:string,applicantOrder:string,index:number,total:number){
   const canvas=document.createElement("canvas");
   canvas.width=1200;canvas.height=440;
   const c=canvas.getContext("2d");
@@ -51,8 +55,10 @@ function labelPng(title:string,name:string,number:string,index:number,total:numb
   c.fillText("RMUTI KKC - หลักฐานชำระค่าสมัคร",38,67);
   c.fillStyle="#102D55";c.font="bold 32px Tahoma,sans-serif";
   for(const [i,value] of [
-    "ตำแหน่ง: "+title,"ชื่อผู้สมัคร: "+name,
-    "เลขผู้สมัคร: "+number,"หลักฐานลำดับที่ "+index+" / "+total
+    "ลำดับผู้สมัคร: "+applicantOrder+"  —  "+name,
+    "ตำแหน่ง: "+title,
+    "เลขผู้สมัครทางราชการ: "+number,
+    "สลิปผู้สมัคร "+applicantOrder+"  ·  หลักฐาน "+index+" / "+total,
   ].entries()){
     let s=value;
     while(s.length>1&&c.measureText(s).width>1110)s=s.slice(0,-2);
@@ -90,7 +96,10 @@ async function makePdf(
       throw Error("ไฟล์รวมมีขนาดใหญ่เกินกำหนดเพื่อความปลอดภัย กรุณาแบ่งกลุ่ม");
     const name=[app.personal_data?.prefix,app.personal_data?.first_name,
       app.personal_data?.last_name].filter(Boolean).join(" ");
-    const header=await pdf.embedPng(labelPng(jobTitle,name,app.application_number||"รอออกเลข",i+1,items.length));
+    const applicantOrder=applicantOrderLabel(app);
+    const header=await pdf.embedPng(labelPng(
+      jobTitle,name,app.application_number||"รอออกเลข",applicantOrder,i+1,items.length,
+    ));
     const first=pdf.addPage(A4);
     first.drawImage(header,{x:0,y:A4[1]-218,width:A4[0],height:218});
     if(isPdf(bytes)){
@@ -133,7 +142,7 @@ export default function PaymentSlips(){
     try{
       const {slips,candidates}=await getSlips(chosen.id);
       setCount(slips.length);
-      if(preview){setMessage("พบสลิป "+slips.length+" รายการในตำแหน่งนี้");return;}
+      if(preview){setMessage("พบสลิป "+slips.length+" รายการ เรียงตามเลขลำดับผู้สมัคร (1), (2), (3)…");return;}
       if(!slips.length)throw Error("ไม่พบสลิปในตำแหน่งนี้");
       if(count!==slips.length)throw Error("จำนวนสลิปเปลี่ยน กรุณาตรวจจำนวนก่อนดาวน์โหลดอีกครั้ง");
       const pdf=await makePdf(slips,candidates,chosen.title,setMessage);
@@ -144,14 +153,14 @@ export default function PaymentSlips(){
       setDownload({url,name:filename});
       const a=document.createElement("a");
       a.href=url;a.download=filename;a.click();
-      setMessage("รวมสลิป "+slips.length+" รายการเป็น PDF เรียบร้อย");
+      setMessage("รวมสลิป "+slips.length+" รายการเป็น PDF เรียงตามเลขลำดับผู้สมัครแล้ว");
     }catch(e){setError(e instanceof Error?e.message:"ไม่สามารถส่งออกสลิปได้");}
     finally{setBusy(false);}
   };
   if(!auth.can("reports"))return <Notice kind="error">ไม่มีสิทธิ์ดูรายงานการชำระเงิน</Notice>;
   return <div className="container section">
     <Title title="ดาวน์โหลดสลิปค่าสมัคร" eyebrow="PAYMENT EVIDENCE"
-      description="เลือกปี รอบรับสมัคร และตำแหน่ง เพื่อรวมสลิปในตำแหน่งนั้นเป็นไฟล์ PDF เดียว"/>
+      description="เลือกปี รอบรับสมัคร และตำแหน่ง เพื่อรวมสลิปเป็น PDF ไฟล์เดียว เรียงตามเลขลำดับผู้สมัคร (1), (2), (3)…"/>
     <section className="panel stack">
       <div className="form-grid">
         <Select label="ปี พ.ศ." value={year} disabled={busy} onChange={e=>{
@@ -176,7 +185,7 @@ export default function PaymentSlips(){
       </button>
       {count!==null&&<div className="subpanel stack">
         <strong>{chosen?.title}</strong>
-        <p>พบสลิปค่าสมัคร {count} รายการ</p>
+        <p>พบสลิปค่าสมัคร {count} รายการ · จะเรียงตามลำดับผู้สมัครของตำแหน่ง เช่น (1) ชื่อผู้สมัคร → สลิปของ (1) → (2) ชื่อผู้สมัคร → สลิปของ (2)</p>
         <button type="button" className="btn primary" disabled={!count||busy} onClick={()=>void run(false)}>
           <Download size={17}/> 2. ดาวน์โหลดสลิปรวม PDF
         </button>
