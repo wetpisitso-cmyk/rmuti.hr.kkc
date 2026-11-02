@@ -187,6 +187,7 @@ export interface StaffRow {
   personal_data: Personal;
   created_at: string;
   submitted_at: string | null;
+  correction_deadline?: string | null;
   job_title: string;
   department_name: string;
   round_name: string;

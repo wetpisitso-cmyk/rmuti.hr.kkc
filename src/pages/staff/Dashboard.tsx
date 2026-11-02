@@ -9,6 +9,7 @@ import {
   Clock3,
   FileWarning,
   CheckCircle2,
+  UserX,
   Trash2,
 } from "lucide-react";
 import { useCatalog } from "../../hooks/useCatalog";
@@ -147,6 +148,21 @@ export default function StaffDashboard({
     try{
       await rpc("admin_set_display_position_order",{p_id:id,p_number:value});
       setSuccess("บันทึกเลขลำดับ ("+value+") เรียบร้อย");
+      await Promise.all([q.refetch(),...(listOnly?[]:[dashboard.refetch()])]);
+    }catch(e){setError(errorTH(e));}finally{setDeletingId(null);}
+  };
+  const rejectExpiredCorrection=async (row:{id:string;personal_data:{first_name:string;last_name:string};correction_deadline?:string|null})=>{
+    if(!a.can("review")||!row.correction_deadline||Date.now()<=new Date(row.correction_deadline).getTime())return;
+    const name=[row.personal_data.first_name,row.personal_data.last_name].filter(Boolean).join(" ");
+    const suggested="ไม่ผ่านคุณสมบัติ เนื่องจากไม่ดำเนินการแก้ไขเอกสารประกอบการสมัครให้ครบถ้วนภายในระยะเวลาที่กำหนด";
+    const reason=window.prompt("เหตุผลการพิจารณาไม่ผ่านคุณสมบัติของ "+name+"\nข้อความนี้จะแสดงต่อผู้สมัครและบันทึกในประวัติ",suggested);
+    if(reason===null)return;
+    if(reason.trim().length<12){setError("กรุณาระบุเหตุผลอย่างน้อย 12 ตัวอักษร");return;}
+    if(!window.confirm("ยืนยันบันทึกผล ไม่ผ่านคุณสมบัติ ให้ "+name+"?\nตรวจสอบว่าผู้สมัครไม่ได้ส่งเอกสารแก้ไขแล้ว ระบบจะบันทึกประวัติและแจ้งผู้สมัคร"))return;
+    setDeletingId(row.id);setError("");setSuccess("");
+    try{
+      await rpc("staff_reject_expired_correction",{p_id:row.id,p_reason:reason.trim()});
+      setSuccess("บันทึกผลไม่ผ่านคุณสมบัติของ "+name+" และแจ้งผู้สมัครเรียบร้อยแล้ว");
       await Promise.all([q.refetch(),...(listOnly?[]:[dashboard.refetch()])]);
     }catch(e){setError(errorTH(e));}finally{setDeletingId(null);}
   };
@@ -381,6 +397,11 @@ export default function StaffDashboard({
                       <small>
                         {r.personal_data.first_name} {r.personal_data.last_name}
                       </small>
+                      {r.status==="needs_correction" && r.correction_deadline && (
+                        <small>กำหนดแก้ไข: {dateTH(r.correction_deadline,true)}
+                          {Date.now()>new Date(r.correction_deadline).getTime()?" · พ้นกำหนดแล้ว":""}
+                        </small>
+                      )}
                     </td>
                     <td>
                       {r.job_title}
@@ -400,6 +421,13 @@ export default function StaffDashboard({
                         >
                           ตรวจใบสมัคร <ArrowRight size={14} />
                         </Link>
+                        {a.can("review") && r.status==="needs_correction" && r.correction_deadline &&
+                          Date.now()>new Date(r.correction_deadline).getTime() && (
+                          <button type="button" className="btn small danger" disabled={deletingId!==null}
+                            onClick={()=>void rejectExpiredCorrection(r)}>
+                            <UserX size={15}/> ไม่ผ่านคุณสมบัติ (พ้นกำหนดแก้ไข)
+                          </button>
+                        )}
                         {a.role === "admin" && <ApplicantDocumentsDownload applicationId={r.id} compact />}
                         {a.role === "admin" && <button type="button" className="btn small outline" disabled={deletingId !== null} onClick={() => void editDisplayOrder(r.id,r.display_position_order ?? r.position_order)}>แก้ลำดับ ({r.display_position_order ?? r.position_order ?? "–"})</button>}
                         {a.role === "admin" && (

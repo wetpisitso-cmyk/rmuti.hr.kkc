@@ -182,6 +182,21 @@ export default function Review() {
     } catch (e) { setError(errorTH(e)); }
     finally { setBusy(false); }
   };
+  const rejectExpiredCorrection=async()=>{
+    if(!auth.can("review")||!a||!id||a.status!=="needs_correction"||
+       !a.correction_deadline||Date.now()<=new Date(a.correction_deadline).getTime())return;
+    const reason=window.prompt("ระบุเหตุผลไม่ผ่านคุณสมบัติที่ผู้สมัครจะเห็น",
+      "ไม่ผ่านคุณสมบัติ เนื่องจากไม่แก้ไขเอกสารประกอบการสมัครให้ครบถ้วนภายในระยะเวลาที่กำหนด");
+    if(reason===null)return;
+    if(reason.trim().length<12){setError("กรุณาระบุเหตุผลอย่างน้อย 12 ตัวอักษร");return;}
+    if(!window.confirm("ยืนยันผลไม่ผ่านคุณสมบัติ (พ้นกำหนดแก้ไข)?\nระบบจะตรวจวันหมดเขตและการส่งเอกสารใหม่ก่อนบันทึก"))return;
+    setBusy(true);setError("");setSuccess("");
+    try{
+      await rpc("staff_reject_expired_correction",{p_id:id,p_reason:reason.trim()});
+      await refresh();setReviewStep(3);
+      setSuccess("บันทึกไม่ผ่านคุณสมบัติและแจ้งผู้สมัครเรียบร้อยแล้ว");
+    }catch(e){setError(errorTH(e));}finally{setBusy(false);}
+  };
   const approvePrint = async () => {
     if(auth.role!=="admin" || !a?.application_number || !signature.data) return;
     if(!window.confirm("ยืนยันให้ผู้สมัครดาวน์โหลดใบสมัคร PDF เลขที่ "+a.application_number+" ?")) return;
@@ -397,6 +412,18 @@ export default function Review() {
                   <Submit busy={busy}>บันทึกสถานะและแจ้งผู้สมัคร</Submit>
                 </form>
               )}
+            {auth.can("review") && a.status==="needs_correction" && a.correction_deadline &&
+               Date.now()>new Date(a.correction_deadline).getTime() && (
+               <section className="panel stack review-color-panel tone-green" hidden={reviewStep!==3}>
+                 <h2>พ้นกำหนดการแก้ไขเอกสาร</h2>
+                 <p>กำหนดแก้ไข: <strong>{dateTH(a.correction_deadline,true)}</strong></p>
+                 <Notice kind="error">กรุณาตรวจว่าไม่มีเอกสารแก้ไขใหม่ก่อนพิจารณา ระบบจะตรวจเอกสารอีกครั้งก่อนบันทึกผล</Notice>
+                 <button type="button" className="btn danger" disabled={busy}
+                   onClick={()=>void rejectExpiredCorrection()}>
+                   ไม่ผ่านคุณสมบัติ (พ้นกำหนดแก้ไข)
+                 </button>
+               </section>
+             )}
             {auth.can("payments") &&
               [...d.payments]
                 .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
