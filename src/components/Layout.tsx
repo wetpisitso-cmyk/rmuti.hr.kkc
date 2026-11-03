@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   GraduationCap,
@@ -21,7 +21,7 @@ import {
   BookOpenCheck,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import { supabase } from "../lib/supabase";
+import { supabase, supabaseUrl } from "../lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { rows } from "../services/api";
 export function Brand({ inHeader = false }: { inHeader?: boolean } = {}) {
@@ -63,6 +63,58 @@ export function Brand({ inHeader = false }: { inHeader?: boolean } = {}) {
     </Link>
   );
 }
+
+// A compact, approximate unique-browser counter. It stores no names, IPs or
+// visitor IDs: each browser contributes at most once if local storage persists.
+const visitStorageKey = "rmuti-kkc-visit-counted-v1";
+let visitRequest: Promise<number> | null = null;
+function getVisitTotal(): Promise<number> {
+  if (visitRequest) return visitRequest;
+  visitRequest = (async () => {
+    let previouslyCounted = false;
+    try {
+      previouslyCounted = window.localStorage.getItem(visitStorageKey) === "1";
+    } catch {
+      // Private mode may disable local storage. Never increment in that case.
+      previouslyCounted = true;
+    }
+    const response = await fetch(`${supabaseUrl}/functions/v1/website-visits`, {
+      method: previouslyCounted ? "GET" : "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Visitor count unavailable");
+    const data: unknown = await response.json();
+    const total = (data as { total?: unknown }).total;
+    if (typeof total !== "number" || !Number.isFinite(total) || total < 0) {
+      throw new Error("Visitor count malformed");
+    }
+    if (!previouslyCounted) {
+      try { window.localStorage.setItem(visitStorageKey, "1"); } catch { /* optional */ }
+    }
+    return total;
+  })();
+  visitRequest.catch(() => { visitRequest = null; });
+  return visitRequest;
+}
+function VisitorCount() {
+  const [total, setTotal] = useState<number | null>(null);
+  useEffect(() => {
+    let active = true;
+    void getVisitTotal().then((count) => {
+      if (active) setTotal(count);
+    }).catch(() => { /* Keep the page functional when the counter is unavailable. */ });
+    return () => { active = false; };
+  }, []);
+  if (total === null) return null;
+  return (
+    <span className="site-visitor-count" title="จำนวนเบราว์เซอร์โดยประมาณ เริ่มนับหลังเปิดใช้ฟีเจอร์นี้">
+      <Users size={14} aria-hidden="true" />
+      ผู้เข้าชมโดยประมาณ {new Intl.NumberFormat("th-TH").format(total)} ครั้ง
+    </span>
+  );
+}
+
 export function Layout() {
   const a = useAuth(),
     nav = useNavigate();
@@ -146,6 +198,7 @@ export function Layout() {
           </p>
           <span>
             <ShieldCheck size={17} /> เอกสารส่วนบุคคลเข้าถึงตามสิทธิ์
+            <VisitorCount />
             <Link className="footer-admin-link" to="/admin/login">เข้าสู่ระบบ Admin</Link>
           </span>
         </div>
