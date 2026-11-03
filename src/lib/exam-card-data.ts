@@ -14,6 +14,7 @@ export interface ExamCardRecord {
  signature_png:string;
  signer_name:string;
  issued_at:string;
+ printed_issue_date?:string|null;
 }
 export interface ExamCardListing {
  assignment_id:string;application_id:string;application_number:string|null;
