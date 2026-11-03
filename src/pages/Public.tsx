@@ -91,7 +91,7 @@ export function Home() {
   const [category, setCategory] = useState("all"),
     [department, setDepartment] = useState(""),
     [employment, setEmployment] = useState(""),
-    [state, setState] = useState("all"),
+    [state, setState] = useState("open"),
     [vacanciesFirst, setVacanciesFirst] = useState(false);
   const list = (jobs.data || []).filter(
     (j) =>
@@ -105,6 +105,16 @@ export function Home() {
       (state === "all" || jobState(j) === state),
   );
   const displayedJobs = vacanciesFirst ? [...list].sort((a, b) => b.vacancies - a.vacancies || a.title.localeCompare(b.title, "th")) : list;
+  // Keep expired positions discoverable without mixing them into open vacancies.
+  const visibleJobs = (jobs.data || []).filter(
+    (j) => j.published && !j.archived &&
+      j.recruitment_rounds?.published && !j.recruitment_rounds.archived,
+  );
+  const stateCounts = {
+    open: visibleJobs.filter((j) => jobState(j) === "open").length,
+    upcoming: visibleJobs.filter((j) => jobState(j) === "upcoming").length,
+    closed: visibleJobs.filter((j) => jobState(j) === "closed").length,
+  };
   const news = useQuery({
     queryKey: ["announcements", "home"],
     queryFn: () => rows<Announcement>("announcements", "*", "created_at", 3),
@@ -225,7 +235,27 @@ export function Home() {
           description="ตรวจคุณสมบัติและกำหนดการตามประกาศแต่ละตำแหน่ง"
         />
         <div className="filter-card home-filter-card">
-          <div className="tabs">
+          <div aria-label="หมวดสถานะการรับสมัคร">
+            <p style={{ fontWeight: 700, color: "#102d55", marginBottom: 10 }}>เลือกสถานะการรับสมัคร</p>
+            <div className="tabs" role="group" aria-label="สถานะการรับสมัคร">
+              {([
+                ["open", "เปิดรับสมัคร"],
+                ["upcoming", "เตรียมเปิดรับ"],
+                ["closed", "ปิดรับสมัครแล้ว"],
+              ] as const).map(([value, label]) => (
+                <button
+                  type="button"
+                  key={value}
+                  className={state === value ? "active" : ""}
+                  aria-pressed={state === value}
+                  onClick={() => { setState(value); setVacanciesFirst(false); }}
+                >
+                  {label} ({stateCounts[value]})
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="tabs" role="group" aria-label="ประเภทตำแหน่ง">
             {[
               ["all", "ทั้งหมด"],
               ["academic", "สายวิชาการ"],
@@ -240,7 +270,7 @@ export function Home() {
               </button>
             ))}
           </div>
-          <div className="filter-grid">
+          <div className="filter-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
             <Select
               label="หน่วยงาน"
               value={department}
@@ -265,24 +295,20 @@ export function Home() {
                 ),
               )}
             </Select>
-            <Select
-              label="สถานะรับสมัคร"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-            >
-              <option value="all">ทุกสถานะ</option>
-              <option value="open">เปิดรับสมัคร</option>
-              <option value="upcoming">เตรียมเปิดรับ</option>
-              <option value="closed">ปิดรับสมัคร</option>
-            </Select>
           </div>
         </div>
         </section>
         <section id="home-job-results" className="home-content-frame home-results-frame" aria-label="รายการตำแหน่งรับสมัคร">
           <div className="home-results-heading">
-            <div><span className="eyebrow">AVAILABLE JOBS</span><h2>รายการตำแหน่งรับสมัคร</h2></div>
+            <div>
+              <span className="eyebrow">{state === "closed" ? "PAST POSITIONS" : state === "upcoming" ? "UPCOMING POSITIONS" : "OPEN POSITIONS"}</span>
+              <h2>{state === "closed" ? "ตำแหน่งที่ปิดรับสมัครแล้ว" : state === "upcoming" ? "ตำแหน่งที่เตรียมเปิดรับสมัคร" : "ตำแหน่งที่เปิดรับสมัคร"}</h2>
+            </div>
             <span className="section-count" aria-live="polite">พบ {displayedJobs.length} ตำแหน่ง</span>
           </div>
+        {!jobs.isPending && !jobs.error && state === "open" && displayedJobs.length === 0 && (
+          <p className="muted">ขณะนี้ไม่พบตำแหน่งที่เปิดรับสมัครในตัวกรองนี้ สามารถดูแท็บ “เตรียมเปิดรับ” หรือ “ปิดรับสมัครแล้ว” ได้</p>
+        )}
         <State loading={jobs.isPending} error={jobs.error} empty={!displayedJobs.length}>
           <div className="job-grid">
             {displayedJobs.map((j) => (
