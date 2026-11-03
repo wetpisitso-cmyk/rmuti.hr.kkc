@@ -90,7 +90,10 @@ async function makePage(item:CardItem):Promise<Uint8Array>{
  ctx.fillText("____________________________",970,1177);
  ctx.font=examCardFont(26,true);ctx.fillText("เจ้าหน้าที่ออกบัตรรับสมัคร",970,1210);
  ctx.font=examCardFont(23);ctx.fillText(item.card.signer_name||"",970,1240);
- ctx.textAlign="left";ctx.font=examCardFont(23);ctx.fillText("ออกบัตรวันที่ "+dateBE(item.card.issued_at),88,1210);
+ ctx.textAlign="left";ctx.font=examCardFont(23);const displayDate=item.card.printed_issue_date
+    ? dateBE(item.card.printed_issue_date+"T00:00:00+07:00")
+    : dateBE(item.card.issued_at);
+  ctx.fillText((item.card.printed_issue_date?"วันที่อ้างอิงบนบัตร ":"ออกบัตรวันที่ ")+displayDate,88,1210);
  const boxTop=1275,boxBottom=1683;
  ctx.fillStyle="#FFF4E8";ctx.fillRect(75,boxTop,1090,boxBottom-boxTop);
  ctx.strokeStyle="#102D55";ctx.lineWidth=3;ctx.strokeRect(75,boxTop,1090,boxBottom-boxTop);
