@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { getHomeStatDestination } from "../src/lib/home-stat-navigation";
 describe("home stat card navigation", () => {
-  it("positions shows all job filters", () => {
+  it("positions shows only open recruitment by default", () => {
     expect(getHomeStatDestination("positions", true)).toEqual({
-      section: "positions", filter: "all", vacanciesFirst: false,
+      section: "positions", filter: "open", vacanciesFirst: false,
     });
   });
   it("vacancies shows open jobs ordered by vacancies", () => {
@@ -16,9 +16,9 @@ describe("home stat card navigation", () => {
       section: "home-job-results", filter: "open", vacanciesFirst: false,
     });
   });
-  it("closed status shows announcements", () => {
+  it("no-open status shows announcements", () => {
     expect(getHomeStatDestination("status", false)).toEqual({
-      section: "home-news-section", filter: "all", vacanciesFirst: false,
+      section: "home-news-section", filter: "open", vacanciesFirst: false,
     });
   });
 });
