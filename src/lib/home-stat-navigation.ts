@@ -15,12 +15,12 @@ export function getHomeStatDestination(
   hasOpenJobs: boolean,
 ): HomeStatDestination {
   if (action === "vacancies") {
-    return { section: "home-job-results", filter: hasOpenJobs ? "open" : "all", vacanciesFirst: true };
+    return { section: "home-job-results", filter: "open", vacanciesFirst: true };
   }
   if (action === "status") {
     return hasOpenJobs
       ? { section: "home-job-results", filter: "open", vacanciesFirst: false }
-      : { section: "home-news-section", filter: "all", vacanciesFirst: false };
+      : { section: "home-news-section", filter: "open", vacanciesFirst: false };
   }
-  return { section: "positions", filter: "all", vacanciesFirst: false };
+  return { section: "positions", filter: "open", vacanciesFirst: false };
 }
