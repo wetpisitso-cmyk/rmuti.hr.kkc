@@ -143,7 +143,7 @@ export function Home() {
             <h1>
               โอกาสใหม่
               <br />
-              <span>เริ่มต้นที่นี่</span>
+              <span>เริ่มต้นที่ มทร.อีสาน ขอนแก่น</span>
             </h1>
             <h2 className="hero-subtitle">ระบบรับสมัครบุคลากรออนไลน์</h2>
             <p>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น</p>
@@ -183,6 +183,7 @@ export function Home() {
         </div>
       </div>
       <div className="container home-stats-strip" aria-label="สรุปข้อมูลการเปิดรับสมัคร">
+        <div className="home-stat-intro"><Users size={27} /><span><strong>ภาพรวมการรับสมัคร</strong><small>ข้อมูลรอบปัจจุบัน</small></span></div>
         <button type="button" className="home-stat-pill home-stat-positions" onClick={() => navigateStat("positions")} aria-label={`ดูตำแหน่งที่เปิดรับสมัครทั้งหมด ${numberTH(open.length)} ตำแหน่ง`}>
           <span className="home-stat-icon orange" aria-hidden="true"><BriefcaseBusiness size={28} /></span>
           <span className="home-stat-body">
