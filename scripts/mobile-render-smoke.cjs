@@ -31,7 +31,7 @@ const ROUTES = [
           await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
           await page.waitForTimeout(1200);
           const content = (await page.locator("body").innerText()).slice(0, 12000);
-          const unexpected = /รหัสข้อผิดพลาด:\\s*(APP_RENDER|ASSET_UPDATE)|ไม่สามารถแสดงหน้านี้ได้|ยังไม่ได้ตั้งค่าการเชื่อมต่อ/.test(content);
+          const unexpected = content.includes("APP_RENDER") || content.includes("ASSET_UPDATE") || content.includes("ไม่สามารถแสดงหน้านี้ได้") || content.includes("ยังไม่ได้ตั้งค่าการเชื่อมต่อ");
           if (!response || response.status() >= 400 || !content.includes(marker) || unexpected || errors.length) {
             failed = true;
             console.error("FAIL", engine, hash, "http", response?.status(), "marker", content.includes(marker), "boundary", unexpected, errors.join("; "), "excerpt", JSON.stringify(content.slice(0, 240)));
