@@ -5,6 +5,7 @@ import { dateTH } from "../../lib/format";
 import { supabase, supabaseUrl, publishableKey } from "../../lib/supabase";
 import { paymentQrUrl } from "../../components/PaymentBankDetails";
 import { errorTH } from "../../lib/errors";
+import ApplicantMailSettings from "../../components/staff/ApplicantMailSettings";
 import {
   Field,
   Textarea,
@@ -519,6 +520,7 @@ export default function Settings() {
         {cleanupMessage && <Notice kind="success">{cleanupMessage}</Notice>}
         {cleanupError && <Notice kind="error">ตรวจสอบ/ลบไม่สำเร็จ: {cleanupError}</Notice>}
       </section>
+      <ApplicantMailSettings />
       <section className="panel">
         <h2>คิวอีเมลล่าสุด</h2>
         <State
