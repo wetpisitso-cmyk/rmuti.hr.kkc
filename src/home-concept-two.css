@@ -72,3 +72,26 @@ body:has(.rmuti-apple-home) .header .main-nav>.btn{border-radius:99px;background
 @media(max-width:800px){body:has(.rmuti-apple-home) .header .header-inner{min-height:75px!important;height:75px!important;border-radius:24px}.rmuti-apple-home .hero-inner{grid-template-columns:1fr;padding:124px 0 117px}.rmuti-apple-home .campus-visual{max-width:600px}.rmuti-apple-home .campus-photo-frame{aspect-ratio:1.8}.rmuti-apple-home .home-content-sections{grid-template-columns:1fr;grid-template-areas:"filters" "results" "news"}.rmuti-apple-home .home-feature-grid{grid-template-columns:1fr}.rmuti-apple-home .home-feature:nth-child(3){grid-column:auto}}
 @media(max-width:590px){body:has(.rmuti-apple-home) .header .header-inner{width:calc(100% - 18px);margin-top:8px;min-height:68px!important;height:68px!important;padding:6px 13px}.rmuti-apple-home .hero-inner{padding:109px 0 104px;gap:17px}.rmuti-apple-home .hero h1{font-size:clamp(35px,9vw,50px)}.rmuti-apple-home .campus-photo-frame{aspect-ratio:1.45;border-radius:29px}.rmuti-apple-home .campus-photo-quote{font-size:11px;padding:10px 12px}.rmuti-apple-home .home-stats-strip{width:calc(100% - 22px);grid-template-columns:1fr;margin-top:-65px;padding:10px;gap:9px}.rmuti-apple-home .home-stat-intro{grid-column:auto}.rmuti-apple-home .home-stat-pill{min-height:95px}.rmuti-apple-home .home-content-sections,.rmuti-apple-home .home-feature-grid,.rmuti-apple-home .home-steps-section{width:calc(100% - 24px)}.rmuti-apple-home .home-content-frame{padding:17px}.rmuti-apple-home .home-news-frame .news-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.rmuti-apple-home *{transition:none!important;animation:none!important}}
+
+/* Concept 02 fast-access tiles: existing routes, no admin credentials on public page */
+.rmuti-apple-home .home-feature-strip{width:100%;padding-bottom:38px}
+.rmuti-apple-home .home-quick-heading{max-width:1390px;width:calc(100% - 48px);display:flex;align-items:center;gap:10px;margin:0 auto 13px}
+.rmuti-apple-home .home-quick-heading-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:13px;background:#fff0df;color:#f47721}
+.rmuti-apple-home .home-quick-heading h2{margin:0;color:#102d55;font-size:25px;font-weight:900}
+.rmuti-apple-home .home-quick-heading p{margin:0;color:#496780;font-size:12px;font-weight:650}
+.rmuti-apple-home .home-quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rmuti-apple-home .home-quick-panel{display:flex;align-items:center;gap:18px;min-width:0;padding:19px;border:1px solid #cde5f8;border-radius:22px;background:linear-gradient(115deg,#e6f4ff,#f6fbff);box-shadow:0 8px 25px #24426815}
+.rmuti-apple-home .home-quick-panel.staff-panel{background:linear-gradient(115deg,#fff0e3,#fff9f3);border-color:#f4dfcd}
+.rmuti-apple-home .home-quick-intro{display:flex;align-items:center;gap:10px;flex:0 0 32%;min-width:0;border-right:1px solid #c9dff4;padding-right:12px;color:#176eb3}
+.rmuti-apple-home .staff-panel .home-quick-intro{color:#ee7119;border-right-color:#f0d5c2}
+.rmuti-apple-home .home-quick-intro>svg{flex:0 0 auto}
+.rmuti-apple-home .home-quick-intro strong{display:block;font-size:15px;font-weight:900;color:#153e72;line-height:1.5}
+.rmuti-apple-home .home-quick-intro small{display:block;font-size:10px;color:#4e647e;line-height:1.5}
+.rmuti-apple-home .home-quick-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;min-width:0;flex:1}
+.rmuti-apple-home .home-quick-links :is(a,button){display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:0;min-height:75px;padding:8px 4px;text-align:center;border-radius:15px;border:1px solid #dbe9f8;background:#ffffffdd;color:#165ca4;font-family:inherit;font-weight:800;font-size:11px;line-height:1.4;cursor:pointer;text-decoration:none}
+.rmuti-apple-home .staff-panel .home-quick-links :is(a,button){color:#ca5f14;border-color:#f0ddcf}
+.rmuti-apple-home .home-quick-links :is(a,button):hover{transform:translateY(-2px);border-color:#ff8b26;box-shadow:0 6px 16px #193b641a}
+.rmuti-apple-home .home-quick-links :is(a,button):focus-visible{outline:3px solid #ff9b45;outline-offset:2px}
+@media(max-width:1230px){.rmuti-apple-home .home-quick-panel{flex-direction:column;align-items:stretch}.rmuti-apple-home .home-quick-intro{flex-basis:auto;border-right:0;border-bottom:1px solid #d2e4f4;padding:0 0 11px}}
+@media(max-width:800px){.rmuti-apple-home .home-quick-grid{grid-template-columns:1fr}.rmuti-apple-home .home-quick-panel{flex-direction:row;align-items:center}.rmuti-apple-home .home-quick-intro{flex:0 0 30%;border-bottom:0;border-right:1px solid #d2e4f4;padding:0 9px 0 0}}
+@media(max-width:590px){.rmuti-apple-home .home-quick-heading{width:calc(100% - 24px)}.rmuti-apple-home .home-quick-panel{flex-direction:column;align-items:stretch;padding:15px}.rmuti-apple-home .home-quick-intro{flex:auto;border-right:0;border-bottom:1px solid #d2e4f4;padding:0 0 12px}.rmuti-apple-home .home-quick-links{grid-template-columns:repeat(2,minmax(0,1fr))}.rmuti-apple-home .home-quick-links :is(a,button){min-height:64px}}
