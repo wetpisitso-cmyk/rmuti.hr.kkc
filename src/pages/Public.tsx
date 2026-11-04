@@ -227,15 +227,6 @@ export function Home() {
               <Link to="/guide"><FileText size={22}/><span>คู่มือผู้สมัคร</span></Link>
             </div>
           </div>
-          <div className="home-quick-panel staff-panel">
-            <div className="home-quick-intro"><ShieldCheck size={27}/><div><strong>สำหรับเจ้าหน้าที่</strong><small>เมนูระบบงานและประกาศ</small></div></div>
-            <div className="home-quick-links">
-              <Link to="/staff"><BriefcaseBusiness size={22}/><span>งานเจ้าหน้าที่</span></Link>
-              <Link to="/announcements"><FileText size={22}/><span>ประกาศ</span></Link>
-              <Link to="/results"><CheckCircle2 size={22}/><span>ผลคัดเลือก</span></Link>
-              <Link to="/guide"><Users size={22}/><span>ติดต่อหน่วยงาน</span></Link>
-            </div>
-          </div>
         </div>
       </section>
       <div className="container section home-content-sections" id="positions">
