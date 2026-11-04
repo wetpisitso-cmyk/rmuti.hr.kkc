@@ -269,7 +269,6 @@ export default function AuthPage({
             <div className="auth-links">
               <Link to="/forgot-password">ลืมรหัสผ่าน</Link>
               <Link to="/register">สมัครสมาชิก</Link>
-              <Link to="/admin/login">เข้าสู่ระบบ Admin</Link>
             </div>
           )}
           {mode === "register" && (
