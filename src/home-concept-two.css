@@ -79,7 +79,7 @@ body:has(.rmuti-apple-home) .header .main-nav>.btn{border-radius:99px;background
 .rmuti-apple-home .home-quick-heading-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:13px;background:#fff0df;color:#f47721}
 .rmuti-apple-home .home-quick-heading h2{margin:0;color:#102d55;font-size:25px;font-weight:900}
 .rmuti-apple-home .home-quick-heading p{margin:0;color:#496780;font-size:12px;font-weight:650}
-.rmuti-apple-home .home-quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rmuti-apple-home .home-quick-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
 .rmuti-apple-home .home-quick-panel{display:flex;align-items:center;gap:18px;min-width:0;padding:19px;border:1px solid #cde5f8;border-radius:22px;background:linear-gradient(115deg,#e6f4ff,#f6fbff);box-shadow:0 8px 25px #24426815}
 .rmuti-apple-home .home-quick-panel.staff-panel{background:linear-gradient(115deg,#fff0e3,#fff9f3);border-color:#f4dfcd}
 .rmuti-apple-home .home-quick-intro{display:flex;align-items:center;gap:10px;flex:0 0 32%;min-width:0;border-right:1px solid #c9dff4;padding-right:12px;color:#176eb3}
