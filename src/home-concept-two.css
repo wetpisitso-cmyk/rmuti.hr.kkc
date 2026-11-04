@@ -1,0 +1,74 @@
+/* RMUTI KKC Concept 02 — presentation-only styles */
+body:has(.rmuti-apple-home) .header{position:absolute;inset:0 0 auto;z-index:40;background:transparent;border:0;box-shadow:none}
+body:has(.rmuti-apple-home) .header::after{display:none}
+body:has(.rmuti-apple-home) .header .header-inner{width:calc(100% - 40px);max-width:1450px;box-sizing:border-box;margin:13px auto 0;padding:9px 23px;min-height:78px;background:#fffffff7;border:1px solid #fff;border-radius:100px;box-shadow:0 15px 45px #051b4050}
+body:has(.rmuti-apple-home) .header .main-nav{gap:clamp(9px,1.3vw,22px)}
+body:has(.rmuti-apple-home) .header .main-nav>a:not(.btn){font-size:13px;font-weight:800}
+body:has(.rmuti-apple-home) .header .main-nav>.btn{border-radius:99px;background:#ff801e;color:#fff;border-color:#ff801e}
+.rmuti-apple-home{display:flex;flex-direction:column;background:#f5f9ff}
+.rmuti-apple-home .hero{order:0;border:0;position:relative;isolation:isolate;background:radial-gradient(ellipse at 100% 20%,#168fe5a8,transparent 65%),linear-gradient(118deg,#081c41 0%,#0a3872 52%,#0872c6 100%);overflow:hidden}
+.rmuti-apple-home .hero::before{display:block;content:"";pointer-events:none;position:absolute;right:-18%;top:-63%;width:900px;height:900px;border:1px solid #ffffff1f;border-radius:50%;box-shadow:0 0 0 95px #ffffff09,0 0 0 170px #ffffff07}
+.rmuti-apple-home .hero::after{display:block;content:"";pointer-events:none;position:absolute;bottom:-120px;left:-10%;width:120%;height:180px;border-radius:50%;background:#f5f9ff;transform:rotate(-2deg);z-index:2}
+.rmuti-apple-home .hero-inner{position:relative;z-index:3;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);align-items:center;gap:48px;min-height:580px;padding:139px 0 140px;max-width:1400px}
+.rmuti-apple-home .hero-tag{border:0;background:transparent;backdrop-filter:none;padding:0;letter-spacing:.23em;color:#dcecff;font-weight:900;font-size:11px;margin-bottom:21px}
+.rmuti-apple-home .hero-tag span{box-shadow:none;background:#ff8b24}
+.rmuti-apple-home .hero h1{color:#fff;font-size:clamp(39px,4.5vw,75px);line-height:1.18;letter-spacing:-.06em;margin-bottom:14px;text-shadow:0 9px 30px #04153240}
+.rmuti-apple-home .hero h1 span{background:linear-gradient(108deg,#ffbb58,#ff7916);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.rmuti-apple-home .hero-subtitle{color:#fff;font-size:clamp(18px,1.9vw,25px);font-weight:900}
+.rmuti-apple-home .hero p{color:#ddeeff;font-size:14px;line-height:1.75}
+.rmuti-apple-home .hero-support-copy{color:#d6e7ff!important;max-width:550px}
+.rmuti-apple-home .hero-actions .btn{border-radius:99px;min-height:55px;padding:13px 23px}
+.rmuti-apple-home .hero-actions .btn.primary{background:linear-gradient(105deg,#ffa52c,#ff7012);border-color:#ff972a;box-shadow:0 12px 25px #ff781b50}
+.rmuti-apple-home .btn.hero-outline{background:#195b9766;border:2px solid #fff;color:#fff}
+.rmuti-apple-home .hero-caption{color:#dbeeff;margin-top:23px}
+.rmuti-apple-home .campus-visual{position:relative;isolation:isolate;padding:12px}
+.rmuti-apple-home .campus-visual::before{display:block;content:"";position:absolute;inset:-18px -12px 35px 42px;transform:rotate(9deg);border:21px solid #ff9123;border-radius:42% 22% 42% 25%;z-index:-1}
+.rmuti-apple-home .campus-photo-frame{aspect-ratio:1.47;border:2px solid #ffffffb8;border-radius:50px 80px 50px 80px;box-shadow:0 25px 65px #00173380}
+.rmuti-apple-home .campus-photo-frame>img{object-position:center 42%}
+.rmuti-apple-home .campus-photo-frame::after{background:linear-gradient(180deg,transparent 50%,#052f5b44)}
+.rmuti-apple-home .campus-photo-quote{top:19px;right:20px;padding:16px 20px;border-radius:23px;background:#ffffffed;border:1px solid #fff;color:#0a427e;text-shadow:none;box-shadow:0 13px 27px #072c5440}
+.rmuti-apple-home .campus-photo-caption,.rmuti-apple-home .campus-floating-stats{display:none}
+.rmuti-apple-home .home-stats-strip{order:1;position:relative;z-index:5;display:grid;grid-template-columns:1.1fr repeat(3,minmax(0,1fr));gap:12px;align-items:stretch;max-width:1390px;width:calc(100% - 48px);padding:12px;margin:-80px auto 0;background:#ffffffed;border:1px solid #fff;border-radius:29px;box-shadow:0 15px 46px #133c6a35;backdrop-filter:blur(20px)}
+.rmuti-apple-home .home-stat-intro{display:flex;align-items:center;gap:12px;min-width:0;padding:15px;color:#16436d}
+.rmuti-apple-home .home-stat-intro svg{color:#317ac2;flex-shrink:0}
+.rmuti-apple-home .home-stat-intro strong{display:block;font-size:17px;font-weight:900}
+.rmuti-apple-home .home-stat-intro small{display:block;color:#546d8c;font-size:11px;margin-top:4px}
+.rmuti-apple-home .home-stat-pill{min-width:0;min-height:112px;display:flex;align-items:center;gap:11px;padding:15px;border-radius:22px;border:1px solid #deebf6;box-shadow:none}
+.rmuti-apple-home .home-stat-pill::before,.rmuti-apple-home .home-stat-arrow{display:none!important}
+.rmuti-apple-home .home-stat-positions{background:linear-gradient(120deg,#fff2e8,#ffe5d2)!important;color:#d65b0d!important;border-color:#ffdec7}
+.rmuti-apple-home .home-stat-vacancies{background:linear-gradient(120deg,#eff8ff,#dcecff)!important;color:#174b85!important;border-color:#d2e5f8}
+.rmuti-apple-home .home-stat-status.is-open{background:linear-gradient(120deg,#f0fff7,#ddf7e9)!important;color:#176c46!important;border-color:#bdebd4}
+.rmuti-apple-home .home-stat-status.is-closed{background:#edf3fb!important;color:#214b78!important}
+.rmuti-apple-home .home-stat-pill .home-stat-icon{width:47px;height:47px;flex-basis:47px;border-radius:16px;background:#fff8f0!important;color:#e8751d!important}
+.rmuti-apple-home .home-stat-vacancies .home-stat-icon{background:#d2eaff!important;color:#267bca!important}
+.rmuti-apple-home .home-stat-status .home-stat-icon{background:#d0f0e1!important;color:#188c58!important}
+.rmuti-apple-home .home-stat-pill .home-stat-kicker{font-size:12px}
+.rmuti-apple-home .home-stat-pill .home-stat-number{font-size:36px!important;color:#e66f19!important;line-height:1}
+.rmuti-apple-home .home-stat-vacancies .home-stat-number{color:#164f8e!important}
+.rmuti-apple-home .home-stat-pill .home-stat-caption,.rmuti-apple-home .home-stat-pill .home-stat-status-note{color:#47627f!important;font-size:11px!important}
+.rmuti-apple-home .home-stat-pill .home-stat-status-text{font-size:clamp(16px,1.6vw,22px)}
+.rmuti-apple-home .home-content-sections{order:2;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);grid-template-areas:"filters news" "results news";align-items:start;gap:16px 20px;width:calc(100% - 48px);max-width:1390px;margin:0 auto;padding:43px 0 15px}
+.rmuti-apple-home .home-content-frame{border:1px solid #e2eaf5;border-radius:23px;background:#fff;padding:23px;box-shadow:0 9px 30px #123a6a14}
+.rmuti-apple-home .home-openings-frame{grid-area:filters;border-top:0}
+.rmuti-apple-home .home-results-frame{grid-area:results;border-top:0}
+.rmuti-apple-home .home-news-frame{grid-area:news;border-top:0;background:#fff}
+.rmuti-apple-home .home-openings-frame .filter-card{background:#f7faff;border:1px solid #e4eefa;box-shadow:none;padding:18px}
+.rmuti-apple-home .home-results-frame .job-grid{grid-template-columns:1fr;gap:12px}
+.rmuti-apple-home .home-results-frame .job-card{padding:20px;border-left:4px solid #fa8027;border-radius:18px;box-shadow:0 5px 18px #102d550e}
+.rmuti-apple-home .home-news-frame .news-grid{grid-template-columns:1fr;gap:13px}
+.rmuti-apple-home .home-news-frame .news-card{padding:17px;border:1px solid #e2ecf7;border-radius:17px;background:#fcfdff;box-shadow:none}
+.rmuti-apple-home .home-news-frame .news-card::before{display:none}
+.rmuti-apple-home .home-news-frame .news-card p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rmuti-apple-home .home-feature-strip{order:3;margin:12px 0 0;background:transparent;box-shadow:none;border:0}
+.rmuti-apple-home .home-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px;max-width:1390px;width:calc(100% - 48px)}
+.rmuti-apple-home .home-feature{padding:22px;border:1px solid #d5e4f5;border-radius:22px;background:linear-gradient(110deg,#e8f4ff,#f8fbff)}
+.rmuti-apple-home .home-feature:nth-child(2){background:linear-gradient(110deg,#fff0e3,#fffaf5);border-color:#f2dcca}
+.rmuti-apple-home .home-feature:nth-child(3){grid-column:1/-1}
+.rmuti-apple-home .home-feature h3{color:#143d73}
+.rmuti-apple-home .home-feature p{color:#45617d!important}
+.rmuti-apple-home .home-feature-icon{background:#d6eaff;color:#176cb7}
+.rmuti-apple-home .home-steps-section{order:4;width:calc(100% - 48px);max-width:1390px;padding:28px 0 55px}
+@media(max-width:1100px){.rmuti-apple-home .home-stats-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.rmuti-apple-home .home-stat-intro{grid-column:1/-1}.rmuti-apple-home .hero-inner{gap:24px}}
+@media(max-width:800px){body:has(.rmuti-apple-home) .header .header-inner{min-height:75px!important;height:75px!important;border-radius:24px}.rmuti-apple-home .hero-inner{grid-template-columns:1fr;padding:124px 0 117px}.rmuti-apple-home .campus-visual{max-width:600px}.rmuti-apple-home .campus-photo-frame{aspect-ratio:1.8}.rmuti-apple-home .home-content-sections{grid-template-columns:1fr;grid-template-areas:"filters" "results" "news"}.rmuti-apple-home .home-feature-grid{grid-template-columns:1fr}.rmuti-apple-home .home-feature:nth-child(3){grid-column:auto}}
+@media(max-width:590px){body:has(.rmuti-apple-home) .header .header-inner{width:calc(100% - 18px);margin-top:8px;min-height:68px!important;height:68px!important;padding:6px 13px}.rmuti-apple-home .hero-inner{padding:109px 0 104px;gap:17px}.rmuti-apple-home .hero h1{font-size:clamp(35px,9vw,50px)}.rmuti-apple-home .campus-photo-frame{aspect-ratio:1.45;border-radius:29px}.rmuti-apple-home .campus-photo-quote{font-size:11px;padding:10px 12px}.rmuti-apple-home .home-stats-strip{width:calc(100% - 22px);grid-template-columns:1fr;margin-top:-65px;padding:10px;gap:9px}.rmuti-apple-home .home-stat-intro{grid-column:auto}.rmuti-apple-home .home-stat-pill{min-height:95px}.rmuti-apple-home .home-content-sections,.rmuti-apple-home .home-feature-grid,.rmuti-apple-home .home-steps-section{width:calc(100% - 24px)}.rmuti-apple-home .home-content-frame{padding:17px}.rmuti-apple-home .home-news-frame .news-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.rmuti-apple-home *{transition:none!important;animation:none!important}}
