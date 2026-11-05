@@ -33,6 +33,7 @@ import PaymentBankDetails from "../components/PaymentBankDetails";
 import ApplicantSubmissionForm from "../components/ApplicantSubmissionForm";
 import type { AdminSignature } from "../components/AdminSignaturePad";
 import { outcomeLabels, statuses } from "../types/models";
+import ApplicantStatusAlert from "../components/ApplicantStatusAlert";
 export default function ApplicationView() {
   const { id } = useParams(),
     nav = useNavigate(),
@@ -149,6 +150,9 @@ export default function ApplicationView() {
                 </div>
               }
             />
+            {auth.role === "applicant" && (
+              <ApplicantStatusAlert application={a} detail hasExamCard={d.assignments.length > 0} />
+            )}
             {a.submitted_at && auth.role === "applicant" && (
               <Notice kind="success">
                 ส่งใบสมัครสำเร็จแล้ว เมื่อวันที่ {dateTH(a.submitted_at, true)}

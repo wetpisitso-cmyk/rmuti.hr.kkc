@@ -1833,3 +1833,78 @@ td strong {
   font-weight: 800;
   color: #b91c1c;
 }
+
+
+/* Applicant-only status center. Styles are scoped so admin and application review stay unchanged. */
+.applicant-notification-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 6px 0 20px;
+  padding: 20px 22px;
+  border: 1px solid #bfd2ec;
+  border-radius: 16px;
+  background: linear-gradient(125deg, #eff6ff, #ffffff);
+}
+.applicant-notification-summary-label { display: flex; align-items: flex-start; gap: 13px; color: #173f76; }
+.applicant-notification-summary-label > svg { flex-shrink: 0; margin-top: 2px; }
+.applicant-notification-summary h2 { margin: 0 0 4px; font-size: clamp(18px, 2vw, 22px); color: #14355e; }
+.applicant-notification-summary p { margin: 0; color: #566a84; font-size: 14px; }
+.applicant-notification-urgent {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 9px;
+  margin-bottom: 18px; padding: 14px 16px; border: 2px solid #dc2626;
+  background: #fff1f2; color: #991b1b; border-radius: 12px;
+}
+.applicant-notification-urgent > svg { flex-shrink: 0; }
+.applicant-notification-urgent span { font-size: 13px; }
+.applicant-status-list { margin-bottom: 22px; }
+.applicant-status-alert {
+  --status-main: #1d5c9f; --status-bg: #edf6ff; --status-border: #a8c9ea;
+  border: 2px solid var(--status-border);
+  border-left: 7px solid var(--status-main);
+  border-radius: 16px;
+  background: var(--status-bg); padding: 18px 20px; color: #19324c;
+  box-shadow: 0 6px 20px rgba(19, 45, 76, 0.045);
+  min-width: 0;
+}
+.applicant-status-alert.tone-warning {
+  --status-main: #bb500c; --status-bg: #fff7ed; --status-border: #f2bb88;
+}
+.applicant-status-alert.tone-success {
+  --status-main: #147a4b; --status-bg: #edf9f1; --status-border: #a2dab6;
+}
+.applicant-status-alert.tone-danger {
+  --status-main: #c32727; --status-bg: #fff0f1; --status-border: #efaaaa;
+}
+.applicant-status-alert.tone-neutral {
+  --status-main: #52657b; --status-bg: #f4f7fb; --status-border: #cad6e5;
+}
+.applicant-status-top { display: flex; align-items: flex-start; gap: 12px; }
+.applicant-status-icon { flex-shrink: 0; display: grid; place-items: center;
+  width: 42px; height: 42px; border-radius: 12px; color: #fff; background: var(--status-main); }
+.applicant-status-copy { min-width: 0; flex: 1; }
+.applicant-status-eyebrow { display: block; color: var(--status-main); font-weight: 700; margin-bottom: 2px; }
+.applicant-status-copy h3 { color: var(--status-main); font-size: clamp(20px, 2.5vw, 25px); line-height: 1.3; margin: 0 0 6px; }
+.applicant-status-copy p { font-size: 14px; line-height: 1.6; margin: 0; color: #405569; }
+.applicant-status-position { display: block; margin-top: 7px; color: #32485f; font-weight: 700; }
+.applicant-status-staff-message {
+  margin-top: 14px; padding: 14px 16px; background: #ffffffd9; border-radius: 10px; border: 1px solid var(--status-border);
+}
+.applicant-status-staff-message strong { display: flex; align-items: center; gap: 7px; color: var(--status-main); }
+.applicant-status-staff-message p { margin: 8px 0 0; font-size: 14px; color: #223c55; overflow-wrap: anywhere; }
+.applicant-status-deadline { display: flex; gap: 7px; align-items: center; color: #a42424; font-weight: 700; margin: 12px 0 0; }
+.applicant-status-actions { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; margin-top: 13px; }
+.applicant-status-exam-ready { display: inline-flex; align-items: center; gap: 7px; color: #166534; font-size: 13px; font-weight: 600; }
+.applicant-unread-count { display: inline-flex; color: #fff; background: #c52525; border-radius: 20px; font-size: 12px; padding: 4px 10px; vertical-align: middle; }
+.applicant-notification-link { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: #174c91; margin-top: 6px; text-decoration: underline; }
+.header-notification-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 10px; color: #173f76; text-decoration: none; border: 1px solid #cbd8ea; border-radius: 11px; background: #fff; white-space: nowrap; font-weight: 700; font-size: 13px; }
+.header-notification-link:hover { background: #eff6ff; }
+.header-notification-count { border-radius: 20px; padding: 1px 7px; background: #cf2028; color: #fff; font-size: 12px; min-width: 21px; text-align: center; }
+@media (max-width: 640px) {
+  .applicant-notification-summary { padding: 15px; }
+  .applicant-notification-summary > .btn { width: 100%; justify-content: center; }
+  .applicant-status-alert { padding: 14px; }
+  .applicant-status-actions > .btn { width: 100%; justify-content: center; }
+}

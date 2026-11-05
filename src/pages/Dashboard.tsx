@@ -23,11 +23,13 @@ import {
   Submit,
 } from "../components/UI";
 import type { Application } from "../types/models";
+import ApplicantStatusAlert from "../components/ApplicantStatusAlert";
 export default function Dashboard() {
   const a = useAuth(),
     qc = useQueryClient();
   const q = useQuery({
     queryKey: ["my-applications", a.session?.user.id],
+    refetchInterval: 30_000,
     queryFn: async () => {
       const r = await supabase
         .from("applications")
@@ -43,12 +45,14 @@ export default function Dashboard() {
   });
   const examCards = useQuery({
     queryKey: ["my-issued-exam-cards", a.session?.user.id],
+    refetchInterval: 30_000,
     enabled: !!a.session,
     queryFn: () => rpc<{id:string;application_id:string}[]>("my_exam_cards"),
     staleTime: 0,
   });
   const notifications = useQuery({
     queryKey: ["notifications", a.session?.user.id],
+    refetchInterval: 30_000,
     queryFn: async () => {
       const r = await supabase
         .from("notifications")
@@ -61,6 +65,8 @@ export default function Dashboard() {
     },
   });
   const [noticeError, setNoticeError] = useState("");
+  const unreadCount = notifications.data?.filter(n => !n.read_at).length || 0;
+  const urgentCount = q.data?.filter(x => x.status === "needs_correction" || x.status === "ineligible").length || 0;
   const markRead = async (id: string) => {
     const r = await supabase
       .from("notifications")
@@ -87,6 +93,34 @@ export default function Dashboard() {
           </div>
         }
       />
+      <section className="applicant-notification-summary" aria-label="การแจ้งเตือนสถานะล่าสุด">
+        <div className="applicant-notification-summary-label">
+          <Bell size={24} aria-hidden="true" />
+          <div>
+            <h2>ศูนย์แจ้งเตือนสถานะใบสมัคร</h2>
+            <p>ตรวจสอบสถานะและข้อความจากเจ้าหน้าที่ผ่านเว็บไซต์นี้ โดยไม่ต้องรออีเมล</p>
+          </div>
+        </div>
+        <a href="#my-notifications" className="btn outline small">
+          {unreadCount > 0 ? `ข้อความยังไม่อ่าน ${unreadCount} รายการ` : "ดูประวัติแจ้งเตือน"}
+          <ArrowRight size={16} />
+        </a>
+      </section>
+      {urgentCount > 0 && (
+        <div className="applicant-notification-urgent" role="alert">
+          <Bell size={20} aria-hidden="true" />
+          <strong>มีใบสมัครที่ต้องตรวจสอบ ${urgentCount} รายการ</strong>
+          <span>กรุณาอ่านข้อความแจ้งสถานะและดำเนินการตามคำแนะนำด้านล่าง</span>
+        </div>
+      )}
+      <State loading={q.isPending} error={q.error}>
+        <div className="stack applicant-status-list">
+          {q.data?.map(x => (
+            <ApplicantStatusAlert key={x.id} application={x}
+              hasExamCard={Boolean(examCards.data?.some(card => card.application_id === x.id))} />
+          ))}
+        </div>
+      </State>
       <div className="kpi-grid three">
         <div className="kpi">
           <span>ใบสมัครที่ส่งแล้ว</span>
@@ -151,7 +185,7 @@ export default function Dashboard() {
           ))}
         </div>
       </State>
-      <h2 className="section-heading">การแจ้งเตือน</h2>
+      <h2 className="section-heading" id="my-notifications">การแจ้งเตือนจากเจ้าหน้าที่ {unreadCount > 0 && <span className="applicant-unread-count">{unreadCount} ยังไม่อ่าน</span>}</h2>
       {noticeError && <Notice kind="error">{noticeError}</Notice>}
       <State
         loading={notifications.isPending}
@@ -169,6 +203,7 @@ export default function Dashboard() {
                 <strong>{n.title}</strong>
                 <p>{n.message}</p>
                 <small>{dateTH(n.created_at, true)}</small>
+                {n.application_id && <Link className="applicant-notification-link" to={`/application/${n.application_id}`}>เปิดใบสมัครที่เกี่ยวข้อง <ArrowRight size={14}/></Link>}
               </div>
               {!n.read_at && (
                 <button
