@@ -19,7 +19,7 @@ Deno.serve(async (req: Request) => {
     const testTo = Deno.env.get("MAIL_TEST_TO") || "";
     const apiKey = Deno.env.get("RESEND_API_KEY") || "";
     const from = Deno.env.get("MAIL_FROM") || "";
-    const validAddress = (value: string) => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value);
+    const validAddress = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     if (!apiKey || !validAddress(from) || !validAddress(testTo))
       return response({ error: "MAIL_TEST_NOT_CONFIGURED" }, 503);
     try {
