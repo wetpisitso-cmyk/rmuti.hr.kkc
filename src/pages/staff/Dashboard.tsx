@@ -370,6 +370,7 @@ export default function StaffDashboard({
             <option value="submission_order">ลำดับส่งใบสมัครตามตำแหน่ง (1), (2), ...</option>
             <option value="number">เลขผู้สมัครทางการ</option>
             <option value="status">สถานะ</option>
+            <option value="ineligible_first">ไม่ผ่านคุณสมบัติก่อน</option>
           </Select>
         </div>
         <State
