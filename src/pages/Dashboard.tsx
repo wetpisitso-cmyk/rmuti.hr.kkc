@@ -24,6 +24,7 @@ import {
 } from "../components/UI";
 import type { Application } from "../types/models";
 import ApplicantStatusAlert from "../components/ApplicantStatusAlert";
+import { visibleNotifications } from "../lib/notification-inbox";
 export default function Dashboard() {
   const a = useAuth(),
     qc = useQueryClient();
@@ -80,10 +81,7 @@ export default function Dashboard() {
     refetchInterval: 30_000,
   });
   const unreadCount = unreadTotal.data || 0;
-  const visibleNotices = (notifications.data || [])
-    .filter(n => notificationFilter === "all" || !n.read_at)
-    .sort((a, b) => (a.read_at ? 1 : 0) - (b.read_at ? 1 : 0)
-      || new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const visibleNotices = visibleNotifications(notifications.data || [], notificationFilter);
   const urgentCount = q.data?.filter(x => x.status === "needs_correction" || x.status === "ineligible").length || 0;
   const markRead = async (id: string) => {
     const r = await supabase
