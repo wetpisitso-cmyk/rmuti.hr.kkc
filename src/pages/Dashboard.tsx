@@ -14,7 +14,6 @@ import { dateTH } from "../lib/format";
 import { errorTH } from "../lib/errors";
 import { rpc } from "../services/api";
 import {
-  Badge,
   Field,
   Select,
   Notice,
@@ -146,11 +145,12 @@ export default function Dashboard() {
           <span>กรุณาอ่านข้อความแจ้งสถานะและดำเนินการตามคำแนะนำด้านล่าง</span>
         </div>
       )}
-      <State loading={q.isPending} error={q.error}>
+      <State loading={q.isPending} error={q.error} empty={!q.data?.length}>
         <div className="stack applicant-status-list">
           {q.data?.map(x => (
             <ApplicantStatusAlert key={x.id} application={x}
-              hasExamCard={Boolean(examCards.data?.some(card => card.application_id === x.id))} />
+              issuedCards={examCards.data?.filter(card => card.application_id === x.id)}
+              examCardsLoaded={examCards.isSuccess} />
           ))}
         </div>
       </State>
@@ -177,47 +177,6 @@ export default function Dashboard() {
           <Bell />
         </div>
       </div>
-      <h2 className="section-heading">ใบสมัครที่ยืนยันส่งแล้ว</h2>
-      <State loading={q.isPending} error={q.error} empty={!q.data?.length}>
-        <div className="stack">
-          {q.data?.map((x) => (
-            <article className="application-card" key={x.id}>
-              <div className="application-icon">
-                <BriefcaseBusiness size={25} />
-              </div>
-              <div className="flex-1">
-                <div className="flex gap-2 flex-wrap">
-                  <Badge status={x.status} />
-                  <Badge status={x.payment_status} payment />
-                </div>
-                <h3>{x.job_positions?.title || x.snapshot?.job.title}</h3>
-                <p>
-                  {x.application_number || (x.submitted_at ? "รอเจ้าหน้าที่ออกเลขผู้สมัคร" : "ยังไม่ได้ส่งใบสมัคร")} · บันทึกล่าสุด{" "}
-                  {dateTH(x.updated_at, true)}
-                </p>
-                {(x.display_position_order ?? x.position_order) != null && <p className="muted">ลำดับในตำแหน่งนี้ <strong>({x.display_position_order ?? x.position_order})</strong> · แยกตามตำแหน่งที่สมัคร</p>}
-                {x.public_message && (
-                  <p className="public-message">{x.public_message}</p>
-                )}
-                {x.correction_deadline && (
-                  <small className="error-text">
-                    แก้ไขภายใน {dateTH(x.correction_deadline, true)}
-                  </small>
-                )}
-              </div>
-              {x.status === "eligible" && examCards.data?.filter(card => card.application_id === x.id).map(card => (
-                <Link key={card.id} className="btn outline" to={"/application/"+x.id+"/exam-card/"+card.id}>
-                  ตรวจสอบ / ดาวน์โหลดบัตรประจำตัวผู้สมัครสอบ
-                </Link>
-              ))}
-              {x.status === "eligible" && examCards.isSuccess && !examCards.data.some(card => card.application_id === x.id) && <small className="muted">บัตรสอบ: รอเจ้าหน้าที่อนุมัติออกบัตร</small>}
-              <Link className="btn outline" to={`/application/${x.id}`}>
-                ดูใบสมัคร <ArrowRight size={17} />
-              </Link>
-            </article>
-          ))}
-        </div>
-      </State>
       <h2 className="section-heading" id="my-notifications">การแจ้งเตือนจากเจ้าหน้าที่ {unreadCount > 0 && <span className="applicant-unread-count">{unreadCount} ยังไม่อ่าน</span>}</h2>
       <div className="applicant-notice-controls" role="group" aria-label="ตัวกรองการแจ้งเตือน">
         <button type="button" className={notificationFilter === "unread" ? "btn primary small" : "btn outline small"}
