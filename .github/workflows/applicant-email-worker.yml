@@ -1,0 +1,78 @@
+name: Applicant notification mail worker
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'test = send only to MAIL_TEST_TO; live = process future applicant mail'
+        required: true
+        type: choice
+        default: test
+        options:
+          - test
+          - live
+
+permissions:
+  contents: read
+
+concurrency:
+  group: applicant-mail-worker
+  cancel-in-progress: false
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      WORKER_SECRET: ${{ secrets.APPLICANT_MAIL_WORKER_SECRET }}
+      MAIL_AUTOMATION_ENABLED: ${{ vars.APPLICANT_MAIL_AUTOMATION_ENABLED }}
+      MAIL_TEST_ENABLED: ${{ vars.APPLICANT_MAIL_TEST_ENABLED }}
+      EVENT_NAME: ${{ github.event_name }}
+      REQUESTED_MODE: ${{ inputs.mode }}
+    steps:
+      - name: Check activation gate
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mode="live"
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            mode="$REQUESTED_MODE"
+          fi
+          if [[ "$mode" == "test" ]]; then
+            if [[ "$MAIL_TEST_ENABLED" != "true" ]]; then
+              echo "::notice::Test mail disabled. Set APPLICANT_MAIL_TEST_ENABLED=true after approving the test recipient."
+              exit 0
+            fi
+          elif [[ "$mode" == "live" ]]; then
+            if [[ "$MAIL_AUTOMATION_ENABLED" != "true" ]]; then
+              echo "::notice::Applicant mail delivery disabled (default)."
+              exit 0
+            fi
+          else
+            echo "::error::Invalid mail mode."
+            exit 1
+          fi
+          if [[ ${#WORKER_SECRET} -lt 32 ]]; then
+            echo "::error::Missing APPLICANT_MAIL_WORKER_SECRET (minimum 32 characters)."
+            exit 1
+          fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "allowed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Invoke server-side mail worker
+        if: steps.gate.outputs.allowed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error \
+            --retry 2 --retry-delay 5 --retry-connrefused \
+            --connect-timeout 10 --max-time 120 \
+            -X POST "https://rioukmxrgaknayltxxyk.supabase.co/functions/v1/applicant-email-worker" \
+            -H "Content-Type: application/json" \
+            -H "x-worker-secret: $WORKER_SECRET" \
+            --data "{\"mode\":\"$MODE\"}"
+        env:
+          MODE: ${{ steps.gate.outputs.mode }}

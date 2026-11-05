@@ -1,5 +1,6 @@
 // Server-only applicant mail worker. Never expose WORKER_SECRET or RESEND_API_KEY to Vite/GitHub Pages.
-// POST with x-worker-secret; no cron until the agency approves the outbound provider.
+// POST with x-worker-secret; disabled until the agency approves the outbound provider.
+// mode=test sends ONLY to the configured MAIL_TEST_TO inbox, never to applicants.
 import { createClient } from "npm:@supabase/supabase-js@2.117.3";
 
 const response = (data: unknown, status = 200) =>
@@ -10,6 +11,41 @@ Deno.serve(async (req: Request) => {
   const secret = Deno.env.get("WORKER_SECRET") || "";
   if (secret.length < 32 || req.headers.get("x-worker-secret") !== secret)
     return response({ error: "UNAUTHORIZED" }, 401);
+
+  // Test email can be verified while production notifications remain disabled.
+  // The recipient is controlled by server-side MAIL_TEST_TO only, never by request input.
+  const requestBody = await req.json().catch(() => ({}));
+  if (requestBody?.mode === "test") {
+    const testTo = Deno.env.get("MAIL_TEST_TO") || "";
+    const apiKey = Deno.env.get("RESEND_API_KEY") || "";
+    const from = Deno.env.get("MAIL_FROM") || "";
+    const validAddress = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    if (!apiKey || !validAddress(from) || !validAddress(testTo))
+      return response({ error: "MAIL_TEST_NOT_CONFIGURED" }, 503);
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + apiKey,
+          "Content-Type": "application/json",
+          "Idempotency-Key": "rmuitest-" + crypto.randomUUID(),
+        },
+        body: JSON.stringify({
+          from,
+          to: [testTo],
+          subject: "[TEST] RMUTI KKC - ทดสอบระบบแจ้งเตือนผู้สมัคร",
+          text: "ข้อความนี้เป็นอีเมลทดสอบระบบ RMUTI KKC เท่านั้น ไม่มีข้อมูลผู้สมัครจริง และยังไม่ได้เปิดใช้งานส่งอีเมลอัตโนมัติ",
+          tags: [{ name: "system", value: "rmuti_kkc_mail_test" }],
+        }),
+      });
+      if (!res.ok) return response({ error: "TEST_PROVIDER_HTTP_" + res.status }, 502);
+      const data = await res.json().catch(() => ({}));
+      if (!data?.id) return response({ error: "TEST_PROVIDER_NO_ID" }, 502);
+      return response({ ok: true, test: true, provider_accepted: true });
+    } catch {
+      return response({ error: "TEST_DELIVERY_ERROR" }, 502);
+    }
+  }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
