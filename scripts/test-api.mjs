@@ -64,19 +64,14 @@ await check("Upload function rejects missing JWT", async () => {
   });
   if (r.status !== 401) throw Error(`Expected 401, got ${r.status}`);
 });
-const worker = await fetch(`${url}/functions/v1/email-worker`, {
-  method: "POST",
-  headers,
-});
-if (worker.status === 404)
-  console.log(
-    "SKIP Email worker — deployment awaits explicit provider approval",
-  );
-else
-  await check("Email worker rejects missing worker secret", () => {
-    if (worker.status !== 401)
-      throw Error(`Expected 401, got ${worker.status}`);
+await check("Retired applicant-email worker rejects outgoing email", async () => {
+  const worker = await fetch(`${url}/functions/v1/applicant-email-worker`, {
+    method: "POST",
+    headers,
   });
+  if (worker.status !== 410)
+    throw Error(`Expected retired worker 410, got ${worker.status}`);
+});
 console.log(
   `${passed} API checks passed. No email was sent and no user/application was created.`,
 );
