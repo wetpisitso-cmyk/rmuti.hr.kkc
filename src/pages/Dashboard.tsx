@@ -14,7 +14,6 @@ import { dateTH } from "../lib/format";
 import { errorTH } from "../lib/errors";
 import { rpc } from "../services/api";
 import {
-  Badge,
   Field,
   Select,
   Notice,
@@ -24,6 +23,7 @@ import {
 } from "../components/UI";
 import type { Application } from "../types/models";
 import ApplicantStatusAlert from "../components/ApplicantStatusAlert";
+import { visibleNotifications } from "../lib/notification-inbox";
 export default function Dashboard() {
   const a = useAuth(),
     qc = useQueryClient();
@@ -59,13 +59,28 @@ export default function Dashboard() {
         .select("*")
         .eq("user_id", a.session!.user.id)
         .order("created_at", { ascending: false })
-        .limit(30);
+        .limit(100);
       if (r.error) throw r.error;
       return r.data;
     },
   });
   const [noticeError, setNoticeError] = useState("");
-  const unreadCount = notifications.data?.filter(n => !n.read_at).length || 0;
+  const [notificationFilter, setNotificationFilter] = useState<"unread" | "all">("unread");
+  const unreadTotal = useQuery({
+    queryKey: ["notifications-unread-total", a.session?.user.id],
+    enabled: !!a.session,
+    queryFn: async () => {
+      const { count, error } = await supabase.from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", a.session!.user.id)
+        .is("read_at", null);
+      if (error) throw error;
+      return count || 0;
+    },
+    refetchInterval: 30_000,
+  });
+  const unreadCount = unreadTotal.data || 0;
+  const visibleNotices = visibleNotifications(notifications.data || [], notificationFilter);
   const urgentCount = q.data?.filter(x => x.status === "needs_correction" || x.status === "ineligible").length || 0;
   const markRead = async (id: string) => {
     const r = await supabase
@@ -73,7 +88,24 @@ export default function Dashboard() {
       .update({ read_at: new Date().toISOString() })
       .eq("id", id);
     if (r.error) setNoticeError(errorTH(r.error));
-    else await qc.invalidateQueries({ queryKey: ["notifications"] });
+    else await Promise.all([
+      qc.invalidateQueries({ queryKey: ["notifications"] }),
+      qc.invalidateQueries({ queryKey: ["notifications-unread-total"] }),
+      qc.invalidateQueries({ queryKey: ["header-notification-count"] }),
+    ]);
+  };
+  const markAllRead = async () => {
+    if (!a.session?.user.id) return;
+    setNoticeError("");
+    const r = await supabase.from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("user_id", a.session.user.id).is("read_at", null);
+    if (r.error) setNoticeError(errorTH(r.error));
+    else await Promise.all([
+      qc.invalidateQueries({ queryKey: ["notifications"] }),
+      qc.invalidateQueries({ queryKey: ["notifications-unread-total"] }),
+      qc.invalidateQueries({ queryKey: ["header-notification-count"] }),
+    ]);
   };
   return (
     <div className="container section">
@@ -113,11 +145,12 @@ export default function Dashboard() {
           <span>กรุณาอ่านข้อความแจ้งสถานะและดำเนินการตามคำแนะนำด้านล่าง</span>
         </div>
       )}
-      <State loading={q.isPending} error={q.error}>
+      <State loading={q.isPending} error={q.error} empty={!q.data?.length}>
         <div className="stack applicant-status-list">
           {q.data?.map(x => (
             <ApplicantStatusAlert key={x.id} application={x}
-              hasExamCard={Boolean(examCards.data?.some(card => card.application_id === x.id))} />
+              issuedCards={examCards.data?.filter(card => card.application_id === x.id)}
+              examCardsLoaded={examCards.isSuccess} />
           ))}
         </div>
       </State>
@@ -144,48 +177,16 @@ export default function Dashboard() {
           <Bell />
         </div>
       </div>
-      <h2 className="section-heading">ใบสมัครที่ยืนยันส่งแล้ว</h2>
-      <State loading={q.isPending} error={q.error} empty={!q.data?.length}>
-        <div className="stack">
-          {q.data?.map((x) => (
-            <article className="application-card" key={x.id}>
-              <div className="application-icon">
-                <BriefcaseBusiness size={25} />
-              </div>
-              <div className="flex-1">
-                <div className="flex gap-2 flex-wrap">
-                  <Badge status={x.status} />
-                  <Badge status={x.payment_status} payment />
-                </div>
-                <h3>{x.job_positions?.title || x.snapshot?.job.title}</h3>
-                <p>
-                  {x.application_number || (x.submitted_at ? "รอเจ้าหน้าที่ออกเลขผู้สมัคร" : "ยังไม่ได้ส่งใบสมัคร")} · บันทึกล่าสุด{" "}
-                  {dateTH(x.updated_at, true)}
-                </p>
-                {(x.display_position_order ?? x.position_order) != null && <p className="muted">ลำดับในตำแหน่งนี้ <strong>({x.display_position_order ?? x.position_order})</strong> · แยกตามตำแหน่งที่สมัคร</p>}
-                {x.public_message && (
-                  <p className="public-message">{x.public_message}</p>
-                )}
-                {x.correction_deadline && (
-                  <small className="error-text">
-                    แก้ไขภายใน {dateTH(x.correction_deadline, true)}
-                  </small>
-                )}
-              </div>
-              {x.status === "eligible" && examCards.data?.filter(card => card.application_id === x.id).map(card => (
-                <Link key={card.id} className="btn outline" to={"/application/"+x.id+"/exam-card/"+card.id}>
-                  ตรวจสอบ / ดาวน์โหลดบัตรประจำตัวผู้สมัครสอบ
-                </Link>
-              ))}
-              {x.status === "eligible" && examCards.isSuccess && !examCards.data.some(card => card.application_id === x.id) && <small className="muted">บัตรสอบ: รอเจ้าหน้าที่อนุมัติออกบัตร</small>}
-              <Link className="btn outline" to={`/application/${x.id}`}>
-                ดูใบสมัคร <ArrowRight size={17} />
-              </Link>
-            </article>
-          ))}
-        </div>
-      </State>
       <h2 className="section-heading" id="my-notifications">การแจ้งเตือนจากเจ้าหน้าที่ {unreadCount > 0 && <span className="applicant-unread-count">{unreadCount} ยังไม่อ่าน</span>}</h2>
+      <div className="applicant-notice-controls" role="group" aria-label="ตัวกรองการแจ้งเตือน">
+        <button type="button" className={notificationFilter === "unread" ? "btn primary small" : "btn outline small"}
+          onClick={() => setNotificationFilter("unread")}>ยังไม่อ่าน ({unreadCount})</button>
+        <button type="button" className={notificationFilter === "all" ? "btn primary small" : "btn outline small"}
+          onClick={() => setNotificationFilter("all")}>ทั้งหมด (ล่าสุด 100 รายการ)</button>
+        {unreadCount > 0 && <button type="button" className="btn outline small" onClick={() => void markAllRead()}>
+          ทำเครื่องหมายอ่านทั้งหมด
+        </button>}
+      </div>
       {noticeError && <Notice kind="error">{noticeError}</Notice>}
       <State
         loading={notifications.isPending}
@@ -193,7 +194,12 @@ export default function Dashboard() {
         empty={!notifications.data?.length}
       >
         <div className="stack">
-          {notifications.data?.map((n) => (
+          {visibleNotices.length === 0 && <p className="muted">
+            {notificationFilter === "unread"
+              ? "ไม่มีข้อความที่ยังไม่ได้อ่านในรายการล่าสุด"
+              : "ยังไม่มีการแจ้งเตือน"}
+          </p>}
+          {visibleNotices.map((n) => (
             <div
               key={n.id}
               className={`notification ${n.read_at ? "read" : ""}`}

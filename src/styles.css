@@ -1908,3 +1908,25 @@ td strong {
   .applicant-status-alert { padding: 14px; }
   .applicant-status-actions > .btn { width: 100%; justify-content: center; }
 }
+
+
+/* Applicant inbox actions: latest/urgent notices remain usable on narrow screens. */
+.applicant-notice-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.applicant-notice-controls .btn { min-height: 38px; }
+@media (max-width: 520px) {
+  .applicant-notice-controls .btn { flex: 1 1 auto; }
+}
+
+
+.applicant-status-meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 7px 16px;
+  margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--status-border);
+  font-size: 13px; color: #42586e;
+}
+.applicant-status-meta strong { color: #1f3b57; font-weight: 700; }
