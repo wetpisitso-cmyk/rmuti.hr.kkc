@@ -4,6 +4,7 @@ import {
   Send, XCircle, CircleMinus, Bell, type LucideIcon,
 } from "lucide-react";
 import { dateTH } from "../lib/format";
+import { Badge } from "./UI";
 import type { Application, AppStatus } from "../types/models";
 
 type StatusStyle = {
@@ -51,11 +52,13 @@ const descriptions: Record<AppStatus, StatusStyle> = {
 };
 
 export default function ApplicantStatusAlert({
-  application, detail = false, hasExamCard = false,
+  application, detail = false, hasExamCard = false, issuedCards, examCardsLoaded = false,
 }: {
   application: Application;
   detail?: boolean;
   hasExamCard?: boolean;
+  issuedCards?: { id: string }[];
+  examCardsLoaded?: boolean;
 }) {
   const info = descriptions[application.status] || descriptions.under_review;
   const Icon = info.Icon;
@@ -76,6 +79,14 @@ export default function ApplicantStatusAlert({
           </small>}
         </div>
       </div>
+      {!detail && (
+        <div className="applicant-status-meta">
+          <span>เลขผู้สมัคร: <strong>{application.application_number || "รอเจ้าหน้าที่ออกเลข"}</strong></span>
+          <span>ลำดับในตำแหน่ง: <strong>{application.display_position_order ?? application.position_order ?? "—"}</strong></span>
+          <span>อัปเดต: {dateTH(application.updated_at,true)}</span>
+          <Badge status={application.payment_status} payment />
+        </div>
+      )}
       {showStaffMessage && (
         <div className="applicant-status-staff-message">
           <strong><Bell size={16} aria-hidden="true" /> ข้อความจากเจ้าหน้าที่</strong>
@@ -94,10 +105,18 @@ export default function ApplicantStatusAlert({
             แก้ไขใบสมัคร <ArrowRight size={16} />
           </Link>
         )}
-        {hasExamCard && application.status === "eligible" && (
+        {detail && hasExamCard && application.status === "eligible" && (
           <span className="applicant-status-exam-ready">
             <CheckCircle2 size={16} /> มีบัตรสอบที่ออกแล้ว กรุณาเปิดดูในรายละเอียดใบสมัคร
           </span>
+        )}
+        {!detail && application.status === "eligible" && issuedCards?.map(card => (
+          <Link key={card.id} className="btn outline small" to={`/application/${application.id}/exam-card/${card.id}`}>
+            ตรวจสอบ / ดาวน์โหลดบัตรสอบ <ArrowRight size={16} />
+          </Link>
+        ))}
+        {!detail && application.status === "eligible" && examCardsLoaded && !issuedCards?.length && (
+          <small className="muted">บัตรสอบ: รอเจ้าหน้าที่อนุมัติออกบัตร</small>
         )}
         {!detail && (
           <Link className="btn outline small" to={`/application/${application.id}`}>
