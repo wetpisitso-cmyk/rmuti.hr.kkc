@@ -5,7 +5,6 @@ import { dateTH } from "../../lib/format";
 import { supabase, supabaseUrl, publishableKey } from "../../lib/supabase";
 import { paymentQrUrl } from "../../components/PaymentBankDetails";
 import { errorTH } from "../../lib/errors";
-import ApplicantMailSettings from "../../components/staff/ApplicantMailSettings";
 import {
   Field,
   Textarea,
@@ -274,16 +273,6 @@ export default function Settings() {
         100,
       ),
   });
-  const outbox = useQuery({
-    queryKey: ["outbox"],
-    queryFn: () =>
-      rows(
-        "email_outbox",
-        "id,status,attempts,error_code,created_at",
-        "created_at",
-        100,
-      ),
-  });
   const c = q.data?.find((x) => x.key === "contact")?.value,
     p = q.data?.find((x) => x.key === "privacy")?.value,
     r = q.data?.find((x) => x.key === "retention")?.value,
@@ -519,38 +508,6 @@ export default function Settings() {
         </div>}
         {cleanupMessage && <Notice kind="success">{cleanupMessage}</Notice>}
         {cleanupError && <Notice kind="error">ตรวจสอบ/ลบไม่สำเร็จ: {cleanupError}</Notice>}
-      </section>
-      <ApplicantMailSettings />
-      <section className="panel">
-        <h2>คิวอีเมลล่าสุด</h2>
-        <State
-          loading={outbox.isPending}
-          error={outbox.error}
-          empty={!outbox.data?.length}
-        >
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>วันเวลา</th>
-                  <th>สถานะ</th>
-                  <th>ครั้งที่พยายาม</th>
-                  <th>รหัสข้อผิดพลาด</th>
-                </tr>
-              </thead>
-              <tbody>
-                {outbox.data?.map((x) => (
-                  <tr key={x.id}>
-                    <td>{dateTH(x.created_at, true)}</td>
-                    <td>{x.status}</td>
-                    <td>{x.attempts}</td>
-                    <td>{x.error_code || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </State>
       </section>
       <section className="panel">
         <h2>ประวัติการเปลี่ยนแปลงล่าสุด</h2>
