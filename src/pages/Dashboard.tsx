@@ -59,13 +59,31 @@ export default function Dashboard() {
         .select("*")
         .eq("user_id", a.session!.user.id)
         .order("created_at", { ascending: false })
-        .limit(30);
+        .limit(100);
       if (r.error) throw r.error;
       return r.data;
     },
   });
   const [noticeError, setNoticeError] = useState("");
-  const unreadCount = notifications.data?.filter(n => !n.read_at).length || 0;
+  const [notificationFilter, setNotificationFilter] = useState<"unread" | "all">("unread");
+  const unreadTotal = useQuery({
+    queryKey: ["notifications-unread-total", a.session?.user.id],
+    enabled: !!a.session,
+    queryFn: async () => {
+      const { count, error } = await supabase.from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", a.session!.user.id)
+        .is("read_at", null);
+      if (error) throw error;
+      return count || 0;
+    },
+    refetchInterval: 30_000,
+  });
+  const unreadCount = unreadTotal.data || 0;
+  const visibleNotices = (notifications.data || [])
+    .filter(n => notificationFilter === "all" || !n.read_at)
+    .sort((a, b) => (a.read_at ? 1 : 0) - (b.read_at ? 1 : 0)
+      || new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   const urgentCount = q.data?.filter(x => x.status === "needs_correction" || x.status === "ineligible").length || 0;
   const markRead = async (id: string) => {
     const r = await supabase
@@ -73,7 +91,24 @@ export default function Dashboard() {
       .update({ read_at: new Date().toISOString() })
       .eq("id", id);
     if (r.error) setNoticeError(errorTH(r.error));
-    else await qc.invalidateQueries({ queryKey: ["notifications"] });
+    else await Promise.all([
+      qc.invalidateQueries({ queryKey: ["notifications"] }),
+      qc.invalidateQueries({ queryKey: ["notifications-unread-total"] }),
+      qc.invalidateQueries({ queryKey: ["header-notification-count"] }),
+    ]);
+  };
+  const markAllRead = async () => {
+    if (!a.session?.user.id) return;
+    setNoticeError("");
+    const r = await supabase.from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("user_id", a.session.user.id).is("read_at", null);
+    if (r.error) setNoticeError(errorTH(r.error));
+    else await Promise.all([
+      qc.invalidateQueries({ queryKey: ["notifications"] }),
+      qc.invalidateQueries({ queryKey: ["notifications-unread-total"] }),
+      qc.invalidateQueries({ queryKey: ["header-notification-count"] }),
+    ]);
   };
   return (
     <div className="container section">
@@ -186,6 +221,15 @@ export default function Dashboard() {
         </div>
       </State>
       <h2 className="section-heading" id="my-notifications">การแจ้งเตือนจากเจ้าหน้าที่ {unreadCount > 0 && <span className="applicant-unread-count">{unreadCount} ยังไม่อ่าน</span>}</h2>
+      <div className="applicant-notice-controls" role="group" aria-label="ตัวกรองการแจ้งเตือน">
+        <button type="button" className={notificationFilter === "unread" ? "btn primary small" : "btn outline small"}
+          onClick={() => setNotificationFilter("unread")}>ยังไม่อ่าน ({unreadCount})</button>
+        <button type="button" className={notificationFilter === "all" ? "btn primary small" : "btn outline small"}
+          onClick={() => setNotificationFilter("all")}>ทั้งหมด (ล่าสุด 100 รายการ)</button>
+        {unreadCount > 0 && <button type="button" className="btn outline small" onClick={() => void markAllRead()}>
+          ทำเครื่องหมายอ่านทั้งหมด
+        </button>}
+      </div>
       {noticeError && <Notice kind="error">{noticeError}</Notice>}
       <State
         loading={notifications.isPending}
@@ -193,7 +237,12 @@ export default function Dashboard() {
         empty={!notifications.data?.length}
       >
         <div className="stack">
-          {notifications.data?.map((n) => (
+          {visibleNotices.length === 0 && <p className="muted">
+            {notificationFilter === "unread"
+              ? "ไม่มีข้อความที่ยังไม่ได้อ่านในรายการล่าสุด"
+              : "ยังไม่มีการแจ้งเตือน"}
+          </p>}
+          {visibleNotices.map((n) => (
             <div
               key={n.id}
               className={`notification ${n.read_at ? "read" : ""}`}
