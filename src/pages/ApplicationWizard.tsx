@@ -397,7 +397,7 @@ export default function ApplicationWizard() {
                     <Textarea label="ที่อยู่ตามทะเบียนบ้าน (บังคับ)" value={personal.registered_address || ""}
                       onChange={e=>update("registered_address",e.target.value)} required maxLength={2000} />
                   </div>
-                  <Field label="สถานะการเกณฑ์ทหาร (ถ้ามี)" value={personal.military_status || ""}
+                  <Field label="สถานะการเกณฑ์ทหาร (ตามประกาศของมหาวิทยาลัยเท่านั้น)" value={personal.military_status || ""}
                     onChange={e=>update("military_status",e.target.value)} maxLength={200}
                     placeholder="เช่น ผ่านการเกณฑ์ทหาร / ได้รับการยกเว้น / ไม่เกี่ยวข้อง" />
                   <div className="col-span-full">

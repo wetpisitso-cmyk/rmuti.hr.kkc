@@ -30,7 +30,7 @@ export function AdminApplicantDetails({ person, email }: Props) {
     { label: "LINE ID", value: text(person.line_id) },
     { label: "ที่อยู่ตามทะเบียนบ้าน", value: text(person.registered_address), requiredNew: true, wide: true },
     { label: "ที่อยู่ปัจจุบัน", value: text(person.address), wide: true },
-    { label: "สถานะการเกณฑ์ทหาร (ถ้ามี)", value: text(person.military_status), wide: true },
+    { label: "สถานะการเกณฑ์ทหาร (ตามประกาศของมหาวิทยาลัยเท่านั้น)", value: text(person.military_status), wide: true },
     { label: "ความรู้ความสามารถพิเศษ", value: text(person.skills), wide: true },
   ];
   const missing = items.filter(item => item.requiredNew && item.value === "—");
