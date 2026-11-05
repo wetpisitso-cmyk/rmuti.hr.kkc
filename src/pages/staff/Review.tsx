@@ -285,6 +285,11 @@ export default function Review() {
                 <div><span>ประสบการณ์ทำงาน</span><strong>{d.experience.length}</strong><small>รายการ</small></div>
                 <div><span>เลขผู้สมัคร</span><strong>{a.application_number ? "ได้รับแล้ว" : "รอกำหนด"}</strong></div>
               </div>
+              {auth.can("review") && d.history.some(h => typeof h.message === "string" && h.message.trim() && !["withdrawn","submitted"].includes(h.to_status)) && (
+                <button type="button" className="btn outline" onClick={() => setReviewStep(3)}>
+                  ดูข้อความที่แจ้งผู้สมัครย้อนหลัง ({d.history.filter(h => typeof h.message === "string" && h.message.trim() && !["withdrawn","submitted"].includes(h.to_status)).length} ข้อความ)
+                </button>
+              )}
               <div className="review-step-tabs" role="tablist" aria-label="ขั้นตอนการตรวจใบสมัคร">
                 {steps.map((item,i) => <button key={item.name} type="button" role="tab" aria-selected={reviewStep===i}
                   className={`review-step-tab tone-${item.tone} ${reviewStep===i?"current":""}`}
@@ -303,29 +308,6 @@ export default function Review() {
                   ขั้นตอนถัดไป <ChevronRight size={17}/>
                 </button>
               </div>
-            </section>
-            <section className="panel stack no-print" aria-label="ประวัติข้อความแจ้งผู้สมัคร">
-              <h2>ข้อความที่แจ้งผู้สมัครไปแล้ว</h2>
-              <p className="muted">
-                ข้อความต่อไปนี้บันทึกไว้ในประวัติใบสมัคร ผู้สมัครสามารถอ่านได้ในหน้าใบสมัครและประวัติสถานะ
-                (ไม่ใช่การยืนยันว่าได้รับอีเมล)
-              </p>
-              {d.history.some(h => typeof h.message === "string" && h.message.trim()) ? (
-                [...d.history]
-                  .filter(h => typeof h.message === "string" && h.message.trim())
-                  .sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                  .map(h => (
-                    <div className="subpanel" key={h.id}>
-                      <div className="flex gap-2 flex-wrap">
-                        <Badge status={h.to_status} />
-                        <small className="muted">{dateTH(h.created_at, true)}</small>
-                      </div>
-                      <p className="pre-wrap">{h.message}</p>
-                    </div>
-                  ))
-              ) : (
-                <p className="muted">ยังไม่มีข้อความที่เจ้าหน้าที่ส่งแจ้งผู้สมัครสำหรับใบสมัครนี้</p>
-              )}
             </section>
             <div className="apple-review-columns">
             <section className="panel review-color-panel tone-blue" id="review-personal" hidden={reviewStep!==0}>
@@ -395,6 +377,28 @@ export default function Review() {
                 <CheckCircle2 size={17}/> {marked("documents")?"ตรวจเอกสารแล้ว":"ยืนยันตรวจเอกสารครบแล้ว"}
               </button>}
             </section>
+            {auth.can("review") && (
+              <section className="panel stack review-color-panel tone-green" hidden={reviewStep!==3} id="review-applicant-notice-history">
+                <h2>ข้อความที่เคยแจ้งผู้สมัคร (ย้อนหลัง)</h2>
+                <p className="muted">นี่คือข้อความที่เจ้าหน้าที่บันทึกแจ้งผู้สมัครในระบบ ผู้สมัครสามารถอ่านได้ในประวัติสถานะ แม้ใบสมัครจะผ่านคุณสมบัติแล้ว แต่ยังไม่ใช่การยืนยันว่าผู้สมัครเปิดอ่านจริง</p>
+                {d.history.some(h => typeof h.message === "string" && h.message.trim() && !["withdrawn","submitted"].includes(h.to_status)) ? (
+                  [...d.history]
+                    .filter(h => typeof h.message === "string" && h.message.trim() && !["withdrawn","submitted"].includes(h.to_status))
+                    .sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                    .map(h => (
+                      <div className="subpanel" key={h.id}>
+                        <div className="flex gap-2 flex-wrap">
+                          <Badge status={h.to_status} />
+                          <small className="muted">{dateTH(h.created_at, true)}</small>
+                        </div>
+                        <p className="pre-wrap">{h.message}</p>
+                      </div>
+                    ))
+                ) : (
+                  <p className="muted">ใบสมัครนี้ยังไม่มีข้อความที่เจ้าหน้าที่แจ้งให้แก้ไขหรือแจ้งผลการพิจารณา</p>
+                )}
+              </section>
+            )}
             {auth.can("review") &&
               ["submitted", "under_review"].includes(a.status) && (
                 <form className="panel stack review-color-panel tone-green" hidden={reviewStep!==3} id="review-decision" onSubmit={submit}>
