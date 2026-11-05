@@ -1922,3 +1922,11 @@ td strong {
 @media (max-width: 520px) {
   .applicant-notice-controls .btn { flex: 1 1 auto; }
 }
+
+
+.applicant-status-meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 7px 16px;
+  margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--status-border);
+  font-size: 13px; color: #42586e;
+}
+.applicant-status-meta strong { color: #1f3b57; font-weight: 700; }
