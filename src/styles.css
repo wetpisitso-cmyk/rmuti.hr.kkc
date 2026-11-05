@@ -1908,3 +1908,17 @@ td strong {
   .applicant-status-alert { padding: 14px; }
   .applicant-status-actions > .btn { width: 100%; justify-content: center; }
 }
+
+
+/* Applicant inbox actions: latest/urgent notices remain usable on narrow screens. */
+.applicant-notice-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.applicant-notice-controls .btn { min-height: 38px; }
+@media (max-width: 520px) {
+  .applicant-notice-controls .btn { flex: 1 1 auto; }
+}
