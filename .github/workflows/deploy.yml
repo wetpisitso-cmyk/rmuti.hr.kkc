@@ -40,3 +40,8 @@ jobs:
     steps:
       - uses: actions/deploy-pages@v4
         id: deployment
+      - name: Public GitHub Pages smoke check
+        run: node scripts/smoke-pages.mjs
+        env:
+          PUBLIC_PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+
