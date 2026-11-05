@@ -304,6 +304,29 @@ export default function Review() {
                 </button>
               </div>
             </section>
+            <section className="panel stack no-print" aria-label="ประวัติข้อความแจ้งผู้สมัคร">
+              <h2>ข้อความที่แจ้งผู้สมัครไปแล้ว</h2>
+              <p className="muted">
+                ข้อความต่อไปนี้บันทึกไว้ในประวัติใบสมัคร ผู้สมัครสามารถอ่านได้ในหน้าใบสมัครและประวัติสถานะ
+                (ไม่ใช่การยืนยันว่าได้รับอีเมล)
+              </p>
+              {d.history.some(h => typeof h.message === "string" && h.message.trim()) ? (
+                [...d.history]
+                  .filter(h => typeof h.message === "string" && h.message.trim())
+                  .sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                  .map(h => (
+                    <div className="subpanel" key={h.id}>
+                      <div className="flex gap-2 flex-wrap">
+                        <Badge status={h.to_status} />
+                        <small className="muted">{dateTH(h.created_at, true)}</small>
+                      </div>
+                      <p className="pre-wrap">{h.message}</p>
+                    </div>
+                  ))
+              ) : (
+                <p className="muted">ยังไม่มีข้อความที่เจ้าหน้าที่ส่งแจ้งผู้สมัครสำหรับใบสมัครนี้</p>
+              )}
+            </section>
             <div className="apple-review-columns">
             <section className="panel review-color-panel tone-blue" id="review-personal" hidden={reviewStep!==0}>
               <div className="flex gap-2">
