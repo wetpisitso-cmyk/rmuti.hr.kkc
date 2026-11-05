@@ -397,9 +397,17 @@ export default function ApplicationWizard() {
                     <Textarea label="ที่อยู่ตามทะเบียนบ้าน (บังคับ)" value={personal.registered_address || ""}
                       onChange={e=>update("registered_address",e.target.value)} required maxLength={2000} />
                   </div>
-                  <Field label="สถานะการเกณฑ์ทหาร (ตามประกาศของมหาวิทยาลัยเท่านั้น)" value={personal.military_status || ""}
-                    onChange={e=>update("military_status",e.target.value)} maxLength={200}
-                    placeholder="เช่น ผ่านการเกณฑ์ทหาร / ได้รับการยกเว้น / ไม่เกี่ยวข้อง" />
+                  <div className="military-status-applicant-field">
+                    <Field label="สถานะการเกณฑ์ทหาร (ตามประกาศของมหาวิทยาลัยเท่านั้น)" value={personal.military_status || ""}
+                      onChange={e=>update("military_status",e.target.value)} maxLength={200}
+                      placeholder="เช่น ผ่านการเกณฑ์ทหาร / ได้รับการยกเว้น / ไม่เกี่ยวข้อง" />
+                    {personal.gender === "หญิง" && (
+                      <p className="military-status-female-note" role="note">
+                        <strong>สำหรับผู้สมัครเพศหญิง: ไม่เกี่ยวข้อง</strong>
+                        <span>กรุณาระบุ “ไม่เกี่ยวข้อง” ในช่องด้านบน โดยยึดตามประกาศของมหาวิทยาลัยเท่านั้น</span>
+                      </p>
+                    )}
+                  </div>
                   <div className="col-span-full">
                     <Textarea label="ความรู้ความสามารถพิเศษ (ไม่บังคับ)" value={personal.skills || ""}
                       onChange={e=>update("skills",e.target.value)} maxLength={2000}

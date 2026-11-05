@@ -1809,3 +1809,27 @@ td strong {
 @media (max-width: 700px) {
   .footer .footer-inner > span { justify-content: center; }
 }
+
+
+/* Applicant-only guidance: show when the selected gender is female. */
+.military-status-applicant-field {
+  min-width: 0;
+}
+.military-status-female-note {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+  margin: 8px 0 0;
+  border: 2px solid #e24646;
+  border-left-width: 5px;
+  border-radius: 10px;
+  background: #fff0f0;
+  color: #a11717;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.military-status-female-note strong {
+  font-weight: 800;
+  color: #b91c1c;
+}
