@@ -401,12 +401,10 @@ export default function ApplicationWizard() {
                     <Field label="สถานะการเกณฑ์ทหาร (ตามประกาศของมหาวิทยาลัยเท่านั้น)" value={personal.military_status || ""}
                       onChange={e=>update("military_status",e.target.value)} maxLength={200}
                       placeholder="เช่น ผ่านการเกณฑ์ทหาร / ได้รับการยกเว้น / ไม่เกี่ยวข้อง" />
-                    {personal.gender === "หญิง" && (
-                      <p className="military-status-female-note" role="note">
-                        <strong>สำหรับผู้สมัครเพศหญิง: ไม่เกี่ยวข้อง</strong>
-                        <span>กรุณาระบุ “ไม่เกี่ยวข้อง” ในช่องด้านบน โดยยึดตามประกาศของมหาวิทยาลัยเท่านั้น</span>
-                      </p>
-                    )}
+                    <p className="military-status-female-note" role="note" aria-label="คำแนะนำสำหรับผู้สมัครเพศหญิง">
+                      <strong>ผู้สมัครเพศหญิง: กรุณาระบุ “ไม่เกี่ยวข้อง”</strong>
+                      <span>กรอกในช่องด้านบน โดยยึดตามประกาศของมหาวิทยาลัยเท่านั้น</span>
+                    </p>
                   </div>
                   <div className="col-span-full">
                     <Textarea label="ความรู้ความสามารถพิเศษ (ไม่บังคับ)" value={personal.skills || ""}
