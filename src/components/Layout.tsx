@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   ArrowUpRight,
   BookOpenCheck,
+  Bell,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase, supabaseUrl } from "../lib/supabase";
@@ -123,6 +124,19 @@ export function Layout() {
     queryKey: ["settings"],
     queryFn: () => rows("app_settings", "*", "key"),
   });
+  const unreadNotifications = useQuery({
+    queryKey: ["header-notification-count", a.session?.user.id],
+    enabled: Boolean(a.session && a.role === "applicant"),
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const { count, error } = await supabase.from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", a.session!.user.id)
+        .is("read_at", null);
+      if (error) throw error;
+      return count || 0;
+    },
+  });
   const contact = settings?.find((s) => s.key === "contact")?.value;
   const logout = async () => {
     await supabase.auth.signOut();
@@ -168,6 +182,16 @@ export function Layout() {
                     ? "ใบสมัครของฉัน"
                     : "หน้าสำหรับเจ้าหน้าที่"}
                 </Link>
+                {a.role === "applicant" && (
+                  <Link className="header-notification-link" to="/dashboard#my-notifications"
+                    aria-label={`การแจ้งเตือนจากเจ้าหน้าที่ ${unreadNotifications.data || 0} ข้อความยังไม่อ่าน`}>
+                    <Bell size={19} aria-hidden="true" />
+                    <span>แจ้งเตือน</span>
+                    {(unreadNotifications.data || 0) > 0 && (
+                      <span className="header-notification-count">{unreadNotifications.data}</span>
+                    )}
+                  </Link>
+                )}
                 <button
                   className="icon-btn"
                   title="ออกจากระบบ"
