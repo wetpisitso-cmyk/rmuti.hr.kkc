@@ -53,10 +53,8 @@ export default function RecruitmentCalendar({ jobs }: { jobs: readonly Job[] }) 
     [displayed.year, displayed.month],
   );
   const todayKey = bangkokDateKey(new Date());
-  const today = todayKey.startsWith(calendarDateKey(displayed.year,displayed.month,1).slice(0,7))
-    ? Number(todayKey.slice(-2)) : null;
   const activeDay = chosenDay !== null && chosenDay <= new Date(Date.UTC(displayed.year,displayed.month,0)).getUTCDate()
-    ? chosenDay : today;
+    ? chosenDay : null;
   const dayKey = activeDay === null ? null : calendarDateKey(displayed.year, displayed.month, activeDay);
   const dayJobs = dayKey ? jobsOnCalendarDay(monthJobs, dayKey) : [];
   const listedJobs = dayKey ? dayJobs : monthJobs;
