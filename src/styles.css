@@ -1930,3 +1930,228 @@ td strong {
   font-size: 13px; color: #42586e;
 }
 .applicant-status-meta strong { color: #1f3b57; font-weight: 700; }
+
+
+/* Homepage recruitment calendar — interactive, public, responsive; no database writes. */
+.recruitment-calendar-section {
+  margin-top: 34px;
+  margin-bottom: 36px;
+  padding: 0;
+  position: relative;
+}
+.recruitment-calendar-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 17px;
+}
+.recruitment-calendar-heading-icon {
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  border-radius: 19px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg,#ff8a2b,#e55e0a);
+  box-shadow: 0 9px 20px #ef6b2233;
+  color: #fff;
+}
+.recruitment-calendar-heading-text { min-width: 240px; flex: 1 1 340px; }
+.recruitment-calendar-kicker {
+  display: block; color: #bb5a16; font-size: 11px;
+  letter-spacing: 0.08em; font-weight: 800;
+}
+.recruitment-calendar-heading h2 {
+  color: #102d55; font-size: clamp(23px,2.5vw,32px);
+  letter-spacing: -0.035em; margin: 1px 0 4px;
+}
+.recruitment-calendar-heading p { color: #65748b; font-size: 13px; margin: 0; }
+.recruitment-calendar-summary {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 13px; color: #9d4d10; background: #fff3e7;
+  border: 1px solid #f7d9bf; border-radius: 99px;
+  font-size: 12px; font-weight: 800;
+}
+.recruitment-calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0,1.12fr) minmax(0,0.88fr);
+  background: #fff;
+  border: 1px solid #dbe4f2;
+  border-radius: 23px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px #1c3d6811, 0 2px 8px #1c3d6810;
+}
+.recruitment-month-panel { padding: 23px; min-width: 0; }
+.recruitment-month-header {
+  background: linear-gradient(118deg,#102b4f,#174c80);
+  border-radius: 16px; padding: 17px 18px; color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; margin-bottom: 18px;
+}
+.recruitment-month-header small { color: #c1d5ed; font-size: 11px; font-weight: 600; }
+.recruitment-month-header h3 {
+  color: #fff; font-size: clamp(18px,2vw,24px); margin: 0; line-height: 1.4;
+}
+.recruitment-month-controls { display: flex; align-items: center; gap: 5px; }
+.recruitment-month-controls button {
+  display: grid; place-items: center; padding: 7px;
+  min-width: 34px; min-height: 34px;
+  border-radius: 9px; border: 1px solid #ffffff45;
+  color: #fff; background: #ffffff16;
+}
+.recruitment-month-controls button:hover:not(:disabled) { background: #ffffff30; }
+.recruitment-month-controls button:disabled { opacity: .35; }
+.recruitment-month-controls button.recruitment-month-today {
+  font-size: 11px; font-weight: 700; padding: 7px 9px; white-space: nowrap;
+}
+.recruitment-calendar-grid {
+  display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 6px;
+}
+.recruitment-weekday {
+  text-align: center; color: #5b6b81; background: #f0f5fc;
+  border-radius: 8px; font-size: 12px; font-weight: 800; padding: 8px 0;
+}
+.recruitment-weekday.is-sunday { color: #c84430; background: #fff2ed; }
+.recruitment-day {
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  gap: 4px; min-width: 0; height: 68px;
+  padding: 6px 4px 7px; background: #fff;
+  border: 1px solid #e4eaf1; border-radius: 10px;
+  color: #293f5d; transition: background .15s,border-color .15s,transform .15s;
+}
+.recruitment-day-number { font-weight: 800; font-size: 16px; line-height: 1.3; }
+.recruitment-day-count {
+  font-size: 10px; font-weight: 800; min-width: 20px; text-align: center;
+  line-height: 16px; padding: 0 4px; color: #174471;
+  border-radius: 99px; background: #e6f0fa;
+}
+.recruitment-day.has-jobs { background: #f4f8fd; border-color: #bdcee3; }
+.recruitment-day.is-open { background: #eaf8f0; border-color: #b6dfc6; }
+.recruitment-day.is-upcoming { background: #fff7e9; border-color: #f0cf9c; }
+.recruitment-day.is-today:not(.is-selected) {
+  outline: 2px solid #ea7b2e; outline-offset: -3px;
+}
+.recruitment-day:hover { transform: translateY(-1px); border-color: #e78539; }
+.recruitment-day.is-selected, .recruitment-day.is-selected.is-open,
+.recruitment-day.is-selected.is-upcoming {
+  color: #fff; border-color: #123f72; background: #123f72;
+  box-shadow: 0 4px 10px #174a8040;
+}
+.recruitment-day.is-selected .recruitment-day-count { background: #ffffff30; color: #fff; }
+.recruitment-day-indicators { display: flex; gap: 3px; min-height: 5px; }
+.recruitment-day-indicators i,.recruitment-calendar-key i {
+  width: 7px; height: 7px; border-radius: 99px; display: inline-block; flex-shrink: 0;
+}
+.recruitment-day-indicators .phase-open,.recruitment-calendar-key .phase-open { background: #159e69; }
+.recruitment-day-indicators .phase-closing,.recruitment-calendar-key .phase-closing { background: #e06a16; }
+.recruitment-day-indicators .phase-upcoming,.recruitment-calendar-key .phase-upcoming { background: #d4a02a; }
+.recruitment-day-indicators .phase-closed,.recruitment-calendar-key .phase-closed { background: #8896a9; }
+.recruitment-day.is-selected .recruitment-day-indicators i { outline: 1px solid #fff; }
+.recruitment-day-empty { min-height: 68px; }
+.recruitment-calendar-key {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;
+  margin-top: 15px; color: #526780; font-size: 12px; font-weight: 700;
+}
+.recruitment-calendar-key span { display: inline-flex; align-items: center; gap: 5px; }
+.recruitment-calendar-footnote {
+  color: #7a899b; margin: 9px 0 0; font-size: 11px;
+}
+.recruitment-calendar-detail {
+  display: flex; flex-direction: column; min-width: 0;
+  border-left: 1px solid #e3eaf4; background: #f8faff;
+}
+.recruitment-calendar-detail-head {
+  padding: 22px 22px 16px;
+  background: linear-gradient(135deg,#f0f5fd,#fff8f1);
+  border-bottom: 1px solid #e2e9f4;
+}
+.recruitment-calendar-detail-head > span {
+  color: #cd661c; letter-spacing: 0.06em; font-size: 11px; font-weight: 800;
+}
+.recruitment-calendar-detail-head h3 {
+  color: #102d55; font-size: clamp(19px,2vw,23px); margin: 4px 0;
+}
+.recruitment-calendar-detail-head p { color: #6d7b90; font-size: 12px; margin: 0; }
+.recruitment-calendar-items {
+  padding: 14px; display: flex; flex-direction: column; gap: 10px;
+  overflow-y: auto; max-height: 520px; min-height: 160px;
+}
+.recruitment-calendar-job {
+  border: 1px solid #e1e8f2; border-left: 4px solid #8b99ab;
+  background: #fff; padding: 14px; border-radius: 12px;
+  box-shadow: 0 2px 7px #223b5010;
+}
+.recruitment-calendar-job.phase-open { border-left-color: #169768; }
+.recruitment-calendar-job.phase-closing { border-left-color: #ea761c; }
+.recruitment-calendar-job.phase-upcoming { border-left-color: #c99318; }
+.recruitment-calendar-job-meta {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 7px;
+}
+.recruitment-calendar-job-state {
+  display: inline-block; border-radius: 99px; padding: 3px 9px;
+  color: #617080; background: #eff2f5; font-size: 11px; font-weight: 800;
+}
+.recruitment-calendar-job-state.phase-open { color: #117850; background: #e6f7ee; }
+.recruitment-calendar-job-state.phase-closing { color: #ae5313; background: #fff0df; }
+.recruitment-calendar-job-state.phase-upcoming { color: #9a6810; background: #fff5d8; }
+.recruitment-calendar-vacancies {
+  display: inline-flex; gap: 4px; align-items: center;
+  color: #526882; font-size: 11px; font-weight: 700;
+}
+.recruitment-calendar-job h4 {
+  margin: 9px 0 7px; color: #17385f; font-size: 15px; font-weight: 800; line-height: 1.55;
+}
+.recruitment-calendar-job p { margin: 0 0 9px; color: #617189; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+.recruitment-calendar-job p svg { flex-shrink: 0; }
+.recruitment-calendar-job-bottom {
+  border-top: 1px solid #e9edf4; padding-top: 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 9px; flex-wrap: wrap;
+}
+.recruitment-calendar-job-bottom small {
+  display: inline-flex; align-items: center; gap: 5px; color: #6a7990; font-size: 11px;
+}
+.recruitment-calendar-job-bottom small svg { flex-shrink: 0; }
+.recruitment-calendar-job-bottom a {
+  color: #d96517; font-size: 12px; font-weight: 800;
+  display: inline-flex; gap: 4px; align-items: center;
+}
+.recruitment-calendar-job-bottom a:hover { text-decoration: underline; }
+.recruitment-calendar-empty {
+  padding: 32px 15px; text-align: center; color: #8492a5;
+  display: flex; align-items: center; flex-direction: column; gap: 6px;
+}
+.recruitment-calendar-empty strong { color: #3b5878; font-size: 14px; }
+.recruitment-calendar-empty span { font-size: 12px; }
+.recruitment-calendar-detail-note {
+  margin-top: auto; padding: 13px 17px; color: #735234;
+  background: #fff7ed; border-top: 1px solid #fae5cb; font-size: 11px;
+}
+@media (max-width: 860px) {
+  .recruitment-calendar-layout { grid-template-columns: minmax(0,1fr); }
+  .recruitment-calendar-detail { border-left: 0; border-top: 1px solid #e4ebf4; }
+  .recruitment-calendar-items { max-height: 440px; }
+}
+@media (max-width: 540px) {
+  .recruitment-calendar-section { margin-top: 20px; margin-bottom: 24px; }
+  .recruitment-calendar-heading { gap: 10px; }
+  .recruitment-calendar-heading-icon { width: 46px; height: 46px; flex-basis: 46px; border-radius: 14px; }
+  .recruitment-calendar-heading-text { min-width: 0; flex-basis: calc(100% - 58px); }
+  .recruitment-calendar-heading h2 { font-size: 21px; }
+  .recruitment-calendar-summary { margin-left: 0; }
+  .recruitment-month-panel { padding: 12px; }
+  .recruitment-month-header { padding: 13px 11px; }
+  .recruitment-month-controls button.recruitment-month-today { font-size: 10px; }
+  .recruitment-calendar-grid { gap: 3px; }
+  .recruitment-day { height: 58px; padding: 5px 1px; border-radius: 7px; }
+  .recruitment-day-empty { min-height: 58px; }
+  .recruitment-day-number { font-size: 14px; }
+  .recruitment-day-count { font-size: 9px; }
+  .recruitment-calendar-detail-head { padding: 16px; }
+  .recruitment-calendar-items { padding: 10px; }
+  .recruitment-calendar-job { padding: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recruitment-day { transition: none; }
+  .recruitment-day:hover { transform: none; }
+}
