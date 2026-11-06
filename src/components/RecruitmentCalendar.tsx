@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight, BriefcaseBusiness, CalendarDays, ChevronLeft, ChevronRight,
-  Clock3, MapPin, Sparkles,
+  Clock3, MapPin, Users, Timer, CheckCircle2,
 } from "lucide-react";
 import type { Job } from "../types/models";
 import { dateTH } from "../lib/format";
@@ -60,6 +60,9 @@ export default function RecruitmentCalendar({ jobs }: { jobs: readonly Job[] }) 
   const listedJobs = dayKey ? dayJobs : monthJobs;
   const currentTime = Date.now();
   const openCount = monthJobs.filter(j => ["open","closing"].includes(recruitmentPhase(j,currentTime))).length;
+  const closingCount = monthJobs.filter(j => recruitmentPhase(j,currentTime)==="closing").length;
+  const monthVacancies = monthJobs.reduce((sum,j)=>sum+j.vacancies,0);
+  const monthName = monthNames[displayed.month-1];
 
   const goMonth = (delta: number) => {
     setMonthOffset(value => Math.max(-36,Math.min(36,value + delta)));
@@ -67,31 +70,49 @@ export default function RecruitmentCalendar({ jobs }: { jobs: readonly Job[] }) 
   };
 
   return (
-    <section className="recruitment-calendar-section container" id="recruitment-calendar"
+    <section className="recruitment-calendar-section recruitment-calendar-style-b container" id="recruitment-calendar"
       aria-label="ปฏิทินรับสมัครงานรายเดือน">
-      <header className="recruitment-calendar-heading">
-        <div className="recruitment-calendar-heading-icon"><CalendarDays size={30} aria-hidden="true" /></div>
-        <div className="recruitment-calendar-heading-text">
-          <span className="recruitment-calendar-kicker">RMUTI KKC · RECRUITMENT CALENDAR</span>
-          <h2>ปฏิทินเปิดรับสมัครงาน</h2>
-          <p>เลือกวันที่เพื่อดูตำแหน่งที่รับสมัคร พร้อมกำหนดเปิด–ปิดจากประกาศในระบบจริง</p>
+      <header className="recruitment-calendar-b-hero">
+        <div className="recruitment-calendar-b-hero-content">
+          <span className="recruitment-calendar-heading-icon"><CalendarDays size={32} aria-hidden="true" /></span>
+          <div className="recruitment-calendar-heading-text">
+            <span className="recruitment-calendar-kicker">RMUTI KKC · RECRUITMENT CALENDAR</span>
+            <h2>ปฏิทินรับสมัครงาน</h2>
+            <p>ตรวจสอบช่วงเวลารับสมัคร เลือกวันที่ และดูรายละเอียดตำแหน่งงานได้ทันที</p>
+          </div>
         </div>
-        <span className="recruitment-calendar-summary"><Sparkles size={16} aria-hidden="true" />
-          {openCount} ตำแหน่งที่ยังเปิดรับในเดือนนี้
-        </span>
+        <CalendarDays className="recruitment-calendar-b-hero-art" size={116} strokeWidth={1.4} aria-hidden="true" />
       </header>
+      <div className="recruitment-calendar-b-overview" aria-label={`สถิติรับสมัครเดือน${monthName} ${displayed.year+543}`}>
+        <div className="recruitment-calendar-b-stat is-primary">
+          <span className="recruitment-calendar-b-stat-icon"><BriefcaseBusiness size={25} /></span>
+          <span><small>ตำแหน่งในเดือนนี้</small><strong>{monthJobs.length} <em>ตำแหน่ง</em></strong></span>
+        </div>
+        <div className="recruitment-calendar-b-stat">
+          <span className="recruitment-calendar-b-stat-icon"><Users size={25} /></span>
+          <span><small>รวมจำนวนอัตรา</small><strong>{monthVacancies} <em>อัตรา</em></strong></span>
+        </div>
+        <div className="recruitment-calendar-b-stat">
+          <span className="recruitment-calendar-b-stat-icon is-green"><CheckCircle2 size={25} /></span>
+          <span><small>กำลังเปิดรับ</small><strong>{openCount} <em>ตำแหน่ง</em></strong></span>
+        </div>
+        <div className="recruitment-calendar-b-stat">
+          <span className="recruitment-calendar-b-stat-icon is-orange"><Timer size={25} /></span>
+          <span><small>ใกล้ปิดรับสมัคร</small><strong>{closingCount} <em>ตำแหน่ง</em></strong></span>
+        </div>
+      </div>
       <div className="recruitment-calendar-layout">
         <div className="recruitment-month-panel">
           <div className="recruitment-month-header">
             <div>
-              <small>ปฏิทินประจำเดือน</small>
-              <h3>{monthNames[displayed.month-1]} {displayed.year+543}</h3>
+              <small>ปฏิทินการรับสมัคร · เดือนที่เลือก</small>
+              <h3><CalendarDays size={21} aria-hidden="true" /> {monthName} {displayed.year+543}</h3>
             </div>
             <div className="recruitment-month-controls" role="group" aria-label="เลื่อนเดือน">
               <button type="button" onClick={() => goMonth(-1)} disabled={monthOffset<=-36}
                 aria-label="เดือนก่อนหน้า"><ChevronLeft size={21} /></button>
               <button type="button" onClick={() => {setMonthOffset(0);setChosenDay(null);}}
-                className="recruitment-month-today">เดือนปัจจุบัน</button>
+                className="recruitment-month-today">กลับเดือนเริ่มต้น</button>
               <button type="button" onClick={() => goMonth(1)} disabled={monthOffset>=36}
                 aria-label="เดือนถัดไป"><ChevronRight size={21} /></button>
             </div>
@@ -125,22 +146,24 @@ export default function RecruitmentCalendar({ jobs }: { jobs: readonly Job[] }) 
               );
             })}
           </div>
-          <div className="recruitment-calendar-key">
-            <span><i className="phase-open" /> เปิดรับ</span>
-            <span><i className="phase-closing" /> ใกล้ปิด</span>
-            <span><i className="phase-upcoming" /> เตรียมเปิด</span>
-            <span><i className="phase-closed" /> ปิดแล้ว</span>
+          <div className="recruitment-calendar-b-day-hint">
+            <CalendarDays size={16} aria-hidden="true" />
+            แตะวันที่เพื่อดูรายการรับสมัคร · แตะวันที่เดิมอีกครั้งเพื่อดูทั้งเดือน
           </div>
-          <p className="recruitment-calendar-footnote">วันที่แสดงตามเวลาประเทศไทย (พ.ศ.) และข้อมูลประกาศที่เผยแพร่ในระบบ</p>
         </div>
 
         <div className="recruitment-calendar-detail" aria-live="polite">
           <div className="recruitment-calendar-detail-head">
-            <span>รายการรับสมัคร</span>
-            <h3>{dayKey
-              ? `วันที่ ${activeDay} ${monthNames[displayed.month-1]} ${displayed.year+543}`
-              : `ตลอดเดือน${monthNames[displayed.month-1]}`}</h3>
-            <p>{dayKey ? "ตำแหน่งที่อยู่ในช่วงรับสมัครของวันที่เลือก" : "เลือกช่องวันที่ในปฏิทินเพื่อดูตำแหน่งเฉพาะวัน"}</p>
+            <span className="recruitment-calendar-detail-head-icon"><CalendarDays size={26} aria-hidden="true" /></span>
+            <div>
+              <span>รายการเปิดรับสมัคร</span>
+              <h3>{dayKey
+                ? `วันที่ ${activeDay} ${monthName} ${displayed.year+543}`
+                : `ประจำเดือน${monthName} ${displayed.year+543}`}</h3>
+              <p>{dayKey
+                ? `พบ ${listedJobs.length} ตำแหน่งในวันที่เลือก`
+                : `รวม ${listedJobs.length} ตำแหน่ง · เลือกวันที่เพื่อดูเฉพาะวัน`}</p>
+            </div>
           </div>
           <div className="recruitment-calendar-items">
             {listedJobs.length===0 && (
@@ -158,7 +181,10 @@ export default function RecruitmentCalendar({ jobs }: { jobs: readonly Job[] }) 
                     <span className={`recruitment-calendar-job-state phase-${phase}`}>{phaseLabels[phase]}</span>
                     <span className="recruitment-calendar-vacancies"><BriefcaseBusiness size={14}/> {job.vacancies} อัตรา</span>
                   </div>
-                  <h4>{job.title}</h4>
+                  <div className="recruitment-calendar-job-title">
+                    <span className="recruitment-calendar-job-icon"><BriefcaseBusiness size={20} aria-hidden="true" /></span>
+                    <h4>{job.title}</h4>
+                  </div>
                   {job.departments?.name && <p><MapPin size={14} aria-hidden="true" />{job.departments.name}</p>}
                   <div className="recruitment-calendar-job-bottom">
                     <small><Clock3 size={14} aria-hidden="true" />{dateTH(job.recruitment_rounds.opens_at)} – {dateTH(job.recruitment_rounds.closes_at)}</small>
@@ -169,10 +195,20 @@ export default function RecruitmentCalendar({ jobs }: { jobs: readonly Job[] }) 
             })}
           </div>
           <div className="recruitment-calendar-detail-note">
-            โปรดอ่านคุณสมบัติ วิธีสมัคร และวันสิ้นสุดตามประกาศของแต่ละตำแหน่งก่อนสมัคร
+            โปรดตรวจสอบคุณสมบัติและวันปิดรับสมัครจากประกาศของแต่ละตำแหน่ง
           </div>
         </div>
       </div>
+      <footer className="recruitment-calendar-b-footer">
+        <strong className="recruitment-calendar-b-footer-title">สัญลักษณ์สถานะ</strong>
+        <div className="recruitment-calendar-key" aria-label="คำอธิบายสีสถานะ">
+          <span><i className="phase-open" /> เปิดรับสมัคร</span>
+          <span><i className="phase-closing" /> ใกล้ปิดรับ</span>
+          <span><i className="phase-upcoming" /> เตรียมเปิด</span>
+          <span><i className="phase-closed" /> ปิดรับแล้ว</span>
+        </div>
+        <p className="recruitment-calendar-footnote">แสดงตามเวลาประเทศไทยและข้อมูลประกาศรับสมัครจริง (พ.ศ.)</p>
+      </footer>
     </section>
   );
 }
