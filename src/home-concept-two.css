@@ -100,3 +100,102 @@ body:has(.rmuti-apple-home) .header .main-nav>.btn{border-radius:99px;background
 @media(max-width:1230px){.rmuti-apple-home .home-quick-panel{flex-direction:column;align-items:stretch}.rmuti-apple-home .home-quick-intro{flex-basis:auto;border-right:0;border-bottom:1px solid #d2e4f4;padding:0 0 11px}}
 @media(max-width:800px){.rmuti-apple-home .home-quick-grid{grid-template-columns:1fr}.rmuti-apple-home .home-quick-panel{flex-direction:row;align-items:center}.rmuti-apple-home .home-quick-intro{flex:0 0 30%;border-bottom:0;border-right:1px solid #d2e4f4;padding:0 9px 0 0}}
 @media(max-width:590px){.rmuti-apple-home .home-quick-heading{width:calc(100% - 24px)}.rmuti-apple-home .home-quick-panel{flex-direction:column;align-items:stretch;padding:15px}.rmuti-apple-home .home-quick-intro{flex:auto;border-right:0;border-bottom:1px solid #d2e4f4;padding:0 0 12px}.rmuti-apple-home .home-quick-links{grid-template-columns:repeat(2,minmax(0,1fr))}.rmuti-apple-home .home-quick-links :is(a,button){min-height:64px}}
+
+
+/* Home headings — Rajamangala navy/orange visual hierarchy.
+   Scoped to public home only; staff/admin headings are unaffected. */
+.rmuti-apple-home .home-content-frame > .page-title,
+.rmuti-apple-home .home-results-heading,
+.rmuti-apple-home .home-steps-heading {
+  position: relative;
+  border-radius: 15px;
+  padding: 12px 14px 15px 18px;
+  margin-bottom: 17px;
+  background: linear-gradient(105deg, #f0f6ff 0%, #fff8f0 100%);
+  border: 1px solid #e5edf8;
+  border-left: 5px solid #f47721;
+}
+.rmuti-apple-home .home-openings-frame > .page-title {
+  background: linear-gradient(110deg, #eaf2ff, #fff9f2);
+}
+.rmuti-apple-home .home-news-frame > .page-title {
+  background: linear-gradient(110deg, #eef5ff, #fff5e9);
+}
+.rmuti-apple-home .home-content-frame > .page-title .eyebrow,
+.rmuti-apple-home .home-results-heading .eyebrow,
+.rmuti-apple-home .home-steps-heading .eyebrow {
+  color: #cb5b0b;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  margin-bottom: 5px;
+}
+.rmuti-apple-home .home-content-frame > .page-title h1,
+.rmuti-apple-home .home-results-heading h2,
+.rmuti-apple-home .home-steps-heading h2 {
+  color: #102d55;
+  font-size: clamp(23px, 2.4vw, 31px);
+  font-weight: 900;
+  line-height: 1.38;
+  letter-spacing: -.035em;
+  margin: 0;
+}
+.rmuti-apple-home .home-content-frame > .page-title h1::after,
+.rmuti-apple-home .home-results-heading h2::after,
+.rmuti-apple-home .home-steps-heading h2::after {
+  content: "";
+  display: block;
+  width: 52px;
+  height: 4px;
+  margin-top: 8px;
+  background: linear-gradient(90deg, #ed690d, #ffb545);
+  border-radius: 9px;
+}
+.rmuti-apple-home .home-content-frame > .page-title p,
+.rmuti-apple-home .home-steps-heading p {
+  color: #536b88;
+  font-size: 13px;
+  line-height: 1.7;
+  margin-top: 8px;
+}
+.rmuti-apple-home .home-news-frame > .page-title .text-link,
+.rmuti-apple-home .home-steps-heading .text-link {
+  color: #bd5209;
+  font-weight: 800;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: #fff4e6;
+  white-space: nowrap;
+}
+.rmuti-apple-home .home-quick-heading h2 {
+  color: #11396b;
+  font-weight: 900;
+}
+.rmuti-apple-home .home-quick-heading-icon {
+  background: linear-gradient(140deg,#f47721,#ffae49);
+  color: #fff;
+}
+.rmuti-apple-home .recruitment-calendar-style-b .recruitment-calendar-heading-text h2 {
+  color: #fff;
+  font-weight: 900;
+}
+.rmuti-apple-home .recruitment-calendar-title-accent {
+  color: #ffbc64;
+  margin-left: .12em;
+}
+.rmuti-apple-home .recruitment-calendar-style-b .recruitment-calendar-kicker {
+  color: #ffd3a5;
+}
+@media (max-width: 590px) {
+  .rmuti-apple-home .home-content-frame > .page-title,
+  .rmuti-apple-home .home-results-heading,
+  .rmuti-apple-home .home-steps-heading {
+    padding: 12px 12px 14px 14px;
+    gap: 8px;
+  }
+  .rmuti-apple-home .home-content-frame > .page-title h1,
+  .rmuti-apple-home .home-results-heading h2,
+  .rmuti-apple-home .home-steps-heading h2 {
+    font-size: 23px;
+  }
+}
