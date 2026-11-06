@@ -47,7 +47,7 @@ body:has(.rmuti-apple-home) .header .main-nav>.btn{border-radius:99px;background
 .rmuti-apple-home .home-stat-vacancies .home-stat-number{color:#164f8e!important}
 .rmuti-apple-home .home-stat-pill .home-stat-caption,.rmuti-apple-home .home-stat-pill .home-stat-status-note{color:#47627f!important;font-size:11px!important}
 .rmuti-apple-home .home-stat-pill .home-stat-status-text{font-size:clamp(16px,1.6vw,22px)}
-.rmuti-apple-home .home-content-sections{order:4;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);grid-template-areas:"filters news" "results news";align-items:start;gap:16px 20px;width:calc(100% - 48px);max-width:1390px;margin:0 auto;padding:43px 0 15px}
+.rmuti-apple-home .home-content-sections{order:4;display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"filters" "results" "news";align-items:start;gap:16px 20px;width:calc(100% - 48px);max-width:1390px;margin:0 auto;padding:43px 0 15px}
 .rmuti-apple-home .home-content-frame{border:1px solid #e2eaf5;border-radius:23px;background:#fff;padding:23px;box-shadow:0 9px 30px #123a6a14}
 .rmuti-apple-home .home-openings-frame{grid-area:filters;border-top:0}
 .rmuti-apple-home .home-results-frame{grid-area:results;border-top:0}
@@ -197,5 +197,104 @@ body:has(.rmuti-apple-home) .header .main-nav>.btn{border-radius:99px;background
   .rmuti-apple-home .home-results-heading h2,
   .rmuti-apple-home .home-steps-heading h2 {
     font-size: 23px;
+  }
+}
+
+
+/* Homepage content hierarchy: find vacancies first, then scan the latest news.
+   Responsive full-width sections avoid the tall news rail next to vacancy filters. */
+.rmuti-apple-home .home-content-sections {
+  row-gap: 20px;
+  align-items: stretch;
+}
+.rmuti-apple-home .home-openings-frame,
+.rmuti-apple-home .home-results-frame,
+.rmuti-apple-home .home-news-frame {
+  min-width: 0;
+}
+.rmuti-apple-home .home-openings-frame .home-filter-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, .83fr) minmax(0, 1.18fr);
+  gap: 12px 18px;
+  align-items: end;
+  margin-bottom: 0;
+}
+.rmuti-apple-home .home-openings-frame .home-filter-card > * { min-width: 0; }
+.rmuti-apple-home .home-openings-frame .home-filter-card .tabs {
+  width: 100%;
+  overflow-x: auto;
+}
+.rmuti-apple-home .home-openings-frame .home-filter-card .tabs button {
+  white-space: nowrap;
+}
+.rmuti-apple-home .home-results-frame .job-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.rmuti-apple-home .home-news-frame {
+  margin-top: 10px;
+}
+.rmuti-apple-home .home-news-frame .news-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 16px;
+}
+.rmuti-apple-home .home-news-frame .news-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px;
+}
+.rmuti-apple-home .home-news-frame .news-card .announcement-card-banner {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 11px;
+  margin-bottom: 2px;
+}
+.rmuti-apple-home .home-news-frame .news-card h3 {
+  color: #123965;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.rmuti-apple-home .home-news-frame .news-card p {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0 0 4px;
+}
+.rmuti-apple-home .home-news-frame .news-card .text-link {
+  font-size: 12px;
+  margin-top: auto;
+}
+@media (max-width: 1130px) {
+  .rmuti-apple-home .home-openings-frame .home-filter-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rmuti-apple-home .home-openings-frame .home-filter-card > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 900px) {
+  .rmuti-apple-home .home-news-frame .news-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .rmuti-apple-home .home-results-frame .job-grid,
+  .rmuti-apple-home .home-news-frame .news-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rmuti-apple-home .home-openings-frame .home-filter-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rmuti-apple-home .home-openings-frame .home-filter-card > :last-child {
+    grid-column: auto;
   }
 }
