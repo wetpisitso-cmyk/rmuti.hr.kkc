@@ -237,8 +237,8 @@ export function Home() {
         <section className="home-content-frame home-openings-frame" aria-label="ค้นหาตำแหน่งที่เปิดรับสมัคร">
         <Title
           eyebrow="OPEN POSITIONS"
-          title="ตำแหน่งที่เปิดรับสมัคร"
-          description="ตรวจคุณสมบัติและกำหนดการตามประกาศแต่ละตำแหน่ง"
+          title="ค้นหาตำแหน่งงาน"
+          description="เลือกสถานะ ประเภทงาน หรือหน่วยงานที่สนใจ"
         />
         <div className="filter-card home-filter-card">
           <div aria-label="หมวดสถานะการรับสมัคร">
