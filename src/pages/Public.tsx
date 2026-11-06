@@ -26,6 +26,7 @@ import { State, Title, Select, Notice } from "../components/UI";
 import type { Announcement, Job, PublishedResult } from "../types/models";
 import { outcomeLabels } from "../types/models";
 import { bannerUrl } from "../lib/announcementBanner";
+import RecruitmentCalendar from "../components/RecruitmentCalendar";
 import { supabase } from "../lib/supabase";
 export function jobState(j: Job) {
   if (
@@ -212,6 +213,9 @@ export function Home() {
           <span className="home-stat-arrow" aria-hidden="true"><ArrowRight size={19} /></span>
         </button>
       </div>
+      <State loading={jobs.isPending} error={jobs.error}>
+        <RecruitmentCalendar jobs={jobs.data || []} />
+      </State>
       <section className="home-feature-strip" aria-label="บริการด่วน">
         <div className="container home-quick-heading">
           <span className="home-quick-heading-icon" aria-hidden="true"><ArrowRight size={21}/></span>
