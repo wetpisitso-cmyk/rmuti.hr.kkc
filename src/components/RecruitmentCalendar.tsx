@@ -77,7 +77,7 @@ export default function RecruitmentCalendar({ jobs }: { jobs: readonly Job[] }) 
           <span className="recruitment-calendar-heading-icon"><CalendarDays size={32} aria-hidden="true" /></span>
           <div className="recruitment-calendar-heading-text">
             <span className="recruitment-calendar-kicker">RMUTI KKC · RECRUITMENT CALENDAR</span>
-            <h2>ปฏิทินรับสมัครงาน</h2>
+            <h2>ปฏิทิน<span className="recruitment-calendar-title-accent">รับสมัครงาน</span></h2>
             <p>ตรวจสอบช่วงเวลารับสมัคร เลือกวันที่ และดูรายละเอียดตำแหน่งงานได้ทันที</p>
           </div>
         </div>
