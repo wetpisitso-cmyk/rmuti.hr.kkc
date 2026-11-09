@@ -17,7 +17,8 @@ export default function AuthPage({
   const nav = useNavigate(),
     location = useLocation(),
     auth = useAuth();
-  const [registrationEmail, setRegistrationEmail] = useState(""),
+  const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState(""),
+    [registrationEmail, setRegistrationEmail] = useState(""),
     [show, setShow] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(() =>
@@ -70,8 +71,11 @@ export default function AuthPage({
         });
         if (r.error) throw r.error;
         if (!r.data.session) {
-          setError(
-            "บัญชีถูกสร้างแล้ว แต่ยังเข้าสู่ระบบไม่ได้ กรุณาให้ผู้ดูแลปิด Confirm Email ใน Supabase ตามคู่มือ",
+          // No access to the mailbox is assumed: fake-user protection can return
+          // a successful signup shape for an address that is already registered.
+          setPendingConfirmationEmail(d.email);
+          setSuccess(
+            "หากอีเมลนี้สามารถใช้สมัครได้และระบบได้ส่งลิงก์ยืนยันแล้ว กรุณาเปิดกล่องจดหมายและกดลิงก์ยืนยันก่อนเข้าสู่ระบบ หากไม่พบอีเมลให้ติดต่อเจ้าหน้าที่",
           );
           return;
         }
@@ -145,6 +149,24 @@ export default function AuthPage({
       setBusy(false);
     }
   };
+  const resendConfirmation = async () => {
+    if (!pendingConfirmationEmail || busy) return;
+    setBusy(true);
+    setError("");
+    setSuccess("");
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: pendingConfirmationEmail,
+      });
+      if (error) throw error;
+      setSuccess("หากบัญชีนี้ยังรอยืนยันและอีเมลถูกต้อง ระบบจะส่งลิงก์ใหม่ให้ กรุณาตรวจกล่องจดหมายและจดหมายขยะ");
+    } catch (e) {
+      setError(errorTH(e));
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <div className="auth-page">
       <aside className="auth-aside">
@@ -179,6 +201,14 @@ export default function AuthPage({
         </p>
         {error && <Notice kind="error">{error}</Notice>}
         {success && <Notice kind="success">{success}</Notice>}
+        {mode === "register" && pendingConfirmationEmail && (
+          <div className="stack">
+            <p className="muted">หากต้องยืนยันอีเมล ให้ตรวจกล่องจดหมายของ <strong>{pendingConfirmationEmail}</strong> และกดลิงก์ก่อนเข้าสู่ระบบ</p>
+            <button type="button" className="btn outline" disabled={busy} onClick={() => void resendConfirmation()}>
+              {busy ? "กำลังดำเนินการ..." : "ขอส่งลิงก์ยืนยันอีเมลอีกครั้ง"}
+            </button>
+          </div>
+        )}
         <form onSubmit={submit} className="stack">
           {mode === "register" && (
             <>

@@ -1,0 +1,28 @@
+name: Staging applicant authorization E2E
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  applicant-roles:
+    if: ${{ vars.RMUTI_STAGING_E2E_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Check two isolated staging applicants and authorization
+        run: node scripts/staging-auth-permissions.mjs
+        env:
+          STAGING_PROJECT_REF: ${{ vars.RMUTI_STAGING_PROJECT_REF }}
+          STAGING_SUPABASE_URL: ${{ vars.RMUTI_STAGING_SUPABASE_URL }}
+          STAGING_SUPABASE_PUBLISHABLE_KEY: ${{ vars.RMUTI_STAGING_SUPABASE_PUBLISHABLE_KEY }}
+          STAGING_APPLICANT_A_EMAIL: ${{ secrets.RMUTI_STAGING_APPLICANT_A_EMAIL }}
+          STAGING_APPLICANT_A_PASSWORD: ${{ secrets.RMUTI_STAGING_APPLICANT_A_PASSWORD }}
+          STAGING_APPLICANT_B_EMAIL: ${{ secrets.RMUTI_STAGING_APPLICANT_B_EMAIL }}
+          STAGING_APPLICANT_B_PASSWORD: ${{ secrets.RMUTI_STAGING_APPLICANT_B_PASSWORD }}
