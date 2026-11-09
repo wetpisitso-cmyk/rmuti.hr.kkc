@@ -80,9 +80,21 @@ function JobCard({ job: j }: { job: Job }) {
         <span>
           <strong>{j.vacancies}</strong> อัตรา
         </span>
-        <Link to={`/jobs/${j.id}`}>
-          ดูรายละเอียด <ArrowRight size={17} />
-        </Link>
+        <div className="job-card-actions">
+          <Link className="job-card-detail-link" to={`/jobs/${j.id}`}>
+            ดูรายละเอียด <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+          {s === "open" && (
+            <Link
+              className="job-card-apply-link"
+              to={`/apply/${j.id}`}
+              aria-label={`สมัครตำแหน่ง ${j.title}`}
+            >
+              <UserRound size={16} aria-hidden="true" />
+              สมัครตำแหน่งนี้ <ArrowRight size={17} aria-hidden="true" />
+            </Link>
+          )}
+        </div>
       </div>
     </article>
   );
