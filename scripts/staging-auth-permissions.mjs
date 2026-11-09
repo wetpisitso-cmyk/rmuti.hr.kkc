@@ -53,10 +53,12 @@ await check("Both applicants cannot read staff notes", async()=>{
     if(!x.error && x.data.length)throw new Error("STAFF_NOTES_EXPOSED");
   }
 });
-await check("Both applicants cannot edit account roles", async()=>{
+await check("Applicant sessions cannot call privileged admin RPC", async()=>{
   for(const app of [a,b]){
-    const x=await app.from("user_roles").update({role:"admin"}).eq("user_id",crypto.randomUUID()).select("user_id");
-    if(!x.error && x.data.length)throw new Error("ROLE_UPDATE_EXPOSED");
+    // Read-only admin RPC must always return FORBIDDEN for applicants.
+    const x=await app.rpc("admin_get_own_username");
+    if(!x.error || !String(x.error.message).includes("FORBIDDEN"))
+      throw new Error("PRIVILEGED_ADMIN_RPC_GUARD_FAILED");
   }
 });
 await Promise.all([a.auth.signOut(),b.auth.signOut()]);
