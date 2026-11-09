@@ -5,7 +5,7 @@ export const registrationSchema = z
     prefix: z.string().min(1, "กรุณาเลือกคำนำหน้า"),
     first_name: z.string().trim().min(1, "กรุณากรอกชื่อ"),
     last_name: z.string().trim().min(1, "กรุณากรอกนามสกุล"),
-    email: z.email("อีเมลไม่ถูกต้อง")
+    email: z.string().trim().pipe(z.email("อีเมลไม่ถูกต้อง"))
       .transform(normalizeRegistrationEmail)
       .refine(v => registrationEmailIssue(v) === null, { message: "กรุณาตรวจสอบอีเมลและโดเมนให้ถูกต้อง" }),
     confirm_email: z.string().trim(),
