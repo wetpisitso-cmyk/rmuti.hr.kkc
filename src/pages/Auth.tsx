@@ -60,7 +60,6 @@ export default function AuthPage({
           email: d.email,
           password: d.password,
           options: {
-            emailRedirectTo: baseUrl(),
             data: {
               prefix: d.prefix,
               first_name: d.first_name,
@@ -159,7 +158,6 @@ export default function AuthPage({
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: pendingConfirmationEmail,
-        options: { emailRedirectTo: baseUrl() },
       });
       if (error) throw error;
       setSuccess("หากบัญชีนี้ยังรอยืนยันและอีเมลถูกต้อง ระบบจะส่งลิงก์ใหม่ให้ กรุณาตรวจกล่องจดหมายและจดหมายขยะ");
