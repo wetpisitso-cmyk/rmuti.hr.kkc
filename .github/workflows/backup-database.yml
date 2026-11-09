@@ -1,0 +1,31 @@
+name: Encrypted off-site database backup
+on:
+  schedule:
+    - cron: "15 2 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: rmuti-kkc-database-backup
+  cancel-in-progress: false
+
+# This job is deliberately dormant until the university has set up a
+# PRIVATE Drive destination, age encryption and database connection secrets.
+jobs:
+  encrypted-backup:
+    if: ${{ vars.RMUTI_BACKUP_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install encryption and Drive upload clients
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends age rclone
+      - name: Dump, inspect, encrypt, and verify remote backup
+        run: bash scripts/backup-database.sh
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.RMUTI_BACKUP_DATABASE_URL }}
+          BACKUP_AGE_RECIPIENT: ${{ secrets.RMUTI_BACKUP_AGE_RECIPIENT }}
+          BACKUP_GDRIVE_SERVICE_ACCOUNT_BASE64: ${{ secrets.RMUTI_BACKUP_GDRIVE_SERVICE_ACCOUNT_BASE64 }}
+          BACKUP_GDRIVE_FOLDER_ID: ${{ secrets.RMUTI_BACKUP_GDRIVE_FOLDER_ID }}
