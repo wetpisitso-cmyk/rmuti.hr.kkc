@@ -6,12 +6,14 @@ import {
   validThaiID,
 } from "../src/validation/forms";
 import { csv, bangkokISO, bangkokInput, safeUrl } from "../src/lib/format";
+import { normalizeRegistrationEmail, registrationEmailIssue, suggestedEmailCorrection } from "../src/validation/registration-email";
 describe("registration and privacy", () => {
   const sample = {
     prefix: "นาย",
     first_name: "ทดสอบ",
     last_name: "ระบบ",
-    email: "example@example.invalid",
+    email: "person@gmail.com",
+    confirm_email: "person@gmail.com",
     phone: "0800000000",
     password: "testpassword",
     confirm: "testpassword",
@@ -33,6 +35,23 @@ describe("registration and privacy", () => {
     ).toBe(false));
   it("accepts the complete registration form", () =>
     expect(registrationSchema.safeParse(sample).success).toBe(true));
+  it("rejects mistyped provider domains and suggests the correct spelling", () => {
+    expect(registrationEmailIssue("person@gamil.com")).toContain("person@gmail.com");
+    expect(suggestedEmailCorrection("person@GMAIL.CON")).toBe("person@gmail.com");
+    expect(registrationSchema.safeParse({ ...sample, email: "person@gamil.com", confirm_email: "person@gamil.com" }).success).toBe(false);
+  });
+  it("rejects mismatched confirmation even when the email has valid syntax", () => {
+    expect(registrationSchema.safeParse({ ...sample, confirm_email: "other@gmail.com" }).success).toBe(false);
+  });
+  it("normalizes surrounding spaces and letter case", () => {
+    expect(normalizeRegistrationEmail(" Person@GMAIL.COM ")).toBe("person@gmail.com");
+    expect(registrationSchema.safeParse({ ...sample, email: " Person@GMAIL.COM ", confirm_email: "person@gmail.com" }).success).toBe(true);
+  });
+  it("rejects test and temporary email domains", () => {
+    for (const domain of ["example.invalid","example.com","mailinator.com","gmail.con"]) {
+      expect(registrationEmailIssue("person@" + domain)).toBeTruthy();
+    }
+  });
   it("rejects invalid national ID lengths and checksum", () => {
     expect(validThaiID("123")).toBe(false);
     expect(validThaiID("1234567890123")).toBe(false);

@@ -1,14 +1,25 @@
 import { z } from "zod";
+import { normalizeRegistrationEmail, registrationEmailIssue } from "./registration-email";
 export const registrationSchema = z
   .object({
     prefix: z.string().min(1, "กรุณาเลือกคำนำหน้า"),
     first_name: z.string().trim().min(1, "กรุณากรอกชื่อ"),
     last_name: z.string().trim().min(1, "กรุณากรอกนามสกุล"),
-    email: z.email("อีเมลไม่ถูกต้อง"),
+    email: z.string().trim().pipe(z.email("อีเมลไม่ถูกต้อง"))
+      .transform(normalizeRegistrationEmail)
+      .refine(v => registrationEmailIssue(v) === null, { message: "กรุณาตรวจสอบอีเมลและโดเมนให้ถูกต้อง" }),
+    confirm_email: z.string().trim(),
     phone: z.string().regex(/^[0-9+ -]{9,20}$/, "เบอร์โทรศัพท์ไม่ถูกต้อง"),
     password: z.string().min(8, "รหัสผ่านอย่างน้อย 8 ตัวอักษร"),
     confirm: z.string(),
     consent: z.boolean().refine(Boolean, "กรุณารับทราบนโยบายข้อมูลส่วนบุคคล"),
+  })
+  .superRefine((d, ctx) => {
+    const issue = registrationEmailIssue(d.email);
+    if (issue) ctx.addIssue({ code: "custom", path: ["email"], message: issue });
+    if (d.email !== normalizeRegistrationEmail(d.confirm_email)) {
+      ctx.addIssue({ code: "custom", path: ["confirm_email"], message: "อีเมลทั้งสองช่องไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง" });
+    }
   })
   .refine((d) => d.password === d.confirm, {
     path: ["confirm"],

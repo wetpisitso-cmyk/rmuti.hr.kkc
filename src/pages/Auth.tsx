@@ -5,6 +5,7 @@ import { Eye, EyeOff, LockKeyhole, ArrowLeft } from "lucide-react";
 import { baseUrl, supabase } from "../lib/supabase";
 import { errorTH } from "../lib/errors";
 import { registrationSchema, passwordSchema } from "../validation/forms";
+import { normalizeRegistrationEmail, registrationEmailIssue, suggestedEmailCorrection } from "../validation/registration-email";
 import { rows } from "../services/api";
 import { Field, Select, Notice, Submit } from "../components/UI";
 import { useAuth } from "../hooks/useAuth";
@@ -16,7 +17,8 @@ export default function AuthPage({
   const nav = useNavigate(),
     location = useLocation(),
     auth = useAuth();
-  const [show, setShow] = useState(false),
+  const [registrationEmail, setRegistrationEmail] = useState(""),
+    [show, setShow] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(() =>
       mode === "forgot" ? sessionStorage.getItem("recovery-error") || "" : "",
@@ -43,8 +45,11 @@ export default function AuthPage({
     setBusy(true);
     try {
       if (mode === "register") {
+        const invalidEmail = registrationEmailIssue(String(data.email || ""));
+        if (invalidEmail) throw new Error(invalidEmail);
         const parsed = registrationSchema.safeParse({
           ...data,
+          email: normalizeRegistrationEmail(String(data.email || "")),
           consent: data.consent === "on",
         });
         if (!parsed.success) throw new Error(parsed.error.issues[0].message);
@@ -128,7 +133,11 @@ export default function AuthPage({
         msg.startsWith("กรุณา") ||
           msg.startsWith("รหัสผ่าน") ||
           msg === "อีเมลไม่ถูกต้อง" ||
-          msg === "เบอร์โทรศัพท์ไม่ถูกต้อง"
+          msg === "เบอร์โทรศัพท์ไม่ถูกต้อง" ||
+          msg.includes("โดเมนอีเมลอาจพิมพ์ผิด") ||
+          msg.includes("อีเมลทั้งสองช่องไม่ตรงกัน") ||
+          msg.includes("อีเมลจริงของคุณ") ||
+          msg.includes("อีเมลส่วนตัวที่ใช้งานประจำ")
           ? msg
           : errorTH(e),
       );
@@ -202,7 +211,42 @@ export default function AuthPage({
               />
             </>
           )}
-          {["login", "register", "forgot"].includes(mode) && (
+          {mode === "register" ? (
+            <div className="stack registration-email-check">
+              <Field
+                label="อีเมลที่ใช้งานจริง"
+                type="email"
+                name="email"
+                required
+                autoComplete="email"
+                value={registrationEmail}
+                onChange={(e) => setRegistrationEmail(e.target.value)}
+                maxLength={254}
+                spellCheck={false}
+                hint="ตรวจสอบตัวสะกดให้ถูกต้อง เช่น @gmail.com · ใช้อีเมลที่คุณเปิดใช้งานได้"
+              />
+              {registrationEmail.trim() && registrationEmailIssue(registrationEmail) && (
+                <Notice kind="error">
+                  {registrationEmailIssue(registrationEmail)}
+                  {suggestedEmailCorrection(registrationEmail) && (
+                    <span> กรุณาตรวจสอบกับเจ้าของอีเมลก่อนแก้ไข ไม่ปรับให้อัตโนมัติ</span>
+                  )}
+                </Notice>
+              )}
+              <Field
+                label="ยืนยันอีเมลอีกครั้ง"
+                type="email"
+                name="confirm_email"
+                required
+                autoComplete="off"
+                onPaste={(e) => e.preventDefault()}
+                maxLength={254}
+                spellCheck={false}
+                hint="พิมพ์อีกครั้งให้ตรงกัน เพื่อป้องกันการสมัครด้วยอีเมลผิด"
+              />
+              <small className="muted">หมายเหตุ: การตรวจรูปแบบและการพิมพ์ซ้ำไม่ยืนยันว่าอีเมลมีเจ้าของจริง ต้องยืนยันผ่านลิงก์ในอีเมลเมื่อระบบเปิดใช้งาน Email Confirmation</small>
+            </div>
+          ) : (["login", "forgot"].includes(mode) && (
             <Field
               label="อีเมล"
               type="email"
@@ -210,7 +254,7 @@ export default function AuthPage({
               required
               autoComplete="email"
             />
-          )}
+          ))}
           {mode !== "forgot" && (
             <div className="password-field">
               <Field
