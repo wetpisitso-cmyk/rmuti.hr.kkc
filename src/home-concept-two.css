@@ -298,3 +298,63 @@ body:has(.rmuti-apple-home) .header .main-nav>.btn{border-radius:99px;background
     grid-column: auto;
   }
 }
+
+
+/* New job cards automatically include this action whenever the job is open.
+   Preserve the details link and keep both actions readable on narrow screens. */
+.rmuti-apple-home .home-results-frame .job-card-bottom { gap: 12px; flex-wrap: wrap; }
+.rmuti-apple-home .home-results-frame .job-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.rmuti-apple-home .home-results-frame .job-card-actions > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  text-decoration: none;
+  border-radius: 11px;
+  padding: 9px 12px;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 800;
+  transition: background-color .15s ease, box-shadow .15s ease;
+}
+.rmuti-apple-home .home-results-frame .job-card-actions .job-card-detail-link {
+  background: #eff4fd;
+  color: #1a4c84;
+  border: 1px solid #d6e4f5;
+}
+.rmuti-apple-home .home-results-frame .job-card-actions .job-card-detail-link:hover {
+  background: #dfebfa;
+}
+.rmuti-apple-home .home-results-frame .job-card-actions .job-card-apply-link {
+  background: linear-gradient(110deg, #f47721, #e8630c);
+  color: #fff;
+  border: 1px solid #e76812;
+  box-shadow: 0 4px 12px #e86b2529;
+}
+.rmuti-apple-home .home-results-frame .job-card-actions .job-card-apply-link:hover {
+  background: #d85c0b;
+  box-shadow: 0 6px 15px #e86b2538;
+}
+.rmuti-apple-home .home-results-frame .job-card-actions > a:focus-visible {
+  outline: 3px solid #143a72;
+  outline-offset: 3px;
+}
+@media (max-width: 590px) {
+  .rmuti-apple-home .home-results-frame .job-card-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .rmuti-apple-home .home-results-frame .job-card-actions > a {
+    flex: 1 1 138px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rmuti-apple-home .home-results-frame .job-card-actions > a { transition: none; }
+}
