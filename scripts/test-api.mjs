@@ -25,8 +25,8 @@ await check("Email/password provider enabled", () => {
 console.log(
   "Confirm Email setting:",
   settings.mailer_autoconfirm
-    ? "disabled — immediate signup ready"
-    : "enabled — owner must disable before immediate signup",
+    ? "disabled: accounts currently enter without verifying email ownership"
+    : "enabled: ensure SMTP and approved redirect URLs have been tested",
 );
 const db = createClient(url, key, {
   auth: { persistSession: false, autoRefreshToken: false },
