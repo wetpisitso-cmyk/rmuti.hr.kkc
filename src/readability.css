@@ -605,3 +605,20 @@ button {
 .staff-review-audit p{margin:5px 0}
 
 .staff-overdue-section{padding:14px;margin-bottom:16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px}.staff-overdue-section h3{margin:0 0 6px;color:#9a3412}.staff-overdue-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-top:1px solid #fed7aa}
+
+/* Notification center: clear spacing and consistent Buddhist Era calendar */
+.staff-application-notifications{display:flex;flex-direction:column;gap:16px}
+.staff-application-notifications .staff-notice-heading{margin-bottom:0;row-gap:12px}
+.staff-application-notifications .staff-notice-summary{margin:0;gap:12px}
+.staff-application-notifications .staff-notice-summary span{display:inline-flex;align-items:center;gap:8px;line-height:1.5}
+.staff-application-notifications .staff-notice-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 18px;margin:0;align-items:end}
+.staff-application-notifications .staff-notice-filters label{display:flex;flex-direction:column;gap:8px;min-width:0;line-height:1.5;font-size:14px}
+.staff-application-notifications .staff-notice-filters input,
+.staff-application-notifications .staff-notice-filters select{display:block;width:100%;height:44px;min-height:44px;padding:9px 12px;margin:0;box-sizing:border-box;font:inherit;line-height:1.4;border-radius:9px}
+.staff-application-notifications .staff-notice-filters .thai-date-field{min-width:0;position:relative}
+.staff-application-notifications .staff-notice-filters .thai-date-input-wrap{position:relative}
+.staff-application-notifications .staff-notice-filters .thai-date-input-wrap input{padding-right:44px}
+.staff-application-notifications .staff-notice-filters .thai-calendar{z-index:100;max-width:min(340px,90vw)}
+.staff-application-notifications .staff-notice-list{margin:0}
+@media(max-width:900px){.staff-application-notifications .staff-notice-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.staff-application-notifications .staff-notice-filters{grid-template-columns:minmax(0,1fr);gap:12px}}
