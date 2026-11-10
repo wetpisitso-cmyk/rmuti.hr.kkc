@@ -26,6 +26,11 @@ export default function StaffApplicationNotifications(){
   const r=await supabase.from("notifications").select("id,application_id,title,message,read_at,created_at,event_key").eq("user_id",auth.session!.user.id).like("event_key","staff-application:%").order("created_at",{ascending:false}).limit(1000);
   if(r.error)throw r.error;return (r.data||[]) as StaffNotice[];
  }});
+ const overdue=useQuery({queryKey:["staff-overdue-applications"],enabled,refetchInterval:60_000,queryFn:async()=>{
+   const cutoff=new Date(Date.now()-24*60*60*1000).toISOString();
+   const r=await supabase.from("applications").select("id,application_number,personal_data,submitted_at,status").in("status",["submitted","under_review"]).lt("submitted_at",cutoff).is("archived_at",null).order("submitted_at",{ascending:true}).limit(30);
+   if(r.error)throw r.error;return r.data||[];
+ }});
  const unread=notices.data?.filter(n=>!n.read_at).length||0;
  const list=(notices.data||[]).filter(n=>(filter==="all"||filter==="unread"&&!n.read_at||filter===kind(n))&&(!search||n.message.toLowerCase().includes(search.toLowerCase()))&&(!from||n.created_at>=from+"T00:00:00+07:00")&&(!to||n.created_at<=to+"T23:59:59+07:00"));
  const shown=list.slice(page*20,(page+1)*20);
@@ -35,6 +40,7 @@ export default function StaffApplicationNotifications(){
  if(!enabled)return null;
  return <section id="staff-notifications" className="panel staff-application-notifications">
   <div className="staff-notice-heading"><div><h2><Bell size={22}/> ศูนย์แจ้งเตือนผู้สมัคร {unread>0&&<span className="staff-notice-count">{unread} ยังไม่อ่าน</span>}</h2><p className="muted">สมัครใหม่ · ส่งแก้ไข · ประวัติย้อนหลัง (อัปเดตทุก 20 วินาที)</p></div><div className="flex gap-2 flex-wrap"><button className="btn outline small" onClick={()=>void notices.refetch()}><RefreshCw size={16}/> รีเฟรช</button>{unread>0&&<button className="btn outline small" onClick={()=>void markAll()}><CheckCheck size={16}/> อ่านทั้งหมด</button>}</div></div>
+  {!!overdue.data?.length&&<div className="staff-overdue-section"><h3>ใบสมัครค้างตรวจเกิน 24 ชั่วโมง ({overdue.data.length}{overdue.data.length===30?"+":""})</h3><p className="muted">นับจากเวลาส่งใบสมัคร รายการที่อยู่ระหว่างตรวจอาจแสดงอยู่จนกว่าจะบันทึกผล</p>{overdue.data.slice(0,8).map(a=><div className="staff-overdue-row" key={a.id}><span>{a.personal_data?.first_name} {a.personal_data?.last_name} · {a.application_number||"รอเลขผู้สมัคร"} · {dateTH(a.submitted_at,true)}</span><Link className="btn outline small" to={`/staff/applications/${a.id}`}>เปิดตรวจ <ArrowRight size={14}/></Link></div>)}</div>}
   <div className="staff-notice-summary"><span>สมัครใหม่ <b>{notices.data?.filter(n=>kind(n)==="new").length||0}</b></span><span>ส่งแก้ไข <b>{notices.data?.filter(n=>kind(n)==="corrected").length||0}</b></span><span>ยังไม่อ่าน <b>{unread}</b></span></div>
   <div className="staff-notice-filters"><label>ประเภท<select value={filter} onChange={e=>{setFilter(e.target.value);setPage(0);}}><option value="all">ทั้งหมด</option><option value="new">สมัครใหม่</option><option value="corrected">ส่งแก้ไขแล้ว</option><option value="overdue">ค้างตรวจ</option><option value="unread">ยังไม่อ่าน</option></select></label><label>ค้นหาชื่อ / ตำแหน่ง<input value={search} onChange={e=>{setSearch(e.target.value);setPage(0);}} placeholder="ค้นหา…"/></label><label>ตั้งแต่<input type="date" value={from} onChange={e=>{setFrom(e.target.value);setPage(0);}}/></label><label>ถึง<input type="date" value={to} onChange={e=>{setTo(e.target.value);setPage(0);}}/></label></div>
   {error&&<p role="alert" className="notice error">{error}</p>}{notices.error&&<p role="alert" className="notice error">{errorTH(notices.error)}</p>}{notices.isPending&&<p>กำลังโหลด…</p>}{notices.isSuccess&&!list.length&&<p className="muted">ไม่พบรายการตามตัวกรอง</p>}
