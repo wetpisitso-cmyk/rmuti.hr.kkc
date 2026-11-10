@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Printer,
+  FileDown,
+  ChevronDown,
   Pencil,
   FileCheck2,
   ArrowLeft,
@@ -131,21 +133,28 @@ export default function ApplicationView() {
                       <Pencil size={17} /> แก้ไขใบสมัคร
                     </Link>
                   )}
-                  {a.submitted_at && printAccess.data && (
-                    <Link
-                      className="btn outline"
-                      to={`/application/${id}/print`}
-                    >
-                      <Printer size={17} /> พิมพ์ใบสมัครสำหรับนำมายื่น (PDF)
-                    </Link>
-                  )}
-                  {!!d.assignments.length && (
-                    <Link
-                      className="btn outline"
-                      to={`/application/${id}/exam`}
-                    >
-                      <FileCheck2 size={17} /> บัตรประจำตัวสอบ
-                    </Link>
+                  {((a.submitted_at && printAccess.data) || d.assignments.length > 0) && (
+                    <details className="applicant-document-dropdown">
+                      <summary className="btn primary applicant-document-trigger">
+                        <FileDown size={20} aria-hidden="true" />
+                        <span>ดาวน์โหลดเอกสาร (PDF)</span>
+                        <ChevronDown size={18} className="applicant-document-chevron" aria-hidden="true" />
+                      </summary>
+                      <div className="applicant-document-options" role="group" aria-label="เลือกประเภทเอกสาร">
+                        {a.submitted_at && printAccess.data && (
+                          <Link className="applicant-document-option" to={`/application/${id}/print`}>
+                            <Printer size={19} aria-hidden="true" />
+                            <span><strong>ใบสมัครสำหรับนำมายื่น</strong><small>เปิดเพื่อพิมพ์หรือบันทึกเป็น PDF</small></span>
+                          </Link>
+                        )}
+                        {d.assignments.length > 0 && (
+                          <Link className="applicant-document-option" to={`/application/${id}/exam`}>
+                            <FileCheck2 size={19} aria-hidden="true" />
+                            <span><strong>บัตรประจำตัวสอบ</strong><small>ดูรายละเอียดบัตรและกำหนดสอบ</small></span>
+                          </Link>
+                        )}
+                      </div>
+                    </details>
                   )}
                 </div>
               }
