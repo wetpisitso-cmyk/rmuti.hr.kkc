@@ -126,13 +126,14 @@ export function Layout() {
   });
   const unreadNotifications = useQuery({
     queryKey: ["header-notification-count", a.session?.user.id],
-    enabled: Boolean(a.session && a.role === "applicant"),
+    enabled: Boolean(a.session && ["applicant", "admin", "hr"].includes(a.role || "")),
     refetchInterval: 30_000,
     queryFn: async () => {
       const { count, error } = await supabase.from("notifications")
         .select("id", { count: "exact", head: true })
         .eq("user_id", a.session!.user.id)
-        .is("read_at", null);
+        .is("read_at", null)
+        .like("event_key", a.role === "applicant" ? "%" : "staff-application:%");
       if (error) throw error;
       return count || 0;
     },
@@ -182,9 +183,9 @@ export function Layout() {
                     ? "ใบสมัครของฉัน"
                     : "หน้าสำหรับเจ้าหน้าที่"}
                 </Link>
-                {a.role === "applicant" && (
-                  <Link className="header-notification-link" to="/dashboard#my-notifications"
-                    aria-label={`การแจ้งเตือนจากเจ้าหน้าที่ ${unreadNotifications.data || 0} ข้อความยังไม่อ่าน`}>
+                {["applicant", "admin", "hr"].includes(a.role || "") && (
+                  <Link className="header-notification-link" to={a.role === "applicant" ? "/dashboard#my-notifications" : "/staff#staff-notifications"}
+                    aria-label={`การแจ้งเตือน ${unreadNotifications.data || 0} ข้อความยังไม่อ่าน`}>
                     <Bell size={19} aria-hidden="true" />
                     <span>แจ้งเตือน</span>
                     {(unreadNotifications.data || 0) > 0 && (
