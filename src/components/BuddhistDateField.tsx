@@ -3,6 +3,7 @@ import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 
 // Keep Buddhist Era years visible even when the browser uses Gregorian date inputs.
 const pad = (n: number) => String(n).padStart(2, "0");
+const normalizeThaiDigits = (s: string) => s.replace(/[๐-๙]/g, d => String("๐๑๒๓๔๕๖๗๘๙".indexOf(d)));
 const thaiMonths = [
   "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
   "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
@@ -10,13 +11,13 @@ const thaiMonths = [
 
 export function buddhistToISO(value: string): string | null {
   if (!value.trim()) return "";
-  const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value.trim());
+  const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(normalizeThaiDigits(value.trim()));
   if (!match) return null;
   const day = Number(match[1]);
   const month = Number(match[2]);
   const yearBE = Number(match[3]);
   const year = yearBE - 543;
-  if (yearBE < 2400 || yearBE > 2800 || month < 1 || month > 12) return null;
+  if (yearBE < 2400 || yearBE > 2800 || month < 1 || month > 12 || day < 1 || day > 31) return null;
   const date = new Date(Date.UTC(year, month - 1, day));
   if (
     date.getUTCFullYear() !== year ||
@@ -27,19 +28,22 @@ export function buddhistToISO(value: string): string | null {
 }
 
 export function BuddhistDateField({
-  label, value, onChange, invalid,
+  label, value, onChange, invalid, required = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   invalid?: boolean;
+  required?: boolean;
 }) {
   const id = useId();
   const root = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [year, setYear] = useState(() => new Date().getFullYear());
   const [month, setMonth] = useState(() => new Date().getMonth());
   const selected = buddhistToISO(value);
+  useEffect(() => { inputRef.current?.setCustomValidity(invalid ? "กรุณากรอกวันที่ พ.ศ. ให้ถูกต้อง" : ""); }, [invalid]);
 
   useEffect(() => {
     if (!open) return;
@@ -82,10 +86,13 @@ export function BuddhistDateField({
       <label htmlFor={id}>{label}</label>
       <div style={{ position: "relative" }}>
         <input
+          ref={inputRef}
           id={id}
           type="text"
           value={value}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) => { event.currentTarget.setCustomValidity(""); onChange(event.target.value); }}
+          required={required}
+          pattern="[0-9๐-๙]{1,2}/[0-9๐-๙]{1,2}/[0-9๐-๙]{4}"
           inputMode="numeric"
           autoComplete="off"
           maxLength={10}
@@ -130,7 +137,10 @@ export function BuddhistDateField({
               <button type="button" aria-label="เดือนก่อนหน้า" onClick={() => changeMonth(-1)} style={arrowStyle}>
                 <ChevronLeft size={18} />
               </button>
-              <strong>{thaiMonths[month]} {year + 543}</strong>
+              <span style={{ fontWeight: 700 }}>{thaiMonths[month]}</span>
+              <select aria-label="ปี พ.ศ." value={year + 543} onChange={e => setYear(Number(e.target.value) - 543)} style={{ width: 84, padding: 4, fontSize: 13, border: "1px solid #dfe5ef", borderRadius: 6 }}>
+                {Array.from({length:401},(_,i)=>2800-i).map(y=><option key={y} value={y}>{y}</option>)}
+              </select>
               <button type="button" aria-label="เดือนถัดไป" onClick={() => changeMonth(1)} style={arrowStyle}>
                 <ChevronRight size={18} />
               </button>
