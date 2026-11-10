@@ -7,98 +7,42 @@ import { useAuth } from "../hooks/useAuth";
 import { dateTH } from "../lib/format";
 import { errorTH } from "../lib/errors";
 
-type StaffNotice = {
-  id: string;
-  application_id: string | null;
-  title: string;
-  message: string;
-  read_at: string | null;
-  created_at: string;
-};
-
-export default function StaffApplicationNotifications() {
-  const auth = useAuth();
-  const qc = useQueryClient();
-  const [error, setError] = useState("");
-  const enabled = !!auth.session && (auth.role === "admin" || auth.role === "hr");
-  const notices = useQuery({
-    queryKey: ["staff-application-notifications", auth.session?.user.id],
-    enabled,
-    refetchInterval: 20_000,
-    queryFn: async () => {
-      const { data, error } = await supabase.from("notifications")
-        .select("id,application_id,title,message,read_at,created_at")
-        .eq("user_id", auth.session!.user.id)
-        .like("event_key", "staff-application:%")
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (error) throw error;
-      return (data || []) as StaffNotice[];
-    },
-  });
-  const unread = notices.data?.filter((n) => !n.read_at).length || 0;
-  const refresh = async () => {
-    await Promise.all([
-      qc.invalidateQueries({ queryKey: ["staff-application-notifications"] }),
-      qc.invalidateQueries({ queryKey: ["header-notification-count"] }),
-    ]);
-  };
-  const markRead = async (id: string) => {
-    setError("");
-    const { error } = await supabase.from("notifications")
-      .update({ read_at: new Date().toISOString() })
-      .eq("id", id).eq("user_id", auth.session!.user.id).is("read_at", null);
-    if (error) setError(errorTH(error));
-    else await refresh();
-  };
-  const markAllRead = async () => {
-    setError("");
-    const { error } = await supabase.from("notifications")
-      .update({ read_at: new Date().toISOString() })
-      .eq("user_id", auth.session!.user.id)
-      .like("event_key", "staff-application:%")
-      .is("read_at", null);
-    if (error) setError(errorTH(error));
-    else await refresh();
-  };
-  if (!enabled) return null;
-  return (
-    <section id="staff-notifications" className="panel staff-application-notifications">
-      <div className="staff-notice-heading">
-        <div>
-          <h2><Bell size={22} aria-hidden="true" /> แจ้งเตือนผู้สมัคร {unread > 0 && <span className="staff-notice-count">{unread} ยังไม่อ่าน</span>}</h2>
-          <p className="muted">ผู้สมัครใหม่และผู้ที่ส่งเอกสารแก้ไขกลับมา · อัปเดตอัตโนมัติทุก 20 วินาที</p>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <button type="button" className="btn outline small" onClick={() => void notices.refetch()}>
-            <RefreshCw size={16} /> รีเฟรช
-          </button>
-          {unread > 0 && <button type="button" className="btn outline small" onClick={() => void markAllRead()}>
-            <CheckCheck size={16} /> อ่านทั้งหมด
-          </button>}
-        </div>
-      </div>
-      {error && <p role="alert" className="notice error">{error}</p>}
-      {notices.error && <p role="alert" className="notice error">ไม่สามารถโหลดการแจ้งเตือนได้: {errorTH(notices.error)}</p>}
-      {notices.isPending && <p className="muted">กำลังโหลดการแจ้งเตือน…</p>}
-      {notices.isSuccess && !notices.data.length && <p className="muted">ยังไม่มีรายการแจ้งเตือนใหม่</p>}
-      <div className="staff-notice-list">
-        {notices.data?.map((n) => (
-          <div className={`staff-notice-item ${n.read_at ? "is-read" : "is-unread"}`} key={n.id}>
-            <div className="staff-notice-body">
-              <strong>{n.title}</strong>
-              <p>{n.message}</p>
-              <small>{dateTH(n.created_at, true)} {n.read_at ? "· อ่านแล้ว" : "· ยังไม่อ่าน"}</small>
-            </div>
-            <div className="staff-notice-actions">
-              {n.application_id && <Link className="btn primary small" to={`/staff/applications/${n.application_id}`} onClick={() => { if (!n.read_at) void markRead(n.id); }}>
-                เปิดใบสมัคร <ArrowRight size={15} />
-              </Link>}
-              {!n.read_at && <button type="button" className="btn outline small" onClick={() => void markRead(n.id)}>อ่านแล้ว</button>}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+type StaffNotice = {id:string;application_id:string|null;title:string;message:string;read_at:string|null;created_at:string;event_key:string|null};
+type Revision = {field:string;before?:unknown;after?:unknown;changed?:boolean};
+const labels:Record<string,string>={prefix:"คำนำหน้า",first_name:"ชื่อ",last_name:"นามสกุล",english_name:"ชื่อภาษาอังกฤษ",birth_date:"วันเกิด",phone:"โทรศัพท์",address:"ที่อยู่",registered_address:"ที่อยู่ตามทะเบียนบ้าน",national_id:"เลขประจำตัวประชาชน",military_status:"สถานภาพทหาร",skills:"ทักษะ",gender:"เพศ",nationality:"สัญชาติ",marital_status:"สถานภาพ",education:"การศึกษา",experience:"ประสบการณ์",documents:"เอกสารแนบ"};
+function kind(n:StaffNotice){return n.title.includes("แก้ไข")?"corrected":n.title.includes("ค้าง")?"overdue":"new";}
+function RevisionDetails({id}:{id:string}){
+ const q=useQuery({queryKey:["staff-revision",id],queryFn:async()=>{const r=await supabase.rpc("staff_notification_revision",{p_application:id});if(r.error)throw r.error;return (Array.isArray(r.data)?r.data:[]) as Revision[];}});
+ if(q.isPending)return <small>กำลังอ่านประวัติการแก้ไข…</small>;
+ if(q.error)return <small role="alert">ไม่สามารถอ่านประวัติ: {errorTH(q.error)}</small>;
+ if(!q.data?.length)return <small>ไม่พบความแตกต่างในฟิลด์ที่บันทึกไว้ หรือเป็นข้อมูลก่อนเปิดระบบเปรียบเทียบ</small>;
+ return <div className="staff-revision-list"><strong>ข้อมูลที่เปลี่ยนแปลง</strong>{q.data.map((d,i)=><div key={i} className="staff-revision-row"><b>{labels[d.field]||d.field}</b>{d.changed?<span>มีการแก้ไข (เปิดใบสมัครเพื่อตรวจรายละเอียด)</span>:<span>ก่อน: {d.field==="national_id"?"•••••••••••••":String(d.before??"–")} → หลัง: {d.field==="national_id"?"•••••••••••••":String(d.after??"–")}</span>}</div>)}</div>;
+}
+export default function StaffApplicationNotifications(){
+ const auth=useAuth(),qc=useQueryClient();
+ const [error,setError]=useState(""),[filter,setFilter]=useState("all"),[search,setSearch]=useState(""),[from,setFrom]=useState(""),[to,setTo]=useState(""),[page,setPage]=useState(0),[expanded,setExpanded]=useState<string|null>(null);
+ const enabled=!!auth.session&&(auth.role==="admin"||auth.role==="hr");
+ const notices=useQuery({queryKey:["staff-application-notifications",auth.session?.user.id],enabled,refetchInterval:20_000,queryFn:async()=>{
+  const r=await supabase.from("notifications").select("id,application_id,title,message,read_at,created_at,event_key").eq("user_id",auth.session!.user.id).like("event_key","staff-application:%").order("created_at",{ascending:false}).limit(1000);
+  if(r.error)throw r.error;return (r.data||[]) as StaffNotice[];
+ }});
+ const unread=notices.data?.filter(n=>!n.read_at).length||0;
+ const list=(notices.data||[]).filter(n=>(filter==="all"||filter==="unread"&&!n.read_at||filter===kind(n))&&(!search||n.message.toLowerCase().includes(search.toLowerCase()))&&(!from||n.created_at>=from+"T00:00:00+07:00")&&(!to||n.created_at<=to+"T23:59:59+07:00"));
+ const shown=list.slice(page*20,(page+1)*20);
+ const refresh=async()=>{await Promise.all([qc.invalidateQueries({queryKey:["staff-application-notifications"]}),qc.invalidateQueries({queryKey:["header-notification-count"]})]);};
+ const markRead=async(id:string)=>{setError("");const r=await supabase.from("notifications").update({read_at:new Date().toISOString()}).eq("id",id).eq("user_id",auth.session!.user.id).is("read_at",null);if(r.error)setError(errorTH(r.error));else await refresh();};
+ const markAll=async()=>{setError("");const r=await supabase.from("notifications").update({read_at:new Date().toISOString()}).eq("user_id",auth.session!.user.id).like("event_key","staff-application:%").is("read_at",null);if(r.error)setError(errorTH(r.error));else await refresh();};
+ if(!enabled)return null;
+ return <section id="staff-notifications" className="panel staff-application-notifications">
+  <div className="staff-notice-heading"><div><h2><Bell size={22}/> ศูนย์แจ้งเตือนผู้สมัคร {unread>0&&<span className="staff-notice-count">{unread} ยังไม่อ่าน</span>}</h2><p className="muted">สมัครใหม่ · ส่งแก้ไข · ประวัติย้อนหลัง (อัปเดตทุก 20 วินาที)</p></div><div className="flex gap-2 flex-wrap"><button className="btn outline small" onClick={()=>void notices.refetch()}><RefreshCw size={16}/> รีเฟรช</button>{unread>0&&<button className="btn outline small" onClick={()=>void markAll()}><CheckCheck size={16}/> อ่านทั้งหมด</button>}</div></div>
+  <div className="staff-notice-summary"><span>สมัครใหม่ <b>{notices.data?.filter(n=>kind(n)==="new").length||0}</b></span><span>ส่งแก้ไข <b>{notices.data?.filter(n=>kind(n)==="corrected").length||0}</b></span><span>ยังไม่อ่าน <b>{unread}</b></span></div>
+  <div className="staff-notice-filters"><label>ประเภท<select value={filter} onChange={e=>{setFilter(e.target.value);setPage(0);}}><option value="all">ทั้งหมด</option><option value="new">สมัครใหม่</option><option value="corrected">ส่งแก้ไขแล้ว</option><option value="overdue">ค้างตรวจ</option><option value="unread">ยังไม่อ่าน</option></select></label><label>ค้นหาชื่อ / ตำแหน่ง<input value={search} onChange={e=>{setSearch(e.target.value);setPage(0);}} placeholder="ค้นหา…"/></label><label>ตั้งแต่<input type="date" value={from} onChange={e=>{setFrom(e.target.value);setPage(0);}}/></label><label>ถึง<input type="date" value={to} onChange={e=>{setTo(e.target.value);setPage(0);}}/></label></div>
+  {error&&<p role="alert" className="notice error">{error}</p>}{notices.error&&<p role="alert" className="notice error">{errorTH(notices.error)}</p>}{notices.isPending&&<p>กำลังโหลด…</p>}{notices.isSuccess&&!list.length&&<p className="muted">ไม่พบรายการตามตัวกรอง</p>}
+  <div className="staff-notice-list">{shown.map(n=><div key={n.id} className={`staff-notice-item ${n.read_at?"is-read":"is-unread"}`}>
+   <div className="staff-notice-body"><div className="flex gap-2 flex-wrap items-center"><strong>{n.title}</strong><span className={`staff-notice-kind ${kind(n)}`}>{kind(n)==="corrected"?"ส่งแก้ไข":kind(n)==="overdue"?"ค้างตรวจ":"สมัครใหม่"}</span></div><p>{n.message}</p><small>{dateTH(n.created_at,true)} · {n.read_at?"อ่านแล้ว":"ยังไม่อ่าน"}</small>{expanded===n.id&&n.application_id&&<RevisionDetails id={n.application_id}/>}</div>
+   <div className="staff-notice-actions">{kind(n)==="corrected"&&n.application_id&&<button className="btn outline small" onClick={()=>setExpanded(expanded===n.id?null:n.id)}>{expanded===n.id?"ซ่อนการแก้ไข":"ดูจุดที่แก้ไข"}</button>}{n.application_id&&<Link className="btn primary small" to={`/staff/applications/${n.application_id}`} onClick={()=>{if(!n.read_at)void markRead(n.id);}}>เปิดใบสมัคร <ArrowRight size={15}/></Link>}{!n.read_at&&<button className="btn outline small" onClick={()=>void markRead(n.id)}>อ่านแล้ว</button>}</div>
+  </div>)}</div>
+  {list.length>20&&<div className="pagination"><button className="btn outline small" disabled={page===0} onClick={()=>setPage(p=>p-1)}>ก่อนหน้า</button><span>หน้า {page+1} / {Math.ceil(list.length/20)}</span><button className="btn outline small" disabled={(page+1)*20>=list.length} onClick={()=>setPage(p=>p+1)}>ถัดไป</button></div>}
+  <small className="muted">แสดงประวัติสูงสุด 1,000 รายการล่าสุดต่อบัญชี · รายการอ่านแล้วไม่ถูกลบ</small>
+ </section>;
 }
