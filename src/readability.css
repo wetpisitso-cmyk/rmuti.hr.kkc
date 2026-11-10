@@ -572,3 +572,20 @@ button {
   .applicant-document-dropdown { width: 100%; }
   .applicant-document-options { left: 0; right: auto; width: 100%; max-width: 100%; }
 }
+
+/* Staff inbox for new and corrected applications */
+.staff-application-notifications{margin:0 0 20px;padding:20px;border:1px solid #c9dcf5;background:#f8fbff;border-radius:16px}
+.staff-notice-heading{display:flex;justify-content:space-between;align-items:start;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.staff-notice-heading h2{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0;color:#123c78;font-size:20px}
+.staff-notice-heading p{margin:6px 0 0}
+.staff-notice-count{display:inline-flex;align-items:center;border-radius:999px;background:#e45720;color:white;padding:4px 10px;font-size:12px;font-weight:800}
+.staff-notice-list{display:grid;gap:9px;max-height:480px;overflow:auto}
+.staff-notice-item{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 16px;border-radius:12px;border:1px solid #d9e6f6;background:#fff}
+.staff-notice-item.is-unread{border-left:5px solid #e45720;background:#fffdf8}
+.staff-notice-body{flex:1;min-width:220px}
+.staff-notice-body strong{color:#123c78}
+.staff-notice-body p{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.staff-notice-body small{color:#617188}
+.staff-notice-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+@media(max-width:640px){.staff-application-notifications{padding:13px}.staff-notice-item{padding:12px}.staff-notice-actions{width:100%}}
+@media print{.staff-application-notifications{display:none!important}}
