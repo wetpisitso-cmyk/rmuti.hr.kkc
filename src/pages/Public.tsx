@@ -228,23 +228,6 @@ export function Home() {
       <State loading={jobs.isPending} error={jobs.error}>
         <RecruitmentCalendar jobs={jobs.data || []} />
       </State>
-      <section className="home-feature-strip" aria-label="บริการด่วน">
-        <div className="container home-quick-heading">
-          <span className="home-quick-heading-icon" aria-hidden="true"><ArrowRight size={21}/></span>
-          <div><h2>บริการด่วน</h2><p>เมนูลัดสำหรับผู้สมัครและเจ้าหน้าที่</p></div>
-        </div>
-        <div className="container home-feature-grid home-quick-grid">
-          <div className="home-quick-panel applicant-panel">
-            <div className="home-quick-intro"><Users size={27}/><div><strong>สำหรับผู้สมัคร</strong><small>สมัครงานและติดตามผลออนไลน์</small></div></div>
-            <div className="home-quick-links">
-              <Link to="/register"><UserRound size={22}/><span>สมัครสมาชิก</span></Link>
-              <button type="button" onClick={() => navigateStat("positions")}><BriefcaseBusiness size={22}/><span>สมัครงาน</span></button>
-              <Link to="/login"><FileCheck2 size={22}/><span>ติดตามสถานะ</span></Link>
-              <Link to="/guide"><FileText size={22}/><span>คู่มือผู้สมัคร</span></Link>
-            </div>
-          </div>
-        </div>
-      </section>
       <div className="container section home-content-sections" id="positions">
         <section className="home-content-frame home-openings-frame" aria-label="ค้นหาตำแหน่งที่เปิดรับสมัคร">
         <Title
