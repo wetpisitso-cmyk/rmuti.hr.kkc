@@ -30,6 +30,7 @@ import { statuses, type Filters } from "../../types/models";
 import { supabase } from "../../lib/supabase";
 import { ThaiDateField } from "../../components/ThaiDateField";
 import ApplicantDocumentsDownload from "../../components/ApplicantDocumentsDownload";
+import StaffApplicationNotifications from "../../components/StaffApplicationNotifications";
 
 const initial: Filters = {
   year: "",
@@ -203,6 +204,7 @@ export default function StaffDashboard({
       />
       {error && <Notice kind="error">{error}</Notice>}
       {success && <Notice kind="success">{success}</Notice>}
+      {!listOnly && <StaffApplicationNotifications />}
       <section className="filter-card no-print">
         <div className="filter-grid staff-filters">
           <Select
