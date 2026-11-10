@@ -22,7 +22,7 @@ import {
 import { rows } from "../services/api";
 import { useCatalog } from "../hooks/useCatalog";
 import { dateTH, money, numberTH, safeUrl } from "../lib/format";
-import { State, Title, Select, Notice } from "../components/UI";
+import { State, Title, Notice } from "../components/UI";
 import type { Announcement, Job, PublishedResult } from "../types/models";
 import { outcomeLabels } from "../types/models";
 import { bannerUrl } from "../lib/announcementBanner";
@@ -112,11 +112,6 @@ export function Home() {
       (state === "all" || jobState(j) === state),
   );
   const displayedJobs = vacanciesFirst ? [...list].sort((a, b) => b.vacancies - a.vacancies || a.title.localeCompare(b.title, "th")) : list;
-  // Keep expired positions discoverable without mixing them into open vacancies.
-  const visibleJobs = (jobs.data || []).filter(
-    (j) => j.published && !j.archived &&
-      j.recruitment_rounds?.published && !j.recruitment_rounds.archived,
-  );
   const news = useQuery({
     queryKey: ["announcements", "home"],
     queryFn: () => rows<Announcement>("announcements", "*", "created_at", 3),
