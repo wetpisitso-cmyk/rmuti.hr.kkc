@@ -603,3 +603,5 @@ button {
 .staff-revision-row{display:grid;gap:3px;font-size:13px;overflow-wrap:anywhere}
 .staff-review-audit{margin:12px 0}
 .staff-review-audit p{margin:5px 0}
+
+.staff-overdue-section{padding:14px;margin-bottom:16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px}.staff-overdue-section h3{margin:0 0 6px;color:#9a3412}.staff-overdue-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-top:1px solid #fed7aa}
