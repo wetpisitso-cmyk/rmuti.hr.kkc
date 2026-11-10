@@ -100,11 +100,8 @@ function JobCard({ job: j }: { job: Job }) {
   );
 }
 export function Home() {
-  const { jobs, departments } = useCatalog();
-  const [category, setCategory] = useState("all"),
-    [department, setDepartment] = useState(""),
-    [employment, setEmployment] = useState(""),
-    [state, setState] = useState("open"),
+  const { jobs } = useCatalog();
+  const [state, setState] = useState("open"),
     [vacanciesFirst, setVacanciesFirst] = useState(false);
   const list = (jobs.data || []).filter(
     (j) =>
@@ -112,9 +109,6 @@ export function Home() {
       !j.archived &&
       j.recruitment_rounds?.published &&
       !j.recruitment_rounds.archived &&
-      (!department || j.department_id === department) &&
-      (!employment || j.employment_type === employment) &&
-      (category === "all" || j.category === category) &&
       (state === "all" || jobState(j) === state),
   );
   const displayedJobs = vacanciesFirst ? [...list].sort((a, b) => b.vacancies - a.vacancies || a.title.localeCompare(b.title, "th")) : list;
@@ -123,11 +117,6 @@ export function Home() {
     (j) => j.published && !j.archived &&
       j.recruitment_rounds?.published && !j.recruitment_rounds.archived,
   );
-  const stateCounts = {
-    open: visibleJobs.filter((j) => jobState(j) === "open").length,
-    upcoming: visibleJobs.filter((j) => jobState(j) === "upcoming").length,
-    closed: visibleJobs.filter((j) => jobState(j) === "closed").length,
-  };
   const news = useQuery({
     queryKey: ["announcements", "home"],
     queryFn: () => rows<Announcement>("announcements", "*", "created_at", 3),
@@ -138,9 +127,6 @@ export function Home() {
   );
   const navigateStat = (action: HomeStatAction) => {
     const destination = getHomeStatDestination(action, open.length > 0);
-    setCategory("all");
-    setDepartment("");
-    setEmployment("");
     setState(destination.filter);
     setVacanciesFirst(destination.vacanciesFirst);
     document.getElementById(destination.section)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -229,76 +215,6 @@ export function Home() {
         <RecruitmentCalendar jobs={jobs.data || []} />
       </State>
       <div className="container section home-content-sections" id="positions">
-        <section className="home-content-frame home-openings-frame" aria-label="ค้นหาตำแหน่งที่เปิดรับสมัคร">
-        <Title
-          eyebrow="OPEN POSITIONS"
-          title="ค้นหาตำแหน่งงาน"
-          description="เลือกสถานะ ประเภทงาน หรือหน่วยงานที่สนใจ"
-        />
-        <div className="filter-card home-filter-card">
-          <div aria-label="หมวดสถานะการรับสมัคร">
-            <p style={{ fontWeight: 700, color: "#102d55", marginBottom: 10 }}>เลือกสถานะการรับสมัคร</p>
-            <div className="tabs" role="group" aria-label="สถานะการรับสมัคร">
-              {([
-                ["open", "เปิดรับสมัคร"],
-                ["upcoming", "เตรียมเปิดรับ"],
-                ["closed", "ปิดรับสมัครแล้ว"],
-              ] as const).map(([value, label]) => (
-                <button
-                  type="button"
-                  key={value}
-                  className={state === value ? "active" : ""}
-                  aria-pressed={state === value}
-                  onClick={() => { setState(value); setVacanciesFirst(false); }}
-                >
-                  {label} ({stateCounts[value]})
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="tabs" role="group" aria-label="ประเภทตำแหน่ง">
-            {[
-              ["all", "ทั้งหมด"],
-              ["academic", "สายวิชาการ"],
-              ["support", "สายสนับสนุน"],
-            ].map(([v, l]) => (
-              <button
-                key={v}
-                className={category === v ? "active" : ""}
-                onClick={() => setCategory(v)}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
-          <div className="filter-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
-            <Select
-              label="หน่วยงาน"
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-            >
-              <option value="">ทุกหน่วยงาน</option>
-              {departments.data?.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </Select>
-            <Select
-              label="ประเภทการจ้าง"
-              value={employment}
-              onChange={(e) => setEmployment(e.target.value)}
-            >
-              <option value="">ทุกประเภท</option>
-              {[...new Set(jobs.data?.map((j) => j.employment_type))].map(
-                (t) => (
-                  <option key={t}>{t}</option>
-                ),
-              )}
-            </Select>
-          </div>
-        </div>
-        </section>
         <section id="home-job-results" className="home-content-frame home-results-frame" aria-label="รายการตำแหน่งรับสมัคร">
           <div className="home-results-heading">
             <div>
@@ -308,7 +224,7 @@ export function Home() {
             <span className="section-count" aria-live="polite">พบ {displayedJobs.length} ตำแหน่ง</span>
           </div>
         {!jobs.isPending && !jobs.error && state === "open" && displayedJobs.length === 0 && (
-          <p className="muted">ขณะนี้ไม่พบตำแหน่งที่เปิดรับสมัครในตัวกรองนี้ สามารถดูแท็บ “เตรียมเปิดรับ” หรือ “ปิดรับสมัครแล้ว” ได้</p>
+          <p className="muted">ขณะนี้ยังไม่มีตำแหน่งเปิดรับสมัคร สามารถติดตามประกาศรับสมัครครั้งถัดไปได้ที่หน้าเว็บไซต์</p>
         )}
         <State loading={jobs.isPending} error={jobs.error} empty={!displayedJobs.length}>
           <div className="job-grid">
