@@ -91,9 +91,19 @@ export default function Review() {
     enabled: !!id,
     queryFn: async () => {
       const {data,error} = await supabase.from("application_review_steps")
-        .select("step,checked_at").eq("application_id",id!);
+        .select("step,checked_at,checked_by").eq("application_id",id!);
       if(error) throw error;
-      return data as {step:string;checked_at:string}[];
+      return data as {step:string;checked_at:string;checked_by:string}[];
+    },
+  });
+  const reviewerNames = useQuery({
+    queryKey: ["staff-reviewer-names", id, reviewMarks.data?.map(m=>m.checked_by).join(",")],
+    enabled: !!reviewMarks.data?.length,
+    queryFn: async () => {
+      const ids = [...new Set((reviewMarks.data || []).map(m=>m.checked_by))];
+      const r = await supabase.from("profiles").select("id,prefix,first_name,last_name").in("id",ids);
+      if(r.error)throw r.error;
+      return Object.fromEntries((r.data || []).map(p=>[p.id,[p.prefix,p.first_name,p.last_name].filter(Boolean).join(" ")])) as Record<string,string>;
     },
   });
   const setReviewMark = async (step: "personal" | "documents", done: boolean) => {
@@ -263,6 +273,7 @@ export default function Review() {
       />
       {error && <Notice kind="error">{error}</Notice>}
       {success && <Notice kind="success">{success}</Notice>}
+      {!!reviewMarks.data?.length && <section className="panel no-print staff-review-audit"><h3>ประวัติเจ้าหน้าที่ตรวจสอบ</h3>{reviewMarks.data.map(m=><p key={m.step}><strong>{m.step==="personal"?"ข้อมูลผู้สมัคร":"เอกสารแนบ"}</strong> · {reviewerNames.data?.[m.checked_by] || "เจ้าหน้าที่"} · {dateTH(m.checked_at,true)}</p>)}</section>}
       <State loading={q.isPending} error={q.error}>
         {a && d && (
           <>
