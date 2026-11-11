@@ -18,7 +18,7 @@ const toBytes=async(url:string)=>{
   if(body.byteLength>15*1024*1024) throw new Error("FILE_TOO_LARGE");
   return new Uint8Array(body);
 };
-function coverPng(title:string,lines:string[]):Uint8Array {
+function coverPng(title:string,lines:string[],portrait?:HTMLImageElement):Uint8Array {
   const canvas=document.createElement("canvas");
   canvas.width=1240;canvas.height=1754;
   const c=canvas.getContext("2d");
@@ -31,7 +31,20 @@ function coverPng(title:string,lines:string[]):Uint8Array {
   c.font="35px sans-serif";c.fillText("แฟ้มเอกสารประกอบใบสมัคร",85,178);
   c.fillStyle="#102D55";c.font="bold 48px sans-serif";
   const chunks=title.match(/.{1,28}/gu)||[title];
-  chunks.slice(0,3).forEach((line,i)=>c.fillText(line,85,360+i*69));
+  // Reserve the right-hand side for a 3:4 applicant photograph.
+  chunks.slice(0,3).forEach((line,i)=>c.fillText(line,85,360+i*69,portrait?810:undefined));
+  const x=955,y=300,w=198,h=264;
+  c.fillStyle="#f3f6fa";c.fillRect(x,y,w,h);
+  if(portrait){
+    const scale=Math.max(w/portrait.naturalWidth,h/portrait.naturalHeight);
+    const sw=w/scale,sh=h/scale;
+    c.drawImage(portrait,(portrait.naturalWidth-sw)/2,(portrait.naturalHeight-sh)/2,sw,sh,x,y,w,h);
+  }else{
+    c.fillStyle="#677991";c.textAlign="center";c.font="24px sans-serif";
+    c.fillText("ไม่พบรูปถ่าย",x+w/2,y+h/2);
+    c.textAlign="left";
+  }
+  c.strokeStyle="#a4b3c5";c.lineWidth=3;c.strokeRect(x,y,w,h);
   let y=610;c.font="32px sans-serif";c.fillStyle="#253e5d";
   for(const line of lines){
     if(y>1570) break;
@@ -45,6 +58,19 @@ function coverPng(title:string,lines:string[]):Uint8Array {
   const bin=atob(b64),bytes=new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
   return bytes;
+}
+async function loadPortrait(bytes:Uint8Array):Promise<HTMLImageElement>{
+  const mime=bytes[0]===137&&bytes[1]===80?"image/png":bytes[0]===255&&bytes[1]===216?"image/jpeg":"";
+  if(!mime)throw new Error("INVALID_PHOTO");
+  const url=URL.createObjectURL(new Blob([Uint8Array.from(bytes).buffer],{type:mime}));
+  try{
+    return await new Promise<HTMLImageElement>((resolve,reject)=>{
+      const image=new Image();
+      image.onload=()=>image.naturalWidth&&image.naturalHeight?resolve(image):reject(new Error("INVALID_PHOTO"));
+      image.onerror=()=>reject(new Error("INVALID_PHOTO"));
+      image.src=url;
+    });
+  }finally{URL.revokeObjectURL(url);}
 }
 function safeFilename(s:string){return Array.from(s.replace(/[\\\\/:*?"<>|]/g,"-")).map(ch=>ch.charCodeAt(0)<32||ch.charCodeAt(0)===127?"-":ch).join("").trim().slice(0,100)||"ผู้สมัคร";}
 function isImage(mime:string){return mime==="image/png"||mime==="image/jpeg";}
@@ -71,6 +97,16 @@ export async function downloadApplicantDocumentsPdf(applicationId:string,onProgr
   const lib=await loadPdfLib();
   const pdf=await lib.PDFDocument.create();
   const fullname=[a.personal_data.prefix,a.personal_data.first_name,a.personal_data.last_name].filter(Boolean).join(" ");
+  const photoDocument=all.find(doc=>doc.document_type==="photo");
+  let photoBytes:Uint8Array|undefined;
+  let portrait:HTMLImageElement|undefined;
+  if(photoDocument){
+    onProgress?.("กำลังโหลดรูปถ่ายผู้สมัคร…");
+    try{
+      photoBytes=await toBytes(await signedFile(photoDocument.storage_path));
+      portrait=await loadPortrait(photoBytes);
+    }catch(e){throw new Error(`ไม่สามารถเปิดรูปถ่ายผู้สมัคร: ${e instanceof Error?e.message:"เกิดข้อผิดพลาด"}`);}
+  }
   const descriptors=all.map((doc,i)=>`${i+1}. ${a.job_positions?.required_documents?.find(r=>r.key===doc.document_type)?.label || (doc.document_type==="payment"?"หลักฐานชำระเงิน":doc.document_type)} — ${doc.file_name}`);
   const cover=await pdf.embedPng(coverPng(fullname,[
     "เลขผู้สมัคร: "+(a.application_number||"ยังไม่ได้รับเลขผู้สมัคร"),
@@ -78,7 +114,7 @@ export async function downloadApplicantDocumentsPdf(applicationId:string,onProgr
     "วันที่จัดทำ: "+dateTH(new Date().toISOString(),true),
     "เอกสารที่แนบทั้งหมด: "+all.length+" รายการ",
     ...descriptors,
-  ]));
+  ],portrait));
   const coverPage=pdf.addPage(A4);
   coverPage.drawImage(cover,{x:0,y:0,width:A4[0],height:A4[1]});
   for(let i=0;i<all.length;i++){
@@ -86,7 +122,7 @@ export async function downloadApplicantDocumentsPdf(applicationId:string,onProgr
     onProgress?.(`กำลังรวมเอกสาร ${i+1}/${all.length}: ${doc.file_name}`);
     let bytes:Uint8Array;
     try {
-      bytes=await toBytes(await signedFile(doc.storage_path));
+      bytes=photoDocument?.id===doc.id&&photoBytes?photoBytes:await toBytes(await signedFile(doc.storage_path));
       const maybePdf=doc.mime_type==="application/pdf"||bytes[0]===37&&bytes[1]===80&&bytes[2]===68&&bytes[3]===70;
       if(maybePdf){
         const source=await lib.PDFDocument.load(bytes);
