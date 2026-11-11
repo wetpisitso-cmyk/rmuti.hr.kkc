@@ -50,7 +50,7 @@ export default function StaffApplicationNotifications(){
        if(applications.error)throw applications.error;
        if(steps.error)throw steps.error;
        for(const a of applications.data||[]){
-         if(!["draft","submitted"].includes(a.status))completed.add(a.id);
+         if(["eligible","ineligible","withdrawn"].includes(a.status))completed.add(a.id);
        }
        for(const step of steps.data||[])completed.add(step.application_id);
      }
@@ -60,9 +60,9 @@ export default function StaffApplicationNotifications(){
  const reviewedIds=new Set(reviewed.data||[]);
  const isCompleted=(n:StaffNotice)=>!!n.application_id&&reviewedIds.has(n.application_id);
  const active=(notices.data||[]).filter(n=>!isCompleted(n));
- const unread=active.filter(n=>!n.read_at).length;
+ const unread=reviewed.isPending||reviewed.error?0:active.filter(n=>!n.read_at).length;
  const list=(filter==="history"?(notices.data||[]).filter(isCompleted):active).filter(n=>(filter==="all"||filter==="history"||filter==="unread"&&!n.read_at||filter===kind(n))&&(!search||n.message.toLowerCase().includes(search.toLowerCase()))&&(!from||n.created_at>=from+"T00:00:00+07:00")&&(!to||n.created_at<=to+"T23:59:59+07:00"));
- const shown=list.slice(page*20,(page+1)*20);
+ const shown=reviewed.isPending||reviewed.error?[]:list.slice(page*20,(page+1)*20);
  const refresh=async()=>{await Promise.all([qc.invalidateQueries({queryKey:["staff-application-notifications"]}),qc.invalidateQueries({queryKey:["staff-notice-reviewed-applications"]}),qc.invalidateQueries({queryKey:["header-notification-count"]})]);};
  const markRead=async(id:string)=>{setError("");const r=await supabase.from("notifications").update({read_at:new Date().toISOString()}).eq("id",id).eq("user_id",auth.session!.user.id).is("read_at",null);if(r.error)setError(errorTH(r.error));else await refresh();};
  const markAll=async()=>{setError("");const r=await supabase.from("notifications").update({read_at:new Date().toISOString()}).eq("user_id",auth.session!.user.id).like("event_key","staff-application:%").is("read_at",null);if(r.error)setError(errorTH(r.error));else await refresh();};
