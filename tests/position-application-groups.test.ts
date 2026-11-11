@@ -5,21 +5,6 @@ const now = Date.parse("2026-11-11T08:00:00Z");
 const window = { year_be:2569, opens_at:"2026-11-08T17:00:00Z", closes_at:"2026-11-13T16:59:00Z", published:true, archived:false };
 const job = (id:string, title:string, change:Partial<PositionWithWindow> = {}): PositionWithWindow => ({
   id, title, round_id:"round", department_id:"dept", published:true, archived:false, recruitment_rounds:window, ...change,
-  it("uses Bangkok calendar dates even when stored times are in UTC",()=>{
-    const displayed = formatPositionRecruitmentPeriods([job("date","ช่างเทคนิค",{
-      recruitment_rounds:{...window,opens_at:"2026-11-08T17:00:00Z",closes_at:"2026-11-13T16:59:00Z"}
-    })]);
-    expect(displayed).toBe("9 พ.ย. 2569 ถึง 13 พ.ย. 2569");
-  });
-  it("shows distinct date ranges for same-title jobs in multiple rounds",()=>{
-    const earlier=job("old","ช่างเทคนิค",{recruitment_rounds:{...window,opens_at:"2026-10-25T17:00:00Z",closes_at:"2026-10-30T16:59:00Z"}});
-    const latest=job("new","ช่างเทคนิค");
-    const formatted=formatPositionRecruitmentPeriods([latest,earlier,earlier]);
-    expect(formatted).toBe("26 ต.ค. 2569 ถึง 30 ต.ค. 2569 • 9 พ.ย. 2569 ถึง 13 พ.ย. 2569");
-  });
-  it("does not show a made-up period when recruitment dates are unavailable",()=>{
-    expect(formatPositionRecruitmentPeriods([job("x","ไม่มีวัน",{recruitment_rounds:null})])).toBe("");
-  });
 });
 const filters = { year:"", round:"", job:"", department:"", status:"", search:"", from:"", to:"" };
 
@@ -27,7 +12,7 @@ describe("group the position chart by recruitment window", () => {
   it("keeps open positions expanded and includes positions with zero applications", () => {
     const result = groupPositionApplicationBars(
       [{name:"ช่างเทคนิค", value:2},{name:"เจ้าหน้าที่",value:181}],
-      [job("1","ช่างเทคนิค"),job("2","ไฟฟ้า"),job("3","เจ้าหน้าที่",{recruitment_rounds:{...window,closes_at:"2026-10-30T16:59:00Z"}})],
+      [job("1","ช่างเทคนิค"),job("2","ไฟฟ้า"),job("3","เจ้าหน้าที่",{recruitment_rounds:{...window,opens_at:"2026-10-25T17:00:00Z",closes_at:"2026-10-30T16:59:00Z"}})],
       filters, now,
     );
     expect(result.open.map(x=>[x.name,x.value])).toEqual([["ช่างเทคนิค",2],["ไฟฟ้า",0]]);
@@ -55,4 +40,20 @@ describe("group the position chart by recruitment window", () => {
     expect(positionStatus(item,Date.parse(window.closes_at))).toBe("open");
     expect(positionStatus(item,Date.parse(window.closes_at)+1)).toBe("closed");
   });
+  it("formats recruitment dates in Thai Buddhist Era using the Bangkok timezone",()=>{
+    const result=formatPositionRecruitmentPeriods([job("date","ช่างเทคนิค",{
+      recruitment_rounds:{...window,opens_at:"2026-11-08T17:00:00Z",closes_at:"2026-11-13T16:59:00Z"}
+    })]);
+    expect(result).toBe("9 พ.ย. 2569 ถึง 13 พ.ย. 2569");
+  });
+  it("keeps distinct date windows when job titles repeat across rounds",()=>{
+    const earlier=job("old","ช่างเทคนิค",{recruitment_rounds:{...window,opens_at:"2026-10-25T17:00:00Z",closes_at:"2026-10-30T16:59:00Z"}});
+    const latest=job("new","ช่างเทคนิค");
+    const result=formatPositionRecruitmentPeriods([latest,earlier,earlier]);
+    expect(result).toBe("26 ต.ค. 2569 ถึง 30 ต.ค. 2569 • 9 พ.ย. 2569 ถึง 13 พ.ย. 2569");
+  });
+  it("does not invent a date when the recruitment round is missing",()=>{
+    expect(formatPositionRecruitmentPeriods([job("x","ไม่มีวัน",{recruitment_rounds:null})])).toBe("");
+  });
+
 });
