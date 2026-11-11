@@ -12,7 +12,7 @@ describe("group the position chart by recruitment window", () => {
   it("keeps open positions expanded and includes positions with zero applications", () => {
     const result = groupPositionApplicationBars(
       [{name:"ช่างเทคนิค", value:2},{name:"เจ้าหน้าที่",value:181}],
-      [job("1","ช่างเทคนิค"),job("2","ไฟฟ้า"),job("3","เจ้าหน้าที่",{recruitment_rounds:{...window,closes_at:"2026-10-30T16:59:00Z"}})],
+      [job("1","ช่างเทคนิค"),job("2","ไฟฟ้า"),job("3","เจ้าหน้าที่",{recruitment_rounds:{...window,opens_at:"2026-10-25T17:00:00Z",closes_at:"2026-10-30T16:59:00Z"}})],
       filters, now,
     );
     expect(result.open.map(x=>[x.name,x.value])).toEqual([["ช่างเทคนิค",2],["ไฟฟ้า",0]]);
