@@ -2361,3 +2361,12 @@ td strong {
 .staff-job-fold[open] > summary > svg { transform: rotate(180deg); }
 .staff-job-fold > summary:focus-visible { outline: 2px solid #176bd3; outline-offset: 3px; }
 .staff-job-fold-content { padding: 2px 0 6px; }
+
+/* Keep the recruitment date visible below each position without crowding the count. */
+.staff-job-date-range {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #586b83;
+  line-height: 1.5;
+}
