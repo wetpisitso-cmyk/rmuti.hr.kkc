@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   UserX,
   Trash2,
+  ChevronDown,
 } from "lucide-react";
 import { useCatalog } from "../../hooks/useCatalog";
 import { useDebounce } from "../../hooks/useDebounce";
@@ -26,7 +27,8 @@ import {
   Badge,
   Notice,
 } from "../../components/UI";
-import { statuses, type Filters } from "../../types/models";
+import { statuses, type Filters, type Job } from "../../types/models";
+import { groupPositionApplicationBars } from "../../lib/position-application-groups";
 import { supabase } from "../../lib/supabase";
 import { ThaiDateField } from "../../components/ThaiDateField";
 import ApplicantDocumentsDownload from "../../components/ApplicantDocumentsDownload";
@@ -55,7 +57,13 @@ export default function StaffDashboard({
     [exporting, setExporting] = useState(false),
     [deletingId, setDeletingId] = useState<string | null>(null),
     [error, setError] = useState(""),
-    [success, setSuccess] = useState("");
+    [success, setSuccess] = useState(""),
+    [currentTime, setCurrentTime] = useState(() => Date.now());
+  useEffect(() => {
+    if (listOnly) return;
+    const timer = window.setInterval(() => setCurrentTime(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, [listOnly]);
   const search = useDebounce(filters.search);
   const applied = {
     ...filters,
@@ -301,9 +309,13 @@ export default function StaffDashboard({
             })}
           </div>
           <div className="chart-grid">
-            <BarChart
-              title="ใบสมัครตามตำแหน่ง"
+            <PositionApplicationChart
               data={dashboard.data?.jobs || []}
+              jobs={catalog.jobs.data}
+              catalogLoading={catalog.jobs.isPending}
+              catalogError={catalog.jobs.error}
+              filters={filters}
+              nowMs={currentTime}
             />
             <BarChart
               title="ใบสมัครตามหน่วยงาน"
@@ -475,29 +487,95 @@ export default function StaffDashboard({
     </>
   );
 }
+type ApplicationBar = { name: string; value: number };
+
+function PositionApplicationChart({
+  data,
+  jobs,
+  catalogLoading,
+  catalogError,
+  filters,
+  nowMs,
+}: {
+  data: ApplicationBar[];
+  jobs?: Job[];
+  catalogLoading: boolean;
+  catalogError: Error | null;
+  filters: Filters;
+  nowMs: number;
+}) {
+  const groups = groupPositionApplicationBars(data, jobs || [], filters, nowMs);
+  return (
+    <section className="panel chart">
+      <h2>ใบสมัครตามตำแหน่ง</h2>
+      {catalogLoading ? (
+        <p className="muted">กำลังตรวจสอบสถานะเปิด–ปิดรับสมัคร…</p>
+      ) : catalogError ? (
+        <p role="alert" className="notice error">ไม่สามารถโหลดวันเปิด–ปิดรับสมัครได้ กรุณารีเฟรชหน้าเว็บ</p>
+      ) : (
+        <>
+          <div className="staff-job-open-heading">
+            <CheckCircle2 size={17} aria-hidden="true" />
+            <strong>เปิดรับสมัครอยู่ ({groups.open.length} ตำแหน่ง)</strong>
+          </div>
+          {groups.open.length ? (
+            <ApplicationBarRows data={groups.open} />
+          ) : (
+            <p className="muted">ไม่มีตำแหน่งเปิดรับสมัครในขณะนี้ตามตัวกรองที่เลือก</p>
+          )}
+          {groups.closed.length > 0 && (
+            <details className="staff-job-fold">
+              <summary>
+                <span>ปิดรับสมัครแล้ว ({groups.closed.length} ตำแหน่ง)</span>
+                <ChevronDown size={18} aria-hidden="true" />
+              </summary>
+              <div className="staff-job-fold-content">
+                <ApplicationBarRows data={groups.closed} />
+              </div>
+            </details>
+          )}
+          {groups.upcoming.length > 0 && (
+            <details className="staff-job-fold">
+              <summary>
+                <span>ยังไม่เปิดรับสมัคร ({groups.upcoming.length} ตำแหน่ง)</span>
+                <ChevronDown size={18} aria-hidden="true" />
+              </summary>
+              <div className="staff-job-fold-content">
+                <ApplicationBarRows data={groups.upcoming} />
+              </div>
+            </details>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+function ApplicationBarRows({ data }: { data: ApplicationBar[] }) {
+  const max = Math.max(...data.map((x) => x.value), 1);
+  return data.map((x, i) => (
+    <div className="bar-row" key={x.name + i}>
+      <div>
+        <span>{x.name}</span>
+        <b>{x.value}</b>
+      </div>
+      <div className="bar-track">
+        <div style={{ width: `${(x.value / max) * 100}%` }} />
+      </div>
+    </div>
+  ));
+}
 function BarChart({
   title,
   data,
 }: {
   title: string;
-  data: { name: string; value: number }[];
+  data: ApplicationBar[];
 }) {
-  const max = Math.max(...data.map((x) => x.value), 1);
   return (
     <section className="panel chart">
       <h2>{title}</h2>
       {data.length ? (
-        data.map((x, i) => (
-          <div className="bar-row" key={i}>
-            <div>
-              <span>{x.name}</span>
-              <b>{x.value}</b>
-            </div>
-            <div className="bar-track">
-              <div style={{ width: `${(x.value / max) * 100}%` }} />
-            </div>
-          </div>
-        ))
+        <ApplicationBarRows data={data} />
       ) : (
         <p className="muted">ยังไม่มีข้อมูลตามตัวกรอง</p>
       )}
