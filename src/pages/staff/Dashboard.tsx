@@ -487,7 +487,7 @@ export default function StaffDashboard({
     </>
   );
 }
-type ApplicationBar = { name: string; value: number };
+type ApplicationBar = { name: string; value: number; period?: string };
 
 function PositionApplicationChart({
   data,
@@ -558,6 +558,7 @@ function ApplicationBarRows({ data }: { data: ApplicationBar[] }) {
         <span>{x.name}</span>
         <b>{x.value}</b>
       </div>
+      {x.period && <small className="staff-job-date-range">รับสมัคร: {x.period}</small>}
       <div className="bar-track">
         <div style={{ width: `${(x.value / max) * 100}%` }} />
       </div>
