@@ -1,6 +1,6 @@
 import type { Filters } from "../types/models";
 
-export type ApplicationBar = { name: string; value: number };
+export type ApplicationBar = { name: string; value: number; period?: string };
 type RoundWindow = {
   year_be: number;
   opens_at: string;
@@ -20,6 +20,25 @@ export type PositionWithWindow = {
 export type PositionStatus = "open" | "closed" | "upcoming";
 
 const normalizeTitle = (title: string) => title.replace(/\s+/g, " ").trim();
+const thaiDay = new Intl.DateTimeFormat("th-TH-u-ca-buddhist-nu-latn", {
+  day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Bangkok",
+});
+
+/** Show stored recruitment dates in Bangkok time and Buddhist Era, without inventing dates. */
+export function formatPositionRecruitmentPeriods(positions: readonly PositionWithWindow[]): string {
+  const periods = new Map<string, { start: number; label: string }>();
+  for (const position of positions) {
+    const round = position.recruitment_rounds;
+    if (!round) continue;
+    const start = Date.parse(round.opens_at);
+    const end = Date.parse(round.closes_at);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) continue;
+    const label = `${thaiDay.format(start)} ถึง ${thaiDay.format(end)}`;
+    periods.set(`${start}:${end}`, { start, label });
+  }
+  return [...periods.values()].sort((a, b) => a.start - b.start)
+    .map(period => period.label).join(" • ");
+}
 
 /** Determine status from the announcement's real UTC instants (displayed in Thai time). */
 export function positionStatus(job: PositionWithWindow, nowMs: number): PositionStatus {
@@ -73,7 +92,8 @@ export function groupPositionApplicationBars(
     const states = positions.map(j => positionStatus(j, nowMs));
     const status: PositionStatus = states.includes("open") ? "open"
       : states.includes("upcoming") ? "upcoming" : "closed";
-    grouped[status].push(count);
+    const period = formatPositionRecruitmentPeriods(positions);
+    grouped[status].push(period ? { ...count, period } : count);
   }
   for (const rows of Object.values(grouped)) {
     rows.sort((a, b) => b.value - a.value || a.name.localeCompare(b.name, "th"));
