@@ -2331,3 +2331,33 @@ td strong {
 @media(prefers-reduced-motion:reduce) {
   .recruitment-calendar-style-b .recruitment-day {transition:none}
 }
+
+/* HR dashboard: open positions visible; past announcements folded on demand. */
+.staff-job-open-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #176b45;
+  margin-top: 18px;
+}
+.staff-job-fold {
+  margin-top: 16px;
+  padding-top: 13px;
+  border-top: 1px solid #dbe5f1;
+}
+.staff-job-fold > summary {
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  color: #243e60;
+  font-weight: 700;
+  padding: 6px 0;
+  list-style: none;
+}
+.staff-job-fold > summary::-webkit-details-marker { display: none; }
+.staff-job-fold > summary > svg { transition: transform .2s ease; flex-shrink: 0; }
+.staff-job-fold[open] > summary > svg { transform: rotate(180deg); }
+.staff-job-fold > summary:focus-visible { outline: 2px solid #176bd3; outline-offset: 3px; }
+.staff-job-fold-content { padding: 2px 0 6px; }
