@@ -7,6 +7,7 @@ import { useAuth } from "../hooks/useAuth";
 import { dateTH } from "../lib/format";
 import { errorTH } from "../lib/errors";
 import { ThaiDateField } from "./ThaiDateField";
+import { isStaffNoticeResolved } from "../lib/staff-notice-status";
 
 type StaffNotice = {id:string;application_id:string|null;title:string;message:string;read_at:string|null;created_at:string;event_key:string|null};
 type Revision = {field:string;before?:unknown;after?:unknown;changed?:boolean};
@@ -58,26 +59,29 @@ export default function StaffApplicationNotifications(){
    }
  });
  const reviewedIds=new Set(reviewed.data||[]);
- const isCompleted=(n:StaffNotice)=>!!n.application_id&&reviewedIds.has(n.application_id);
+ const isCompleted=(n:StaffNotice)=>isStaffNoticeResolved(n,reviewedIds);
  const active=(notices.data||[]).filter(n=>!isCompleted(n));
- const unread=reviewed.isPending||reviewed.error?0:active.filter(n=>!n.read_at).length;
+ const unread=active.filter(n=>!n.read_at).length;
  const list=(filter==="history"?(notices.data||[]).filter(isCompleted):active).filter(n=>(filter==="all"||filter==="history"||filter==="unread"&&!n.read_at||filter===kind(n))&&(!search||n.message.toLowerCase().includes(search.toLowerCase()))&&(!from||n.created_at>=from+"T00:00:00+07:00")&&(!to||n.created_at<=to+"T23:59:59+07:00"));
- const shown=reviewed.isPending||reviewed.error?[]:list.slice(page*20,(page+1)*20);
+ const shown=reviewed.isPending?[]:list.slice(page*20,(page+1)*20);
  const refresh=async()=>{await Promise.all([qc.invalidateQueries({queryKey:["staff-application-notifications"]}),qc.invalidateQueries({queryKey:["staff-notice-reviewed-applications"]}),qc.invalidateQueries({queryKey:["header-notification-count"]})]);};
- const markRead=async(id:string)=>{setError("");const r=await supabase.from("notifications").update({read_at:new Date().toISOString()}).eq("id",id).eq("user_id",auth.session!.user.id).is("read_at",null);if(r.error)setError(errorTH(r.error));else await refresh();};
+ const markRead=async(id:string)=>{setError("");const r=await supabase.from("notifications").update({read_at:new Date().toISOString()}).eq("id",id).eq("user_id",auth.session!.user.id).is("read_at",null);if(r.error)setError(errorTH(r.error));else {
+   qc.setQueryData<StaffNotice[]>(["staff-application-notifications",auth.session!.user.id],old=>old?.map(n=>n.id===id?{...n,read_at:n.read_at||new Date().toISOString()}:n));
+   await refresh();
+ };};
  const markAll=async()=>{setError("");const r=await supabase.from("notifications").update({read_at:new Date().toISOString()}).eq("user_id",auth.session!.user.id).like("event_key","staff-application:%").is("read_at",null);if(r.error)setError(errorTH(r.error));else await refresh();};
  if(!enabled)return null;
  return <section id="staff-notifications" className="panel staff-application-notifications">
-  <div className="staff-notice-heading"><div><h2><Bell size={22}/> ศูนย์แจ้งเตือนผู้สมัคร {unread>0&&<span className="staff-notice-count">{unread} ยังไม่อ่าน</span>}</h2><p className="muted">รายการรอตรวจ · ส่งแก้ไข · ประวัติที่ตรวจแล้ว (อัปเดตทุก 20 วินาที)</p></div><div className="flex gap-2 flex-wrap"><button className="btn outline small" onClick={()=>void notices.refetch()}><RefreshCw size={16}/> รีเฟรช</button>{unread>0&&<button className="btn outline small" onClick={()=>void markAll()}><CheckCheck size={16}/> อ่านทั้งหมด</button>}</div></div>
+  <div className="staff-notice-heading"><div><h2><Bell size={22}/> ศูนย์แจ้งเตือนผู้สมัคร {unread>0&&<span className="staff-notice-count">{unread} ยังไม่อ่าน</span>}</h2><p className="muted">รายการใหม่ที่ยังไม่ได้อ่านหรือตรวจ · ประวัติย้อนหลัง (อัปเดตทุก 20 วินาที)</p></div><div className="flex gap-2 flex-wrap"><button className="btn outline small" onClick={()=>void notices.refetch()}><RefreshCw size={16}/> รีเฟรช</button>{unread>0&&<button className="btn outline small" onClick={()=>void markAll()}><CheckCheck size={16}/> อ่านทั้งหมด</button>}</div></div>
   {!!overdue.data?.length&&<div className="staff-overdue-section"><h3>ใบสมัครค้างตรวจเกิน 24 ชั่วโมง ({overdue.data.length}{overdue.data.length===30?"+":""})</h3><p className="muted">นับจากเวลาส่งใบสมัคร รายการที่อยู่ระหว่างตรวจอาจแสดงอยู่จนกว่าจะบันทึกผล</p>{overdue.data.slice(0,8).map(a=><div className="staff-overdue-row" key={a.id}><span>{a.personal_data?.first_name} {a.personal_data?.last_name} · {a.application_number||"รอเลขผู้สมัคร"} · {dateTH(a.submitted_at,true)}</span><Link className="btn outline small" to={`/staff/applications/${a.id}`}>เปิดตรวจ <ArrowRight size={14}/></Link></div>)}</div>}
-  <div className="staff-notice-summary"><span>สมัครใหม่ <b>{active.filter(n=>kind(n)==="new").length}</b></span><span>ส่งแก้ไข <b>{active.filter(n=>kind(n)==="corrected").length}</b></span><span>ยังไม่อ่าน <b>{unread}</b></span><span>ตรวจแล้ว <b>{(notices.data||[]).length-active.length}</b></span></div>
-  <div className="staff-notice-filters"><label>ประเภท<select value={filter} onChange={e=>{setFilter(e.target.value);setPage(0);}}><option value="all">ทั้งหมด</option><option value="new">สมัครใหม่</option><option value="corrected">ส่งแก้ไขแล้ว</option><option value="overdue">ค้างตรวจ</option><option value="unread">ยังไม่อ่าน</option><option value="history">ตรวจแล้ว (ประวัติ)</option></select></label><label>ค้นหาชื่อ / ตำแหน่ง<input value={search} onChange={e=>{setSearch(e.target.value);setPage(0);}} placeholder="ค้นหา…"/></label><ThaiDateField label="ตั้งแต่ (พ.ศ.)" value={from} onChange={v=>{setFrom(v);setPage(0);}}/><ThaiDateField label="ถึง (พ.ศ.)" value={to} onChange={v=>{setTo(v);setPage(0);}}/></div>
+  <div className="staff-notice-summary"><span>สมัครใหม่ <b>{active.filter(n=>kind(n)==="new").length}</b></span><span>ส่งแก้ไข <b>{active.filter(n=>kind(n)==="corrected").length}</b></span><span>ยังไม่อ่าน <b>{unread}</b></span><span>อ่านแล้ว/ตรวจแล้ว <b>{(notices.data||[]).length-active.length}</b></span></div>
+  <div className="staff-notice-filters"><label>ประเภท<select value={filter} onChange={e=>{setFilter(e.target.value);setPage(0);}}><option value="all">ทั้งหมด</option><option value="new">สมัครใหม่</option><option value="corrected">ส่งแก้ไขแล้ว</option><option value="overdue">ค้างตรวจ</option><option value="unread">ยังไม่อ่าน</option><option value="history">อ่านแล้ว/ตรวจแล้ว (ประวัติ)</option></select></label><label>ค้นหาชื่อ / ตำแหน่ง<input value={search} onChange={e=>{setSearch(e.target.value);setPage(0);}} placeholder="ค้นหา…"/></label><ThaiDateField label="ตั้งแต่ (พ.ศ.)" value={from} onChange={v=>{setFrom(v);setPage(0);}}/><ThaiDateField label="ถึง (พ.ศ.)" value={to} onChange={v=>{setTo(v);setPage(0);}}/></div>
   {error&&<p role="alert" className="notice error">{error}</p>}{notices.error&&<p role="alert" className="notice error">{errorTH(notices.error)}</p>}{(notices.isPending||reviewed.isPending)&&<p>กำลังโหลด…</p>}{reviewed.error&&<p role="alert" className="notice error">ไม่สามารถตรวจสถานะใบสมัคร: {errorTH(reviewed.error)}</p>}{notices.isSuccess&&!reviewed.isPending&&!list.length&&<p className="muted">ไม่พบรายการตามตัวกรอง</p>}
   <div className="staff-notice-list">{shown.map(n=><div key={n.id} className={`staff-notice-item ${n.read_at?"is-read":"is-unread"}`}>
    <div className="staff-notice-body"><div className="flex gap-2 flex-wrap items-center"><strong>{n.title}</strong><span className={`staff-notice-kind ${kind(n)}`}>{kind(n)==="corrected"?"ส่งแก้ไข":kind(n)==="overdue"?"ค้างตรวจ":"สมัครใหม่"}</span></div><p>{n.message}</p><small>{dateTH(n.created_at,true)} · {n.read_at?"อ่านแล้ว":"ยังไม่อ่าน"}</small>{expanded===n.id&&n.application_id&&<RevisionDetails id={n.application_id}/>}</div>
    <div className="staff-notice-actions">{kind(n)==="corrected"&&n.application_id&&<button className="btn outline small" onClick={()=>setExpanded(expanded===n.id?null:n.id)}>{expanded===n.id?"ซ่อนการแก้ไข":"ดูจุดที่แก้ไข"}</button>}{n.application_id&&<Link className="btn primary small" to={`/staff/applications/${n.application_id}`} onClick={()=>{if(!n.read_at)void markRead(n.id);}}>เปิดใบสมัคร <ArrowRight size={15}/></Link>}{!n.read_at&&<button className="btn outline small" onClick={()=>void markRead(n.id)}>อ่านแล้ว</button>}</div>
   </div>)}</div>
   {list.length>20&&<div className="pagination"><button className="btn outline small" disabled={page===0} onClick={()=>setPage(p=>p-1)}>ก่อนหน้า</button><span>หน้า {page+1} / {Math.ceil(list.length/20)}</span><button className="btn outline small" disabled={(page+1)*20>=list.length} onClick={()=>setPage(p=>p+1)}>ถัดไป</button></div>}
-  <small className="muted">แสดงประวัติสูงสุด 1,000 รายการล่าสุดต่อบัญชี · รายการที่ตรวจแล้วไม่ถูกลบ สามารถดูได้ในตัวกรอง ตรวจแล้ว (ประวัติ)</small>
+  <small className="muted">แสดงประวัติสูงสุด 1,000 รายการล่าสุดต่อบัญชี · รายการที่อ่านหรือผ่านการตรวจแล้วไม่ถูกลบ สามารถดูได้ในตัวกรอง อ่านแล้ว/ตรวจแล้ว (ประวัติ)</small>
  </section>;
 }
