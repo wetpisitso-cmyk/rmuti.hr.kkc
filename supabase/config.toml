@@ -429,6 +429,11 @@ verify_jwt = true
 [functions.email-worker]
 verify_jwt = false
 
+# Retired applicant notification sender. Keep the inactive endpoint behind JWT.
+# In-app notifications and Supabase Auth transactional emails are unaffected.
+[functions.applicant-email-worker]
+verify_jwt = true
+
 # Admin username/password requests authenticate in the function body.
 [functions.admin-login]
 verify_jwt = false
