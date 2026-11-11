@@ -33,18 +33,18 @@ function coverPng(title:string,lines:string[],portrait?:HTMLImageElement):Uint8A
   const chunks=title.match(/.{1,28}/gu)||[title];
   // Reserve the right-hand side for a 3:4 applicant photograph.
   chunks.slice(0,3).forEach((line,i)=>c.fillText(line,85,360+i*69,portrait?810:undefined));
-  const x=955,y=300,w=198,h=264;
-  c.fillStyle="#f3f6fa";c.fillRect(x,y,w,h);
+  const x=955,photoY=300,w=198,h=264;
+  c.fillStyle="#f3f6fa";c.fillRect(x,photoY,w,h);
   if(portrait){
     const scale=Math.max(w/portrait.naturalWidth,h/portrait.naturalHeight);
     const sw=w/scale,sh=h/scale;
-    c.drawImage(portrait,(portrait.naturalWidth-sw)/2,(portrait.naturalHeight-sh)/2,sw,sh,x,y,w,h);
+    c.drawImage(portrait,(portrait.naturalWidth-sw)/2,(portrait.naturalHeight-sh)/2,sw,sh,x,photoY,w,h);
   }else{
     c.fillStyle="#677991";c.textAlign="center";c.font="24px sans-serif";
-    c.fillText("ไม่พบรูปถ่าย",x+w/2,y+h/2);
+    c.fillText("ไม่พบรูปถ่าย",x+w/2,photoY+h/2);
     c.textAlign="left";
   }
-  c.strokeStyle="#a4b3c5";c.lineWidth=3;c.strokeRect(x,y,w,h);
+  c.strokeStyle="#a4b3c5";c.lineWidth=3;c.strokeRect(x,photoY,w,h);
   let y=610;c.font="32px sans-serif";c.fillStyle="#253e5d";
   for(const line of lines){
     if(y>1570) break;
