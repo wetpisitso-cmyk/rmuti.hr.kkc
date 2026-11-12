@@ -174,7 +174,7 @@ export default function StaffDashboard({
   };
   const saveCorrectionDeadline=async()=>{
     if(!editingCorrection||!a.can("review")||savingCorrection)return;
-    if(!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/.test(editingCorrection.value)){
+    if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(editingCorrection.value)){
       setError("กรุณาเลือกวันที่และเวลาแก้ไขเอกสารให้ครบถ้วน");
       return;
     }
