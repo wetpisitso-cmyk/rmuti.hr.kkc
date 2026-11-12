@@ -2370,3 +2370,7 @@ td strong {
   color: #586b83;
   line-height: 1.5;
 }
+
+/* Correction deadline editor in compact HR application action row */
+.correction-deadline-editor { flex-basis: 100%; max-width: 380px; min-width: min(100%, 270px); margin: 8px 0; }
+.correction-deadline-editor .thai-date-field { width: 100%; }
