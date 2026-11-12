@@ -56,6 +56,8 @@ export default function StaffDashboard({
     [sort, setSort] = useState("created"),
     [exporting, setExporting] = useState(false),
     [deletingId, setDeletingId] = useState<string | null>(null),
+    [editingCorrection, setEditingCorrection] = useState<{ id: string; original: string; value: string } | null>(null),
+    [savingCorrection, setSavingCorrection] = useState(false),
     [error, setError] = useState(""),
     [success, setSuccess] = useState(""),
     [currentTime, setCurrentTime] = useState(() => Date.now());
@@ -159,6 +161,45 @@ export default function StaffDashboard({
       setSuccess("บันทึกเลขลำดับ ("+value+") เรียบร้อย");
       await Promise.all([q.refetch(),...(listOnly?[]:[dashboard.refetch()])]);
     }catch(e){setError(errorTH(e));}finally{setDeletingId(null);}
+  };
+  const openCorrectionEditor=(row:{id:string;correction_deadline?:string|null})=>{
+    if(!a.can("review")||!row.correction_deadline)return;
+    setError("");
+    setSuccess("");
+    setEditingCorrection({
+      id:row.id,
+      original:row.correction_deadline,
+      value:bangkokInput(row.correction_deadline),
+    });
+  };
+  const saveCorrectionDeadline=async()=>{
+    if(!editingCorrection||!a.can("review")||savingCorrection)return;
+    if(!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/.test(editingCorrection.value)){
+      setError("กรุณาเลือกวันที่และเวลาแก้ไขเอกสารให้ครบถ้วน");
+      return;
+    }
+    const next=bangkokISO(editingCorrection.value);
+    if(!Number.isFinite(Date.parse(next))||Date.parse(next)<=Date.now()){
+      setError("กำหนดส่งเอกสารใหม่ต้องเป็นวันและเวลาในอนาคต");
+      return;
+    }
+    if(new Date(next).getTime()===new Date(editingCorrection.original).getTime()){
+      setError("กำหนดส่งเอกสารใหม่ตรงกับกำหนดเดิม");
+      return;
+    }
+    if(!window.confirm("ยืนยันเปลี่ยนกำหนดส่งเอกสารเป็น "+dateTH(next,true)+"?\\nระบบจะบันทึกประวัติและแจ้งผู้สมัครผ่านเว็บไซต์"))return;
+    setSavingCorrection(true);setError("");setSuccess("");
+    try{
+      await rpc("staff_update_correction_deadline",{
+        p_id:editingCorrection.id,
+        p_expected_deadline:editingCorrection.original,
+        p_new_deadline:next
+      });
+      setEditingCorrection(null);
+      setSuccess("แก้ไขกำหนดส่งเอกสารสำเร็จ และแจ้งผู้สมัครผ่านเว็บไซต์แล้ว");
+      await Promise.all([q.refetch(),...(listOnly?[]:[dashboard.refetch()])]);
+    }catch(e){setError(errorTH(e));}
+    finally{setSavingCorrection(false);}
   };
   const rejectExpiredCorrection=async (row:{id:string;personal_data:{first_name:string;last_name:string};correction_deadline?:string|null})=>{
     if(!a.can("review")||!row.correction_deadline||Date.now()<=new Date(row.correction_deadline).getTime())return;
@@ -436,12 +477,38 @@ export default function StaffDashboard({
                         >
                           ตรวจใบสมัคร <ArrowRight size={14} />
                         </Link>
+                        {a.can("review") && r.status==="needs_correction" && r.correction_deadline && (
+                          <button type="button" className="btn small outline"
+                            disabled={savingCorrection||deletingId!==null}
+                            onClick={()=>openCorrectionEditor(r)}>
+                            <Clock3 size={14}/> แก้กำหนดส่งเอกสาร
+                          </button>
+                        )}
                         {a.can("review") && r.status==="needs_correction" && r.correction_deadline &&
                           Date.now()>new Date(r.correction_deadline).getTime() && (
                           <button type="button" className="btn small danger" disabled={deletingId!==null}
                             onClick={()=>void rejectExpiredCorrection(r)}>
                             <UserX size={15}/> ไม่ผ่านคุณสมบัติ (พ้นกำหนดแก้ไข)
                           </button>
+                        )}
+                        {editingCorrection?.id===r.id && (
+                          <div className="subpanel stack correction-deadline-editor" role="group"
+                            aria-label="แก้กำหนดส่งเอกสาร">
+                            <strong>เปลี่ยนกำหนดส่งเอกสาร</strong>
+                            <small>กำหนดเดิม: {dateTH(editingCorrection.original,true)}</small>
+                            <ThaiDateField label="กำหนดใหม่ (พ.ศ. เวลาไทย)" withTime required
+                              value={editingCorrection.value}
+                              onChange={(value)=>setEditingCorrection((prev)=>prev&&prev.id===r.id?{...prev,value}:prev)}/>
+                            <div className="flex gap-2 flex-wrap">
+                              <button type="button" className="btn small"
+                                disabled={savingCorrection||!editingCorrection.value}
+                                onClick={()=>void saveCorrectionDeadline()}>
+                                {savingCorrection?"กำลังบันทึก…":"ยืนยันกำหนดใหม่"}
+                              </button>
+                              <button type="button" className="btn small outline" disabled={savingCorrection}
+                                onClick={()=>setEditingCorrection(null)}>ยกเลิก</button>
+                            </div>
+                          </div>
                         )}
                         {a.role === "admin" && <ApplicantDocumentsDownload applicationId={r.id} compact />}
                         {a.role === "admin" && <button type="button" className="btn small outline" disabled={deletingId !== null} onClick={() => void editDisplayOrder(r.id,r.display_position_order ?? r.position_order)}>แก้ลำดับ ({r.display_position_order ?? r.position_order ?? "–"})</button>}
