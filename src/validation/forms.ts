@@ -34,6 +34,15 @@ export const passwordSchema = z
     path: ["confirm"],
     message: "รหัสผ่านทั้งสองช่องไม่ตรงกัน",
   });
+/** Require a real military status only when male is selected. */
+export function militaryStatusIssue(gender: unknown, status: unknown): string | null {
+  if (gender !== "ชาย") return null;
+  const value = typeof status === "string" ? status.trim() : "";
+  if (!value || value === "ไม่เกี่ยวข้อง") return "ผู้สมัครชายต้องเลือกสถานะการเกณฑ์ทหารก่อนดำเนินการต่อ";
+  if (value.startsWith("อื่น ๆ:") && !value.slice("อื่น ๆ:".length).trim())
+    return "กรุณาระบุรายละเอียดสถานะการเกณฑ์ทหารในช่องอื่น ๆ";
+  return null;
+}
 export const personalSchema = z.object({
   prefix: z.string().min(1),
   first_name: z.string().trim().min(1),
@@ -46,6 +55,10 @@ export const personalSchema = z.object({
   nationality: z.string().trim().min(1, "กรุณาระบุสัญชาติ"),
   marital_status: z.string().trim().min(1, "กรุณาเลือกสถานภาพ"),
   registered_address: z.string().trim().min(1, "กรุณากรอกที่อยู่ตามทะเบียนบ้าน"),
+  military_status: z.string().optional(),
+}).superRefine((personal, ctx) => {
+  const issue = militaryStatusIssue(personal.gender, personal.military_status);
+  if (issue) ctx.addIssue({ code:"custom", path:["military_status"], message:issue });
 });
 export function validThaiID(id: string) {
   if (!/^\d{13}$/.test(id)) return false;
