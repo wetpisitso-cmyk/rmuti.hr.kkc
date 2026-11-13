@@ -58,7 +58,7 @@ describe("registration and privacy", () => {
   });
 });
 describe("applicant English name is required before submission", () => {
-  const personal = { prefix: "นางสาว", first_name: "ทดสอบ", last_name: "ระบบ", english_name: "TEST PERSON", birth_date: "2000-01-01", phone: "0800000000", address: "Khon Kaen", gender: "ไม่ประสงค์ระบุ", nationality: "ไทย", marital_status: "โสด", registered_address: "Khon Kaen" };
+  const personal = { prefix: "นางสาว", first_name: "ทดสอบ", last_name: "ระบบ", english_name: "TEST PERSON", birth_date: "2000-01-01", phone: "0800000000", address: "Khon Kaen", gender: "ไม่ประสงค์ระบุ", nationality: "ไทย", ethnicity:"ไทย", religion:"พุทธ", line_id:"ไม่มี", skills:"ไม่มี", marital_status: "โสด", registered_address: "Khon Kaen" };
   it("accepts complete English names", () => expect(personalSchema.safeParse(personal).success).toBe(true));
   it("rejects missing English names", () => expect(personalSchema.safeParse({ ...personal, english_name: "" }).success).toBe(false));
   it("rejects Thai-only names in the English field", () => expect(personalSchema.safeParse({ ...personal, english_name: "ทดสอบ ระบบ" }).success).toBe(false));
@@ -86,7 +86,7 @@ describe("export and timezone", () => {
 });
 
 describe("conditional military status on applicant forms", () => {
-  const form = { prefix:"นาย",first_name:"ทดสอบ",last_name:"ระบบ",english_name:"TEST APPLICANT",birth_date:"2000-01-01",phone:"0800000000",address:"Khon Kaen",gender:"ชาย",nationality:"ไทย",marital_status:"โสด",registered_address:"Khon Kaen",military_status:"" };
+  const form = { prefix:"นาย",first_name:"ทดสอบ",last_name:"ระบบ",english_name:"TEST APPLICANT",birth_date:"2000-01-01",phone:"0800000000",address:"Khon Kaen",gender:"ชาย",nationality:"ไทย",ethnicity:"ไทย",religion:"พุทธ",line_id:"ไม่มี",skills:"ไม่มี",marital_status:"โสด",registered_address:"Khon Kaen",military_status:"" };
   it("blocks males with no military status",()=>expect(personalSchema.safeParse(form).success).toBe(false));
   it("blocks males with not-applicable military status",()=>expect(personalSchema.safeParse({...form,military_status:"ไม่เกี่ยวข้อง"}).success).toBe(false));
   it("accepts completed military selection",()=>expect(personalSchema.safeParse({...form,military_status:"ผ่านการเกณฑ์ทหาร"}).success).toBe(true));
@@ -99,7 +99,7 @@ describe("conditional military status on applicant forms", () => {
 });
 
 describe("male military eligibility excludes pending states", () => {
-  const personal = { prefix:"นาย",first_name:"ทดสอบ",last_name:"ระบบ",english_name:"TEST APPLICANT",birth_date:"2000-01-01",phone:"0800000000",address:"Khon Kaen",gender:"ชาย",nationality:"ไทย",marital_status:"โสด",registered_address:"Khon Kaen" };
+  const personal = { prefix:"นาย",first_name:"ทดสอบ",last_name:"ระบบ",english_name:"TEST APPLICANT",birth_date:"2000-01-01",phone:"0800000000",address:"Khon Kaen",gender:"ชาย",nationality:"ไทย",ethnicity:"ไทย",religion:"พุทธ",line_id:"ไม่มี",skills:"ไม่มี",marital_status:"โสด",registered_address:"Khon Kaen" };
   for (const value of ["อยู่ระหว่างดำเนินการ","ยังไม่ผ่านเกณฑ์ทหาร","อื่น ๆ: รอดำเนินการ","อื่น ๆ: รอเกณฑ์ทหาร"]) {
     it(`rejects a pending status: ${value}`, () =>
       expect(personalSchema.safeParse({ ...personal, military_status:value }).success).toBe(false));
@@ -108,4 +108,22 @@ describe("male military eligibility excludes pending states", () => {
     expect(personalSchema.safeParse({...personal,military_status:"ผ่านการเกณฑ์ทหาร"}).success).toBe(true));
   it("accepts legally exempted status",()=>
     expect(personalSchema.safeParse({...personal,military_status:"ได้รับการยกเว้น"}).success).toBe(true));
+});
+
+describe("all remaining applicant personal fields required", () => {
+  const applicant = { prefix:"นางสาว",first_name:"ทดสอบ",last_name:"ระบบ",
+    english_name:"TEST PERSON",birth_date:"2000-01-01",phone:"0800000000",
+    address:"Khon Kaen",gender:"หญิง",nationality:"ไทย",ethnicity:"ไทย",
+    religion:"พุทธ",line_id:"ไม่มี",skills:"ไม่มี",
+    marital_status:"โสด",registered_address:"Khon Kaen" };
+  for (const field of ["ethnicity","religion","line_id","skills"] as const) {
+    it(`rejects blank ${field} on the personal step`, () => {
+      expect(personalSchema.safeParse({...applicant,[field]:""}).success).toBe(false);
+      expect(personalSchema.safeParse({...applicant,[field]:"   "}).success).toBe(false);
+    });
+  }
+  it("permits applicants without LINE or special skills to state none", () =>
+    expect(personalSchema.safeParse(applicant).success).toBe(true));
+  it("continues to validate preexisting mandatory information", () =>
+    expect(personalSchema.safeParse({...applicant,first_name:""}).success).toBe(false));
 });
