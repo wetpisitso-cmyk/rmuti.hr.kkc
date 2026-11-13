@@ -97,3 +97,15 @@ describe("conditional military status on applicant forms", () => {
   it("does not require female applicants to fill military status",()=>expect(personalSchema.safeParse({...form,gender:"หญิง",military_status:""}).success).toBe(true));
   it("keeps legacy other gender values for draft correction",()=>expect(personalSchema.safeParse({...form,gender:"อื่น ๆ",military_status:""}).success).toBe(true));
 });
+
+describe("male military eligibility excludes pending states", () => {
+  const personal = { prefix:"นาย",first_name:"ทดสอบ",last_name:"ระบบ",english_name:"TEST APPLICANT",birth_date:"2000-01-01",phone:"0800000000",address:"Khon Kaen",gender:"ชาย",nationality:"ไทย",marital_status:"โสด",registered_address:"Khon Kaen" };
+  for (const value of ["อยู่ระหว่างดำเนินการ","ยังไม่ผ่านเกณฑ์ทหาร","อื่น ๆ: รอดำเนินการ","อื่น ๆ: รอเกณฑ์ทหาร"]) {
+    it(`rejects a pending status: ${value}`, () =>
+      expect(personalSchema.safeParse({ ...personal, military_status:value }).success).toBe(false));
+  }
+  it("accepts passed military service",()=>
+    expect(personalSchema.safeParse({...personal,military_status:"ผ่านการเกณฑ์ทหาร"}).success).toBe(true));
+  it("accepts legally exempted status",()=>
+    expect(personalSchema.safeParse({...personal,military_status:"ได้รับการยกเว้น"}).success).toBe(true));
+});

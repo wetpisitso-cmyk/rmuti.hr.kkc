@@ -38,7 +38,9 @@ export const passwordSchema = z
 export function militaryStatusIssue(gender: unknown, status: unknown): string | null {
   if (gender !== "ชาย") return null;
   const value = typeof status === "string" ? status.trim() : "";
-  if (!value || value === "ไม่เกี่ยวข้อง") return "ผู้สมัครชายต้องเลือกสถานะการเกณฑ์ทหารก่อนดำเนินการต่อ";
+  if (!value || value === "ไม่เกี่ยวข้อง") return "ผู้สมัครชายต้องระบุว่าได้ผ่านการเกณฑ์ทหารหรือได้รับการยกเว้นแล้ว";
+  if (/อยู่ระหว่างดำเนินการ|ยังไม่ผ่าน|รอดำเนินการ|รอเกณฑ์/.test(value))
+    return "สถานะยังไม่ผ่านเกณฑ์ทหารไม่เป็นไปตามเงื่อนไข กรุณาตรวจสอบประกาศรับสมัคร";
   if (value.startsWith("อื่น ๆ:") && !value.slice("อื่น ๆ:".length).trim())
     return "กรุณาระบุรายละเอียดสถานะการเกณฑ์ทหารในช่องอื่น ๆ";
   return null;
