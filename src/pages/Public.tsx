@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { getHomeStatDestination, type HomeStatAction } from "../lib/home-stat-navigation";
 import { Link, useParams } from "react-router-dom";
+import { LineOAButton } from "../components/LineOAButton";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
@@ -149,6 +150,7 @@ export function Home() {
               <Link className="btn hero-outline" to="/login">
                 <UserRound size={18}/> เข้าสู่ระบบ
               </Link>
+              <LineOAButton variant="hero" />
             </div>
             <div className="hero-caption">
               <ShieldCheck size={15}/> สมัครสมาชิก · กรอกข้อมูล · ติดตามผลได้ในที่เดียว

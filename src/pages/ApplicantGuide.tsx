@@ -9,6 +9,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { rows } from "../services/api";
 import { scrollToGuideSection } from "../lib/guide-scroll";
+import { LineOAButton } from "../components/LineOAButton";
 
 type GuideItem = { number: string; title: string; detail: string; points: string[]; Icon: LucideIcon };
 const wizardSteps: GuideItem[] = [
@@ -139,6 +140,8 @@ export default function ApplicantGuide() {
             {settings.error && <small>ไม่สามารถโหลดช่องทางติดต่อได้ในขณะนี้</small>}
             {!settings.isPending && !contact?.phone && !contact?.email && <small>โทรศัพท์และอีเมลจะแสดงเมื่อผู้ดูแลกำหนด</small>}
           </div>
+          <LineOAButton variant="guide" />
+          <small className="muted">LINE OA สำหรับสอบถามข่าวสาร ไม่ควรส่งเอกสารส่วนบุคคลหรือข้อมูลสำคัญผ่านแชต</small>
           <Link className="btn manual-contact-btn" to="/announcements">อ่านข่าวและประกาศ <ArrowRight size={17}/></Link>
         </aside>
       </section>

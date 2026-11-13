@@ -1,3 +1,4 @@
+import { getLineOAUrl } from "../../lib/line-oa";
 import { useState, useRef, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { rows, rpc } from "../../services/api";
@@ -283,12 +284,15 @@ export default function Settings() {
     setError("");
     try {
       const data = Object.fromEntries(new FormData(e.currentTarget));
+      if (key === "contact" && String(data.line_oa_url || "").trim() && !getLineOAUrl(data.line_oa_url)) {
+        throw new Error("กรุณาระบุลิงก์ LINE OA รูปแบบ https://lin.ee/...");
+      }
       if (key === "retention") data.months = Number(data.months) as any;
       await rpc("save_setting", { p_key: key, p_value: data });
       await qc.invalidateQueries({ queryKey: ["settings"] });
       setSuccess("บันทึกการตั้งค่าแล้ว");
     } catch (e) {
-      setError(errorTH(e));
+      setError(e instanceof Error && e.message.startsWith("กรุณา") ? e.message : errorTH(e));
     } finally {
       setBusy(false);
     }
@@ -363,13 +367,15 @@ export default function Settings() {
               ["phone", "โทรศัพท์"],
               ["email", "อีเมล"],
               ["hours", "เวลาติดต่อ"],
+              ["line_oa_url", "ลิงก์เพิ่มเพื่อน LINE OA"],
             ].map(([k, l]) => (
               <Field
                 key={k}
                 label={l}
                 name={k}
-                type={k === "email" ? "email" : "text"}
+                type={k === "email" ? "email" : k === "line_oa_url" ? "url" : "text"}
                 defaultValue={c?.[k] || ""}
+                placeholder={k === "line_oa_url" ? "https://lin.ee/WDP0knw" : undefined}
                 required={["department", "university"].includes(k)}
               />
             ))}

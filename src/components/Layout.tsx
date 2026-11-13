@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { LineOAButton } from "./LineOAButton";
 import {
   GraduationCap,
   Menu,
@@ -224,6 +225,7 @@ export function Layout() {
           <span>
             <ShieldCheck size={17} /> เอกสารส่วนบุคคลเข้าถึงตามสิทธิ์
             <VisitorCount />
+            <LineOAButton variant="footer" />
             <Link className="footer-admin-link" to="/admin/login">เข้าสู่ระบบ Admin</Link>
           </span>
         </div>
