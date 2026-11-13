@@ -231,9 +231,11 @@ export default function ApplicationWizard() {
       if (step === 0) {
         const message = militaryStatusIssue(personal.gender, personal.military_status);
         if (message) throw new Error(message);
-        if (!personalSchema.safeParse(personal).success ||
-            (job?.require_national_id && !validThaiID(personal.national_id || "")))
-          throw new Error("กรุณากรอกข้อมูลส่วนตัวให้ครบและถูกต้อง");
+        const personalResult = personalSchema.safeParse(personal);
+        if (!personalResult.success)
+          throw new Error(personalResult.error.issues[0]?.message || "กรุณากรอกข้อมูลส่วนตัวให้ครบและถูกต้อง");
+        if (job?.require_national_id && !validThaiID(personal.national_id || ""))
+          throw new Error("กรุณาตรวจสอบเลขประจำตัวประชาชนให้ถูกต้อง");
       }
       if (step === 1) {
         const issue = educationIssue(education);
@@ -255,9 +257,11 @@ export default function ApplicationWizard() {
     run(async () => {
       const message = militaryStatusIssue(personal.gender, personal.military_status);
       if (message) throw new Error(message);
-      if (!personalSchema.safeParse(personal).success ||
-          (job?.require_national_id && !validThaiID(personal.national_id || "")))
-        throw new Error("กรุณากรอกข้อมูลส่วนตัวให้ครบและถูกต้อง");
+      const personalResult = personalSchema.safeParse(personal);
+      if (!personalResult.success)
+        throw new Error(personalResult.error.issues[0]?.message || "กรุณากรอกข้อมูลส่วนตัวให้ครบและถูกต้อง");
+      if (job?.require_national_id && !validThaiID(personal.national_id || ""))
+        throw new Error("กรุณาตรวจสอบเลขประจำตัวประชาชนให้ถูกต้อง");
       const educationError = educationIssue(education);
       if (educationError) throw new Error(educationError);
       if (job?.required_documents.some((r) =>
