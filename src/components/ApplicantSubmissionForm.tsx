@@ -41,6 +41,17 @@ export default function ApplicantSubmissionForm({
     .filter(doc => doc.document_type !== "photo" && doc.document_type !== "payment")
     .filter(doc => !requirements.some(r => r.key === doc.document_type));
   const number = application.application_number;
+  const firstEducation = education.find(item => item.degree || item.major || item.institution);
+  const employeeType = snapshot.job.employment_type?.trim() || "บุคลากร";
+  const birth = person.birth_date?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const asOf = application.submitted_at
+    ? new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit" })
+        .format(new Date(application.submitted_at)).split("-").map(Number)
+    : null;
+  const age = birth && asOf
+    ? asOf[0] - Number(birth[1]) -
+      (asOf[1] < Number(birth[2]) || (asOf[1] === Number(birth[2]) && asOf[2] < Number(birth[3])) ? 1 : 0)
+    : null;
   const reviewStatus = application.status === "eligible" ? "ผ่านการตรวจคุณสมบัติ"
     : application.status === "ineligible" ? "ไม่ผ่านคุณสมบัติ"
     : application.status === "needs_correction" ? "รอแก้ไขเอกสาร"
@@ -49,28 +60,42 @@ export default function ApplicantSubmissionForm({
 
   return (
     <article className="print-sheet official-application">
-      <div className="official-heading">
+      <header className="official-heading">
         <div className="official-title">
-          <h1>ใบสมัครเข้ารับการสอบคัดเลือกเป็นบุคลากร</h1>
+          <h1>ใบสมัครเข้ารับการสอบคัดเลือกเป็น{employeeType}</h1>
           <h2>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น</h2>
           <p>ตำแหน่ง {snapshot.job.title}</p>
           <p>{snapshot.job.departments?.name || "หน่วยงานตามประกาศรับสมัคร"}</p>
         </div>
-        <div className="official-photo-slot">
-          {photo ? <img src={photo} alt="รูปถ่ายผู้สมัคร" /> :
-            <span>ติดรูปถ่าย<br />ขนาดตามประกาศ</span>}
+        <div className="official-photo-block">
+          <div className="official-photo-slot">
+            {photo ? <img src={photo} alt="รูปถ่ายผู้สมัคร" /> :
+              <span>รูปถ่ายผู้สมัคร<br />3 × 4 ซม.</span>}
+          </div>
+          <small>รูปถ่ายผู้สมัคร</small>
         </div>
-      </div>
+      </header>
       <div className="official-reference">
-        <p><strong>เลขผู้สมัคร:</strong> {number || "รอ Admin กำหนดเลขผู้สมัคร"}</p>
+        <p><strong>เลขประจำตัวผู้สมัคร:</strong> {number || "รอเจ้าหน้าที่กำหนด"}</p>
         <p><strong>รอบรับสมัคร:</strong> {snapshot.round.name} (พ.ศ. {snapshot.round.year_be})</p>
-        <p><strong>สถานะใบสมัคร:</strong> {reviewStatus}</p>
       </div>
 
-      <p className="official-intro"><strong>เรียน รองอธิการบดีประจำวิทยาเขตขอนแก่น</strong></p>
+      <p className="official-intro"><strong>เรียน</strong> รองอธิการบดีประจำวิทยาเขตขอนแก่น</p>
       <p className="official-intro">
-        ข้าพเจ้า <strong>{fullName}</strong> มีความประสงค์สมัครเข้ารับการสอบคัดเลือกในตำแหน่ง
-        {" "}<strong>{snapshot.job.title}</strong> และขอแสดงรายละเอียดประกอบการพิจารณาดังต่อไปนี้
+        ข้าพเจ้า <strong>{fullName}</strong> สัญชาติ {optional(person,"nationality")}
+        {" "}เกิดวันที่ {dateTH(person.birth_date)}
+        {age !== null && age >= 0 && age <= 120 ? ` อายุ ${age} ปี` : ""}
+      </p>
+      {firstEducation && <p className="official-intro">
+        เป็นผู้สำเร็จการศึกษาคุณวุฒิ {dash(firstEducation.degree)}
+        {" "}สาขา/วิชาเอก {dash(firstEducation.major)}
+        {" "}จากสถานศึกษา {dash(firstEducation.institution)}
+        {" "}ปีที่สำเร็จการศึกษา พ.ศ. {dash(firstEducation.graduation_year)}
+        {" "}คะแนนเฉลี่ย {dash(firstEducation.gpa)}
+      </p>}
+      <p className="official-intro">
+        ขอสมัครเข้ารับการสอบคัดเลือกเป็น{employeeType} มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน
+        วิทยาเขตขอนแก่น และขอแจ้งรายละเอียดเพื่อประกอบการพิจารณา ดังนี้
       </p>
 
       <section className="official-section">
@@ -80,9 +105,10 @@ export default function ApplicantSubmissionForm({
           <Row label="ชื่อภาษาอังกฤษ" value={optional(person,"english_name","name_en")} />
           <Row label="เพศ" value={optional(person,"gender","sex")} />
           <Row label="วันเดือนปีเกิด (พ.ศ.)" value={dateTH(person.birth_date)} />
-          <Row label="สัญชาติ / เชื้อชาติ" value={optional(person,"nationality") + " / " + optional(person,"ethnicity","race")} />
+          <Row label="สัญชาติ" value={optional(person,"nationality")} />
+          <Row label="เชื้อชาติ" value={optional(person,"ethnicity","race")} />
           <Row label="ศาสนา" value={optional(person,"religion")} />
-          <Row label="เลขประจำตัวประชาชน" value={person.national_id} />
+          <Row label="บัตรประจำตัวประชาชนเลขที่" value={person.national_id} />
           <Row label="สถานภาพ" value={optional(person,"marital_status")} />
           <Row label="โทรศัพท์" value={person.phone} />
           <Row label="อีเมล" value={snapshot.email} />
@@ -95,12 +121,12 @@ export default function ApplicantSubmissionForm({
 
       <section className="official-section">
         <h3>2. ประวัติการศึกษา</h3>
-        <table className="official-table"><thead><tr>
-          <th>คุณวุฒิที่ได้รับ</th><th>สาขา / วิชาเอก</th><th>ชื่อสถานศึกษา</th><th>ปี พ.ศ.</th><th>GPA</th>
+        <table className="official-table official-education-table"><thead><tr>
+          <th>คุณวุฒิที่ได้รับ</th><th>สาขา / วิชาเอก</th><th>คะแนนเฉลี่ย</th><th>ชื่อสถานศึกษา</th><th>ปีที่สำเร็จ (พ.ศ.)</th>
         </tr></thead><tbody>
           {education.length ? education.map((item,index) => <tr key={index}>
-            <td>{dash(item.degree)}</td><td>{dash(item.major)}</td><td>{dash(item.institution)}</td>
-            <td>{dash(item.graduation_year)}</td><td>{dash(item.gpa)}</td>
+            <td>{dash(item.degree)}</td><td>{dash(item.major)}</td><td>{dash(item.gpa)}</td>
+            <td>{dash(item.institution)}</td><td>{dash(item.graduation_year)}</td>
           </tr>) : <tr><td colSpan={5}>ไม่ได้ระบุข้อมูลการศึกษา</td></tr>}
         </tbody></table>
       </section>
@@ -109,17 +135,26 @@ export default function ApplicantSubmissionForm({
         <h3>3. ประวัติการทำงาน / การฝึกงาน</h3>
         <table className="official-table official-work-table"><thead><tr>
           <th>สถานที่ทำงาน / สถานที่ฝึกงาน</th>
-          <th>ตำแหน่ง / ลักษณะงาน</th>
-          <th>เริ่มงาน (พ.ศ.)</th><th>สิ้นสุด (พ.ศ.)</th>
+          <th>ตำแหน่ง</th><th>เงินเดือนสุดท้ายก่อนออก</th>
+          <th>ตั้งแต่</th><th>ถึง</th>
         </tr></thead><tbody>
           {experience.length ? experience.map((item,index) => <tr key={index}>
             <td>{dash(item.employer)}</td>
-            <td><strong>{dash(item.position)}</strong>{item.details &&
-              <div className="official-details">{item.details}</div>}</td>
+            <td>{dash(item.position)}</td>
+            <td>—</td>
             <td>{dateTH(item.start_date)}</td>
             <td>{item.end_date ? dateTH(item.end_date) : "ปัจจุบัน"}</td>
-          </tr>) : <tr><td colSpan={4}>ไม่ได้ระบุข้อมูลประสบการณ์</td></tr>}
+          </tr>) : <tr><td colSpan={5}>ไม่ได้ระบุข้อมูลประสบการณ์</td></tr>}
         </tbody></table>
+        {experience.some(item => item.details?.trim()) && <div className="official-work-notes">
+          <strong>รายละเอียดลักษณะงาน</strong>
+          {experience.map((item,index) => item.details?.trim() ? (
+            <div className="official-work-note" key={index}>
+              <strong>{index + 1}. {dash(item.position)} – {dash(item.employer)}</strong>
+              <p>{item.details}</p>
+            </div>
+          ) : null)}
+        </div>}
       </section>
 
       <section className="official-section">
@@ -132,7 +167,8 @@ export default function ApplicantSubmissionForm({
       </section>
 
       <section className="official-section official-documents">
-        <h3>5. เอกสารและหลักฐานที่ใช้ยื่นพร้อมใบสมัคร</h3>
+        <h3>5. สำหรับเจ้าหน้าที่รับสมัคร</h3>
+        <p className="official-documents-lead">เอกสารและหลักฐานต่าง ๆ ที่ใช้ยื่นพร้อมใบสมัคร มีดังนี้</p>
         <p className="official-small">เครื่องหมาย ☑ แสดงว่ามีการอัปโหลดไฟล์เข้าระบบ ไม่ใช่ผลรับรองความถูกต้องของเอกสาร</p>
         <ul>
           {requirements.map(item => <li key={item.key}>
@@ -173,7 +209,7 @@ export default function ApplicantSubmissionForm({
       </section>
 
       <section className="official-section official-declaration">
-        <h3>คำรับรองของผู้สมัคร</h3>
+        <h3>คำรับรองผู้สมัคร</h3>
         <p>
           ข้าพเจ้าขอรับรองว่าข้อมูลที่ระบุและเอกสารที่ส่งผ่านระบบเป็นความจริง
           หากตรวจพบภายหลังว่าไม่ถูกต้อง ข้าพเจ้ายินยอมให้มหาวิทยาลัยดำเนินการ
@@ -184,8 +220,8 @@ export default function ApplicantSubmissionForm({
       </section>
 
       <footer className="official-footer">
-        แผนกงานบริหารงานบุคคล • มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น
-        <div>เอกสารสร้างจากข้อมูลใบสมัครของผู้สมัคร • กรุณาตรวจสอบความถูกต้องก่อนลงนามและนำมายื่น</div>
+        ติดต่อ แผนกงานบริหารงานบุคคล: 043-283700 ต่อ 1211 • hr.kkc@rmuti.ac.th
+        <div>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น • เอกสารจัดทำจากข้อมูลที่ผู้สมัครส่งผ่านระบบ</div>
       </footer>
     </article>
   );
