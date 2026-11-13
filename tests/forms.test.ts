@@ -84,3 +84,16 @@ describe("export and timezone", () => {
     );
   });
 });
+
+describe("conditional military status on applicant forms", () => {
+  const form = { prefix:"นาย",first_name:"ทดสอบ",last_name:"ระบบ",english_name:"TEST APPLICANT",birth_date:"2000-01-01",phone:"0800000000",address:"Khon Kaen",gender:"ชาย",nationality:"ไทย",marital_status:"โสด",registered_address:"Khon Kaen",military_status:"" };
+  it("blocks males with no military status",()=>expect(personalSchema.safeParse(form).success).toBe(false));
+  it("blocks males with not-applicable military status",()=>expect(personalSchema.safeParse({...form,military_status:"ไม่เกี่ยวข้อง"}).success).toBe(false));
+  it("accepts completed military selection",()=>expect(personalSchema.safeParse({...form,military_status:"ผ่านการเกณฑ์ทหาร"}).success).toBe(true));
+  it("requires detail for other military choice",()=>{
+    expect(personalSchema.safeParse({...form,military_status:"อื่น ๆ: "}).success).toBe(false);
+    expect(personalSchema.safeParse({...form,military_status:"อื่น ๆ: ผ่อนผันตามประกาศ"}).success).toBe(true);
+  });
+  it("does not require female applicants to fill military status",()=>expect(personalSchema.safeParse({...form,gender:"หญิง",military_status:""}).success).toBe(true));
+  it("keeps legacy other gender values for draft correction",()=>expect(personalSchema.safeParse({...form,gender:"อื่น ๆ",military_status:""}).success).toBe(true));
+});

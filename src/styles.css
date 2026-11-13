@@ -2398,3 +2398,16 @@ td strong {
 @media (max-width: 440px) {
   .rmuti-apple-home .hero-actions .line-oa-hero { width: 100%; }
 }
+
+/* Male applicant only: mandatory military status question */
+.military-status-applicant-field { min-width:0; margin:0; padding:18px 20px; background:#fffaf5; border:1.5px solid #ffbb83; border-radius:14px; }
+.military-status-applicant-field legend { padding:0 6px; color:#17345c; font-weight:800; font-size:15px; }
+.military-required { color:#ca3415; }
+.military-status-help { color:#53677f; font-size:13px; margin:0 0 13px; }
+.military-status-choices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:10px; }
+.military-status-choice { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #d8e2ef; border-radius:10px; padding:12px; cursor:pointer; color:#17345c; font-size:14px; line-height:1.45; }
+.military-status-choice:has(input:checked) { border-color:#f47721; background:#fff0e5; box-shadow:0 0 0 1px #f47721; }
+.military-status-choice input { flex-shrink:0; accent-color:#e86d10; width:17px; height:17px; }
+.military-status-choice:focus-within { outline:2px solid #1675c5; outline-offset:2px; }
+.military-status-error { color:#be3218; font-size:13px; font-weight:700; margin:12px 0 0; }
+@media (max-width:600px) { .military-status-choices { grid-template-columns:1fr; } .military-status-applicant-field { padding:15px; } }
