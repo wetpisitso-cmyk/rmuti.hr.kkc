@@ -387,10 +387,11 @@ export default function ApplicationWizard() {
                   </Select>
                   <Field label="สัญชาติ (บังคับ)" value={personal.nationality || ""}
                     onChange={e=>update("nationality",e.target.value)} required maxLength={100} placeholder="เช่น ไทย" />
-                  <Field label="เชื้อชาติ (ไม่บังคับ)" value={personal.ethnicity || ""}
-                    onChange={e=>update("ethnicity",e.target.value)} maxLength={100} />
-                  <Field label="ศาสนา (ไม่บังคับ)" value={personal.religion || ""}
-                    onChange={e=>update("religion",e.target.value)} maxLength={100} />
+                  <Field label="เชื้อชาติ (บังคับ)" value={personal.ethnicity || ""}
+                    onChange={e=>update("ethnicity",e.target.value)} required maxLength={100} placeholder="เช่น ไทย" />
+                  <Field label="ศาสนา (บังคับ)" value={personal.religion || ""}
+                    onChange={e=>update("religion",e.target.value)} required maxLength={100}
+                    placeholder="เช่น พุทธ / คริสต์ / อิสลาม / ไม่มีศาสนา" />
                   <Select label="สถานภาพ (บังคับ)" value={personal.marital_status || ""}
                     onChange={e=>update("marital_status",e.target.value)}>
                     <option value="">เลือก / ไม่ระบุ</option>
@@ -398,8 +399,10 @@ export default function ApplicationWizard() {
                     <option value="หย่า">หย่า</option><option value="หม้าย">หม้าย</option>
                     <option value="อื่น ๆ">อื่น ๆ</option>
                   </Select>
-                  <Field label="LINE ID (ไม่บังคับ)" value={personal.line_id || ""}
-                    onChange={e=>update("line_id",e.target.value)} maxLength={100} />
+                  <Field label="LINE ID (บังคับ)" value={personal.line_id || ""}
+                    onChange={e=>update("line_id",e.target.value)} required maxLength={100}
+                    placeholder="กรอก LINE ID หรือ ไม่มี"
+                    hint="หากไม่มีบัญชี LINE ให้กรอก “ไม่มี”" />
                   <div className="col-span-full">
                     <Textarea label="ที่อยู่ตามทะเบียนบ้าน (บังคับ)" value={personal.registered_address || ""}
                       onChange={e=>update("registered_address",e.target.value)} required maxLength={2000} />
@@ -409,9 +412,9 @@ export default function ApplicationWizard() {
                       onChange={value=>update("military_status",value)} />
                   )}
                   <div className="col-span-full">
-                    <Textarea label="ความรู้ความสามารถพิเศษ (ไม่บังคับ)" value={personal.skills || ""}
-                      onChange={e=>update("skills",e.target.value)} maxLength={2000}
-                      placeholder="เช่น โปรแกรมคอมพิวเตอร์ ภาษาอังกฤษ งานบริการ หรือทักษะอื่น ๆ" />
+                    <Textarea label="ความรู้ความสามารถพิเศษ (บังคับ)" value={personal.skills || ""}
+                      onChange={e=>update("skills",e.target.value)} required maxLength={2000}
+                      placeholder="กรอกความรู้ความสามารถพิเศษ หรือ ไม่มี หากไม่มี" />
                   </div>
                   {job?.require_national_id && (
                     <Field
