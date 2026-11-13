@@ -89,7 +89,7 @@ export default function ApplicantSubmissionForm({
           <Row label="LINE ID" value={optional(person,"line_id","lineId")} />
           <Row label="ที่อยู่ตามทะเบียนบ้าน" value={optional(person,"registered_address")} />
           <Row label="ที่อยู่ปัจจุบัน" value={person.address} />
-          <Row label="สถานะการเกณฑ์ทหาร (ตามประกาศของมหาวิทยาลัยเท่านั้น)" value={optional(person,"military_status")} />
+          {person.gender === "ชาย" && <Row label="สถานะการเกณฑ์ทหาร (ตามประกาศของมหาวิทยาลัยเท่านั้น)" value={optional(person,"military_status")} />}
         </tbody></table>
       </section>
 
