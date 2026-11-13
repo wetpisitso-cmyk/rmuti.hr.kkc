@@ -2374,3 +2374,27 @@ td strong {
 /* Correction deadline editor in compact HR application action row */
 .correction-deadline-editor { flex-basis: 100%; max-width: 380px; min-width: min(100%, 270px); margin: 8px 0; }
 .correction-deadline-editor .thai-date-field { width: 100%; }
+
+/* RMUTI HR official LINE OA call to action */
+.line-oa-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 44px; padding: 11px 16px; border-radius: 14px;
+  background: #06c755; border: 1px solid #05af4a; color: #fff !important;
+  font-size: 14px; line-height: 1.35; font-weight: 800; text-decoration: none !important;
+  box-shadow: 0 8px 20px rgba(0, 140, 62, .18);
+  transition: background .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+.line-oa-button:hover, .line-oa-button:focus-visible {
+  background: #05ae49; transform: translateY(-1px);
+  box-shadow: 0 11px 22px rgba(0, 140, 62, .25);
+}
+.line-oa-button:focus-visible { outline: 3px solid #103e77; outline-offset: 3px; }
+.rmuti-apple-home .hero-actions .line-oa-hero {
+  min-height: 55px; padding: 13px 23px; border-radius: 99px;
+  background: #06c755; color: #fff !important; border-color: #05af4a;
+}
+.footer .line-oa-footer { font-size: 12px; min-height: 38px; padding: 7px 11px; box-shadow: none; }
+.manual-contact-card .line-oa-guide { margin: 12px 0; width: 100%; }
+@media (max-width: 440px) {
+  .rmuti-apple-home .hero-actions .line-oa-hero { width: 100%; }
+}
