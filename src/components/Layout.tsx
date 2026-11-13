@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { resetPageHorizontalScroll } from "../lib/layout-scroll";
 import { LineOAButton } from "./LineOAButton";
 import {
   GraduationCap,
@@ -250,7 +251,21 @@ const links = [
 ] as const;
 export function StaffLayout() {
   const a = useAuth();
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  // On browser restore or staff-route navigation, a previously scrolled-wide
+  // element can leave the whole dashboard displaced to the left.
+  // Keep vertical scroll exactly where it was; only restore horizontal origin.
+  useEffect(() => {
+    const reset = () => resetPageHorizontalScroll(window);
+    reset();
+    const frame = window.requestAnimationFrame(reset);
+    window.addEventListener("pageshow", reset);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("pageshow", reset);
+    };
+  }, [pathname]);
   return (
     <div className="staff-shell">
       <aside className={open ? "sidebar open" : "sidebar"}>
