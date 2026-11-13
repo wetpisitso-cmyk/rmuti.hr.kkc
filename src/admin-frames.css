@@ -168,3 +168,64 @@
     box-shadow:none !important;
   }
 }
+
+/* Staff dashboard width safety: avoid horizontal page scrolling / cropped left edge.
+   Large tables keep their own .table-wrap scroll container, not body-level overflow. */
+.staff-shell {
+  width: 100%;
+  max-width: 1600px;
+  min-width: 0;
+  margin-inline: auto;
+  grid-template-columns: minmax(0, 248px) minmax(0, 1fr);
+}
+.staff-shell .staff-main {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+.staff-shell .staff-main > :is(.page-title, .panel, .filter-card, .kpi-grid, .chart-grid) {
+  min-width: 0;
+  max-width: 100%;
+}
+.staff-shell .staff-main > .page-title {
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+}
+.staff-shell .staff-main > .page-title > div {
+  min-width: 0;
+  flex: 1 1 250px;
+}
+.staff-shell .staff-main .chart-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.staff-shell .staff-main .chart-grid > .panel {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.staff-shell .staff-main .staff-filters {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.staff-shell .staff-main .staff-filters > *,
+.staff-shell .staff-main :is(.kpi-grid, .staff-application-notifications, .staff-notice-heading, .staff-notice-summary, .staff-notice-heading > div) {
+  min-width: 0;
+  max-width: 100%;
+}
+.staff-shell .staff-main .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+@media (max-width: 1100px) {
+  .staff-shell { grid-template-columns: minmax(0, 236px) minmax(0, 1fr); }
+  .staff-shell .staff-main .staff-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 800px) {
+  .staff-shell { display: block; }
+  .staff-shell .staff-main .chart-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 540px) {
+  .staff-shell .staff-main .staff-filters { grid-template-columns: minmax(0, 1fr); }
+}
