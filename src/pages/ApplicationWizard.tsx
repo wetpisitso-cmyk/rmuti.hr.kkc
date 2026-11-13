@@ -19,7 +19,8 @@ import {
 import { errorTH } from "../lib/errors";
 import { dateTH, money, bangkokISO, bangkokInput } from "../lib/format";
 import { ThaiDateField } from "../components/ThaiDateField";
-import { personalSchema, validThaiID, educationIssue } from "../validation/forms";
+import { personalSchema, militaryStatusIssue, validThaiID, educationIssue } from "../validation/forms";
+import { MilitaryStatusQuestion } from "../components/MilitaryStatusQuestion";
 import type { Personal, Education, Experience } from "../types/models";
 const emptyEducation = (): Education => ({
   degree: "",
@@ -198,7 +199,7 @@ export default function ApplicationWizard() {
     const newId = await saveDraft(
       appId,
       selected,
-      personal,
+      personal.gender === "หญิง" ? { ...personal, military_status: "" } : personal,
       education,
       experience,
     );
@@ -227,13 +228,13 @@ export default function ApplicationWizard() {
   };
   const next = () =>
     run(async () => {
-      if (
-        step === 0 &&
-        (!personalSchema.safeParse(personal).success ||
-          (job?.require_national_id &&
-            !validThaiID(personal.national_id || "")))
-      )
-        throw new Error("กรุณากรอกข้อมูลส่วนตัวให้ครบและถูกต้อง");
+      if (step === 0) {
+        const message = militaryStatusIssue(personal.gender, personal.military_status);
+        if (message) throw new Error(message);
+        if (!personalSchema.safeParse(personal).success ||
+            (job?.require_national_id && !validThaiID(personal.national_id || "")))
+          throw new Error("กรุณากรอกข้อมูลส่วนตัวให้ครบและถูกต้อง");
+      }
       if (step === 1) {
         const issue = educationIssue(education);
         if (issue) throw new Error(issue);
@@ -252,6 +253,8 @@ export default function ApplicationWizard() {
     });
   const submit = () =>
     run(async () => {
+      const message = militaryStatusIssue(personal.gender, personal.military_status);
+      if (message) throw new Error(message);
       if (!personalSchema.safeParse(personal).success ||
           (job?.require_national_id && !validThaiID(personal.national_id || "")))
         throw new Error("กรุณากรอกข้อมูลส่วนตัวให้ครบและถูกต้อง");
@@ -279,7 +282,9 @@ export default function ApplicationWizard() {
     setSaved(new Date().toISOString());
   });
   const update = (k: keyof Personal, v: string) =>
-    setPersonal((p) => ({ ...p, [k]: v }));
+    setPersonal((p) => k === "gender" && p.gender !== v
+      ? { ...p, gender: v, military_status: "" }
+      : { ...p, [k]: v });
   return (
     <div className="container section">
       <Title
@@ -373,10 +378,12 @@ export default function ApplicationWizard() {
                   </div>
                   <Field label="ชื่อ–นามสกุลภาษาอังกฤษ (บังคับ)" value={personal.english_name || ""}
                     onChange={e=>update("english_name",e.target.value)} required maxLength={200} placeholder="เช่น SOMCHAI JAIDEE" />
-                  <Select label="เพศ (บังคับ)" value={personal.gender || ""} onChange={e=>update("gender",e.target.value)}>
-                    <option value="">เลือก / ไม่ระบุ</option>
-                    <option value="ชาย">ชาย</option><option value="หญิง">หญิง</option>
-                    <option value="อื่น ๆ">อื่น ๆ</option><option value="ไม่ประสงค์ระบุ">ไม่ประสงค์ระบุ</option>
+                  <Select label="เพศ (บังคับ)" value={personal.gender || ""} required onChange={e=>update("gender",e.target.value)}>
+                    <option value="">กรุณาเลือกเพศ</option>
+                    <option value="ชาย">ชาย</option>
+                    <option value="หญิง">หญิง</option>
+                    {personal.gender && !["ชาย","หญิง"].includes(personal.gender) &&
+                      <option value={personal.gender}>{personal.gender} (ข้อมูลใบสมัครเดิม)</option>}
                   </Select>
                   <Field label="สัญชาติ (บังคับ)" value={personal.nationality || ""}
                     onChange={e=>update("nationality",e.target.value)} required maxLength={100} placeholder="เช่น ไทย" />
@@ -397,15 +404,10 @@ export default function ApplicationWizard() {
                     <Textarea label="ที่อยู่ตามทะเบียนบ้าน (บังคับ)" value={personal.registered_address || ""}
                       onChange={e=>update("registered_address",e.target.value)} required maxLength={2000} />
                   </div>
-                  <div className="military-status-applicant-field">
-                    <Field label="สถานะการเกณฑ์ทหาร (ตามประกาศของมหาวิทยาลัยเท่านั้น)" value={personal.military_status || ""}
-                      onChange={e=>update("military_status",e.target.value)} maxLength={200}
-                      placeholder="เช่น ผ่านการเกณฑ์ทหาร / ได้รับการยกเว้น / ไม่เกี่ยวข้อง" />
-                    <p className="military-status-female-note" role="note" aria-label="คำแนะนำสำหรับผู้สมัครเพศหญิง">
-                      <strong>ผู้สมัครเพศหญิง: กรุณาระบุ “ไม่เกี่ยวข้อง”</strong>
-                      <span>กรอกในช่องด้านบน โดยยึดตามประกาศของมหาวิทยาลัยเท่านั้น</span>
-                    </p>
-                  </div>
+                  {personal.gender === "ชาย" && (
+                    <MilitaryStatusQuestion value={personal.military_status || ""}
+                      onChange={value=>update("military_status",value)} />
+                  )}
                   <div className="col-span-full">
                     <Textarea label="ความรู้ความสามารถพิเศษ (ไม่บังคับ)" value={personal.skills || ""}
                       onChange={e=>update("skills",e.target.value)} maxLength={2000}
