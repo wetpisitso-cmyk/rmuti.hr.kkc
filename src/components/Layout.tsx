@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { resetPageHorizontalScroll } from "../lib/layout-scroll";
+import { isStaffNoticeResolved } from "../lib/staff-notice-status";
 import { LineOAButton } from "./LineOAButton";
 import {
   GraduationCap,
@@ -127,17 +128,63 @@ export function Layout() {
     queryFn: () => rows("app_settings", "*", "key"),
   });
   const unreadNotifications = useQuery({
-    queryKey: ["header-notification-count", a.session?.user.id],
+    queryKey: ["header-notification-count", a.session?.user.id, a.role],
     enabled: Boolean(a.session && ["applicant", "admin", "hr"].includes(a.role || "")),
     refetchInterval: 30_000,
     queryFn: async () => {
-      const { count, error } = await supabase.from("notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", a.session!.user.id)
-        .is("read_at", null)
-        .like("event_key", a.role === "applicant" ? "%" : "staff-application:%");
-      if (error) throw error;
-      return count || 0;
+      const userId = a.session!.user.id;
+      // Applicant notices have no staff review state, so a simple unread count is sufficient.
+      if (a.role === "applicant") {
+        const { count, error } = await supabase.from("notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .is("read_at", null)
+          .like("event_key", "%");
+        if (error) throw error;
+        return count || 0;
+      }
+
+      // The staff inbox already hides notices for reviewed applications.
+      // Match that rule in the header instead of counting all read_at IS NULL.
+      // Paginate to avoid silently truncating the count at the API row limit.
+      const unreadNotices: { application_id: string | null; read_at: string | null }[] = [];
+      const pageSize = 500;
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await supabase.from("notifications")
+          .select("application_id,read_at")
+          .eq("user_id", userId)
+          .like("event_key", "staff-application:%")
+          .is("read_at", null)
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: false })
+          .range(offset, offset + pageSize - 1);
+        if (error) throw error;
+        unreadNotices.push(...(data || []));
+        if (!data || data.length < pageSize) break;
+      }
+      if (!unreadNotices.length) return 0;
+
+      const applicationIds = [...new Set(unreadNotices
+        .map(n => n.application_id)
+        .filter((id): id is string => Boolean(id)))];
+      const reviewedIds = new Set<string>();
+      for (let i = 0; i < applicationIds.length; i += 150) {
+        const batch = applicationIds.slice(i, i + 150);
+        const [applications, steps] = await Promise.all([
+          supabase.from("applications").select("id,status").in("id", batch),
+          supabase.from("application_review_steps").select("application_id").in("application_id", batch),
+        ]);
+        if (applications.error) throw applications.error;
+        if (steps.error) throw steps.error;
+        for (const application of applications.data || []) {
+          if (["eligible", "ineligible", "withdrawn"].includes(application.status)) {
+            reviewedIds.add(application.id);
+          }
+        }
+        for (const step of steps.data || []) reviewedIds.add(step.application_id);
+      }
+
+      return unreadNotices.filter(n => !isStaffNoticeResolved(n, reviewedIds)).length;
     },
   });
   const contact = settings?.find((s) => s.key === "contact")?.value;
