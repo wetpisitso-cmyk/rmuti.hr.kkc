@@ -1,0 +1,161 @@
+/* Recruitment portal footer: orderly official links across desktop and mobile.
+   Loaded after the theme CSS to keep legacy footer styles from wrapping menus. */
+.footer .footer-refined {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px 40px;
+}
+.footer .footer-identity {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2vw, 34px);
+  min-width: 0;
+}
+.footer .footer-identity > .brand { flex: 0 0 auto; }
+.footer .footer-identity > p {
+  margin: 0;
+  max-width: 285px;
+  font-size: 12px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.footer .footer-information {
+  display: grid;
+  gap: 12px;
+  justify-items: end;
+  min-width: 0;
+}
+.footer .footer-navigation {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 9px;
+  flex-wrap: nowrap;
+}
+.footer .footer-navigation > a {
+  box-sizing: border-box;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.footer .footer-navigation .footer-official-link {
+  background: rgba(255, 255, 255, .045);
+  border: 1px solid rgba(213, 228, 251, .42);
+  color: #f3f7ff;
+}
+.footer .footer-navigation .footer-official-link:hover,
+.footer .footer-navigation .footer-official-link:focus-visible {
+  background: rgba(255, 255, 255, .14);
+  border-color: #ffb782;
+}
+.footer .footer-navigation .line-oa-footer {
+  min-height: 42px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  box-shadow: none;
+  font-size: 12px;
+}
+.footer .footer-navigation .footer-admin-link {
+  border: 1px solid rgba(255, 169, 108, .55);
+  background: rgba(244, 119, 33, .095);
+  color: #ffd1ad;
+}
+.footer .footer-navigation .footer-admin-link:hover,
+.footer .footer-navigation .footer-admin-link:focus-visible {
+  border-color: #ffbd89;
+  color: #fff;
+  background: rgba(244, 119, 33, .2);
+}
+.footer .footer-navigation > a:focus-visible {
+  outline: 2px solid #ffc58d;
+  outline-offset: 3px;
+}
+.footer .footer-navigation svg { flex: 0 0 auto; }
+.footer .footer-navigation .footer-official-link span { color: inherit; }
+.footer .footer-trust-info {
+  display: flex;
+  gap: 10px 22px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  color: #d0dff3;
+  font-size: 12px;
+}
+.footer .footer-trust-info .footer-privacy-note,
+.footer .footer-trust-info .site-visitor-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #d0dff3 !important;
+  font-size: 12px;
+  font-weight: 550;
+  white-space: normal;
+  text-align: right;
+}
+.footer .footer-trust-info svg { flex: 0 0 auto; }
+
+@media (max-width: 1370px) {
+  .footer .footer-refined {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 18px;
+  }
+  .footer .footer-identity {
+    justify-content: center;
+    width: 100%;
+  }
+  .footer .footer-identity > p { max-width: none; }
+  .footer .footer-information {
+    justify-items: center;
+    width: 100%;
+  }
+  .footer .footer-navigation {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .footer .footer-trust-info { justify-content: center; }
+}
+@media (max-width: 640px) {
+  .footer .footer-refined { gap: 20px; }
+  .footer .footer-identity {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    text-align: center;
+  }
+  .footer .footer-identity > .brand { max-width: 100%; }
+  .footer .footer-identity > p { flex-basis: 100%; }
+  .footer .footer-navigation {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .footer .footer-navigation > a {
+    min-height: 48px;
+    padding: 10px 8px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .footer .footer-navigation .footer-official-link span {
+    display: inline;
+    font-size: 12px;
+  }
+  .footer .footer-trust-info { gap: 6px 16px; }
+  .footer .footer-trust-info .footer-privacy-note,
+  .footer .footer-trust-info .site-visitor-count { text-align: center; }
+}
+@media (max-width: 360px) {
+  .footer .footer-navigation { grid-template-columns: minmax(0,1fr); }
+}

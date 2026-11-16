@@ -16,6 +16,7 @@ import "./manual-guides.css";
 import "./readability.css";
 import "./admin-frames.css";
 import "./home-concept-two.css";
+import "./footer-links.css";
 // Handle stale Vite chunks after GitHub Pages publishes a new build.
 // Preserve hash routes so users can resume their applications.
 const FRESH_PARAM = "rmuti_fresh";

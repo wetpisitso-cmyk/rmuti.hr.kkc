@@ -266,29 +266,42 @@ export function Layout() {
         <Outlet />
       </main>
       <footer className="footer">
-        <div className="container footer-inner">
-          <Brand />
-          <p>
-            {contact?.department || "แผนกงานบริหารงานบุคคล"}
-            <br />
-            มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น
-          </p>
-          <span>
-            <ShieldCheck size={17} /> เอกสารส่วนบุคคลเข้าถึงตามสิทธิ์
-            <VisitorCount />
-            <LineOAButton variant="footer" />
-            <a className="footer-official-link" href="https://www.kkc.rmuti.ac.th/"
-              target="_blank" rel="noopener noreferrer"
-              aria-label="เว็บไซต์ มทร.อีสาน วิทยาเขตขอนแก่น (เปิดแท็บใหม่)">
-              <Globe size={16} aria-hidden="true" /> เว็บไซต์ มทร.ขอนแก่น <ExternalLink size={13} aria-hidden="true" />
-            </a>
-            <a className="footer-official-link" href="https://www.facebook.com/hr.rmutikkc"
-              target="_blank" rel="noopener noreferrer"
-              aria-label="Facebook งานบริหารงานบุคคล มทร.อีสาน วิทยาเขตขอนแก่น (เปิดแท็บใหม่)">
-              <Facebook size={16} aria-hidden="true" /> Facebook งานบุคคล <ExternalLink size={13} aria-hidden="true" />
-            </a>
-            <Link className="footer-admin-link" to="/admin/login">เข้าสู่ระบบ Admin</Link>
-          </span>
+        <div className="container footer-inner footer-refined">
+          <div className="footer-identity">
+            <Brand />
+            <p>
+              {contact?.department || "แผนกงานบริหารงานบุคคล"}
+              <br />
+              มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น
+            </p>
+          </div>
+          <div className="footer-information">
+            <nav className="footer-navigation" aria-label="ช่องทางติดต่อและเว็บไซต์ที่เกี่ยวข้อง">
+              <LineOAButton variant="footer" />
+              <a className="footer-official-link" href="https://www.kkc.rmuti.ac.th/"
+                target="_blank" rel="noopener noreferrer"
+                aria-label="เว็บไซต์ มทร.อีสาน วิทยาเขตขอนแก่น (เปิดแท็บใหม่)">
+                <Globe size={17} aria-hidden="true" />
+                <span>เว็บไซต์ มทร.ขอนแก่น</span>
+                <ExternalLink size={13} aria-hidden="true" />
+              </a>
+              <a className="footer-official-link" href="https://www.facebook.com/hr.rmutikkc"
+                target="_blank" rel="noopener noreferrer"
+                aria-label="Facebook งานบริหารงานบุคคล มทร.อีสาน วิทยาเขตขอนแก่น (เปิดแท็บใหม่)">
+                <Facebook size={17} aria-hidden="true" />
+                <span>Facebook งานบุคคล</span>
+                <ExternalLink size={13} aria-hidden="true" />
+              </a>
+              <Link className="footer-admin-link" to="/admin/login">เข้าสู่ระบบ Admin</Link>
+            </nav>
+            <div className="footer-trust-info">
+              <span className="footer-privacy-note">
+                <ShieldCheck size={16} aria-hidden="true" />
+                เอกสารส่วนบุคคลเข้าถึงตามสิทธิ์
+              </span>
+              <VisitorCount />
+            </div>
+          </div>
         </div>
       </footer>
     </>
