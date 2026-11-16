@@ -11,6 +11,7 @@ import {
   LogIn,
   LayoutDashboard,
   Files,
+  Archive,
   FileSpreadsheet,
   ReceiptText,
   BriefcaseBusiness,
@@ -311,6 +312,7 @@ export function Layout() {
 const links = [
   ["", "ภาพรวม", LayoutDashboard, ""],
   ["applications", "ตรวจใบสมัคร", Files, "review"],
+  ["application-records", "คลังใบสมัครที่ตรวจแล้ว", Archive, "review"],
   ["roster", "รายชื่อผู้สมัคร / PDF / Excel", FileSpreadsheet, "reports"],
   ["payment-slips", "ดาวน์โหลดสลิปค่าสมัคร", ReceiptText, "reports"],
   ["jobs", "ตำแหน่งรับสมัคร", BriefcaseBusiness, "manage_jobs"],

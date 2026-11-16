@@ -76,7 +76,11 @@ export default function App() {
                 <Route index element={<StaffDashboard />} />
                 <Route
                   path="applications"
-                  element={<StaffDashboard listOnly />}
+                  element={<StaffDashboard key="pending" listOnly />}
+                />
+                <Route
+                  path="application-records"
+                  element={<StaffDashboard key="records" listOnly recordsOnly />}
                 />
                 <Route element={<Guard permission="reports" />}>
                   <Route path="roster" element={<ApplicantRoster />} />

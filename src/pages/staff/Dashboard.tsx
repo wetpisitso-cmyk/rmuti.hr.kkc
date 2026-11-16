@@ -33,6 +33,7 @@ import { supabase } from "../../lib/supabase";
 import { ThaiDateField } from "../../components/ThaiDateField";
 import ApplicantDocumentsDownload from "../../components/ApplicantDocumentsDownload";
 import StaffApplicationNotifications from "../../components/StaffApplicationNotifications";
+import { staffQueueView } from "../../lib/staff-application-view";
 
 const initial: Filters = {
   year: "",
@@ -46,8 +47,10 @@ const initial: Filters = {
 };
 export default function StaffDashboard({
   listOnly = false,
+  recordsOnly = false,
 }: {
   listOnly?: boolean;
+  recordsOnly?: boolean;
 }) {
   const a = useAuth(),
     catalog = useCatalog(),
@@ -69,6 +72,7 @@ export default function StaffDashboard({
   const search = useDebounce(filters.search);
   const applied = {
     ...filters,
+    ...(staffQueueView(listOnly, recordsOnly) ? { queue_view: staffQueueView(listOnly, recordsOnly) } : {}),
     search,
     from: filters.from ? bangkokISO(filters.from) : "",
     to: filters.to
@@ -78,7 +82,7 @@ export default function StaffDashboard({
   const q = useQuery({
     queryKey: ["staff-list", applied, page, sort],
     queryFn: () => staffList(applied, page, 20, sort),
-
+    refetchInterval: listOnly ? 60_000 : false,
   });
   const dashboard = useQuery({
     queryKey: ["staff-dashboard", applied],
@@ -231,8 +235,12 @@ export default function StaffDashboard({
     <>
       <Title
         eyebrow="RECRUITMENT OVERVIEW"
-        title={listOnly ? "รายการใบสมัคร" : "ภาพรวมการรับสมัคร"}
-        description="แสดงเฉพาะใบสมัครที่ยืนยันส่งแล้ว โดยสถิติและรายการปรับตามตัวกรองที่เลือก"
+        title={listOnly ? (recordsOnly ? "คลังใบสมัครที่ตรวจแล้ว / ปิดรับสมัคร" : "ใบสมัครที่ยังเปิดรับสมัครและรอตรวจ") : "ภาพรวมการรับสมัคร"}
+        description={listOnly
+          ? recordsOnly
+            ? "ใบสมัครที่ตรวจแล้ว หรืออยู่ในตำแหน่งที่ปิดรับสมัคร สามารถค้นหา เปิดตรวจ และดาวน์โหลดเอกสารย้อนหลังได้ โดยไม่ลบข้อมูล"
+            : "แสดงเฉพาะใบสมัครที่ยังต้องตรวจในตำแหน่งที่อยู่ระหว่างเปิดรับสมัคร ตามเวลาเปิด–ปิดของประกาศ"
+          : "แสดงเฉพาะใบสมัครที่ยืนยันส่งแล้ว โดยสถิติและรายการปรับตามตัวกรองที่เลือก"}
         action={
           <div className="flex gap-2 no-print">
             {a.can("reports") && (
@@ -411,8 +419,15 @@ export default function StaffDashboard({
         </section>
       )}
       <section className="panel">
+        {listOnly && (
+          <div className="notice" role="status">
+            {recordsOnly
+              ? "คลังข้อมูลแสดงใบสมัครที่ตรวจแล้วและใบสมัครของรอบที่ปิดรับสมัคร หากยังตรวจไม่เสร็จสามารถเปิดตรวจต่อได้ ข้อมูลและเอกสารยังอยู่ครบ"
+              : "แสดงเฉพาะใบสมัครที่ยังรอการตรวจและประกาศยังไม่หมดเวลารับสมัคร เมื่อปิดรับหรือบันทึกผลแล้ว รายการจะอยู่ที่เมนูคลังใบสมัครด้านซ้าย"}
+          </div>
+        )}
         <div className="flex justify-between items-center mb-3 flex-wrap gap-3">
-          <h2>ใบสมัคร {q.data?.count || 0} รายการ</h2>
+          <h2>{listOnly ? (recordsOnly ? "ใบสมัครในคลัง" : "ใบสมัครรอตรวจในรอบที่เปิดอยู่") : "ใบสมัคร"} {q.data?.count || 0} รายการ</h2>
           <Select
             label="เรียงลำดับ"
             value={sort}
