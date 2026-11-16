@@ -145,13 +145,13 @@ export default function ApplicantGuide() {
             <a href="https://www.kkc.rmuti.ac.th/" target="_blank" rel="noopener noreferrer"
               aria-label="เปิดเว็บไซต์ มทร.อีสาน วิทยาเขตขอนแก่น ในแท็บใหม่">
               <Globe size={22} aria-hidden="true" />
-              <span><strong>เว็บไซต์ มทร.อีสาน วิทยาเขตขอนแก่น</strong><small>www.kkc.rmuti.ac.th</small></span>
+              <span><strong>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น</strong><small>www.kkc.rmuti.ac.th</small></span>
               <ExternalLink size={17} aria-hidden="true" />
             </a>
             <a href="https://www.facebook.com/hr.rmutikkc" target="_blank" rel="noopener noreferrer"
               aria-label="เปิด Facebook งานบริหารงานบุคคล มทร.อีสาน วิทยาเขตขอนแก่น ในแท็บใหม่">
               <Facebook size={22} aria-hidden="true" />
-              <span><strong>Facebook งานบริหารงานบุคคล</strong><small>facebook.com/hr.rmutikkc</small></span>
+              <span><strong>แผนกงานบริหารงานบุคคล</strong><small>facebook.com/hr.rmutikkc</small></span>
               <ExternalLink size={17} aria-hidden="true" />
             </a>
           </div>

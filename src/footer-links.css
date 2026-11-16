@@ -159,3 +159,26 @@
 @media (max-width: 360px) {
   .footer .footer-navigation { grid-template-columns: minmax(0,1fr); }
 }
+
+/* Official channel names: preserve the full formal Thai titles without clipping. */
+.footer .footer-navigation .footer-official-link {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+  min-height: 54px;
+}
+.footer .footer-navigation .footer-official-link[href="https://www.kkc.rmuti.ac.th/"] {
+  max-width: 290px;
+}
+.footer .footer-navigation .footer-official-link[href="https://www.facebook.com/hr.rmutikkc"] {
+  max-width: 205px;
+}
+.footer .footer-navigation .footer-official-link > span {
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .footer .footer-navigation .footer-official-link {
+    max-width: none;
+    min-height: 70px;
+  }
+}

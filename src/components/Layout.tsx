@@ -282,14 +282,14 @@ export function Layout() {
                 target="_blank" rel="noopener noreferrer"
                 aria-label="เว็บไซต์ มทร.อีสาน วิทยาเขตขอนแก่น (เปิดแท็บใหม่)">
                 <Globe size={17} aria-hidden="true" />
-                <span>เว็บไซต์ มทร.ขอนแก่น</span>
+                <span>มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น</span>
                 <ExternalLink size={13} aria-hidden="true" />
               </a>
               <a className="footer-official-link" href="https://www.facebook.com/hr.rmutikkc"
                 target="_blank" rel="noopener noreferrer"
                 aria-label="Facebook งานบริหารงานบุคคล มทร.อีสาน วิทยาเขตขอนแก่น (เปิดแท็บใหม่)">
                 <Facebook size={17} aria-hidden="true" />
-                <span>Facebook งานบุคคล</span>
+                <span>แผนกงานบริหารงานบุคคล</span>
                 <ExternalLink size={13} aria-hidden="true" />
               </a>
               <Link className="footer-admin-link" to="/admin/login">เข้าสู่ระบบ Admin</Link>
