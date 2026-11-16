@@ -2415,3 +2415,27 @@ td strong {
 .military-status-choice:focus-within { outline:2px solid #1675c5; outline-offset:2px; }
 .military-status-error { color:#be3218; font-size:13px; font-weight:700; margin:12px 0 0; }
 @media (max-width:720px) { .military-status-choices { grid-template-columns:minmax(0,1fr); } .military-status-applicant-field { padding:15px; } }
+
+/* Official HR and campus channels — footer links, independent of application logic. */
+.footer .footer-official-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid rgba(230, 240, 255, .32);
+  border-radius: 999px;
+  color: #eef5ff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color .2s, background-color .2s;
+}
+.footer .footer-official-link:hover,
+.footer .footer-official-link:focus-visible {
+  background: rgba(244, 119, 33, .17);
+  border-color: #ffaf78;
+  color: #fff;
+}
+.footer .footer-official-link svg { flex: 0 0 auto; }

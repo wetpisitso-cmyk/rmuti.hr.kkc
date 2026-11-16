@@ -134,3 +134,54 @@
 .manual-page [id^="applicant-"],.manual-page [id^="admin-"]{scroll-margin-top:180px}
 @media(max-width:780px){.manual-page [id^="applicant-"],.manual-page [id^="admin-"]{scroll-margin-top:100px}}
 @media(max-width:600px){.manual-topic-nav button{font-size:12px;padding:8px 9px}}
+
+/* Official contact channels: two accessible cards within the guide contact panel. */
+.manual-contact-official-links {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 14px;
+}
+.manual-contact-official-links > a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid rgba(255,255,255,.29);
+  border-radius: 13px;
+  background: rgba(255,255,255,.09);
+  color: #fff;
+  text-decoration: none;
+  min-width: 0;
+  transition: background-color .2s, border-color .2s;
+}
+.manual-contact-official-links > a:hover,
+.manual-contact-official-links > a:focus-visible {
+  background: rgba(255,255,255,.17);
+  border-color: #ffb578;
+}
+.manual-contact-official-links > a > svg:first-child {
+  flex: 0 0 auto;
+  color: #ffc38a;
+}
+.manual-contact-official-links > a > svg:last-child {
+  margin-left: auto;
+  flex: 0 0 auto;
+  color: #dbe9ff;
+}
+.manual-contact-official-links > a > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.manual-contact-official-links strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #fff;
+}
+.manual-contact-official-links small {
+  display: block;
+  font-size: 12px;
+  color: #d3e4fc;
+  overflow-wrap: anywhere;
+}

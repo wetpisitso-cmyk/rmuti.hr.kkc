@@ -23,6 +23,9 @@ import {
   ArrowUpRight,
   BookOpenCheck,
   Bell,
+  Globe,
+  Facebook,
+  ExternalLink,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase, supabaseUrl } from "../lib/supabase";
@@ -274,6 +277,16 @@ export function Layout() {
             <ShieldCheck size={17} /> เอกสารส่วนบุคคลเข้าถึงตามสิทธิ์
             <VisitorCount />
             <LineOAButton variant="footer" />
+            <a className="footer-official-link" href="https://www.kkc.rmuti.ac.th/"
+              target="_blank" rel="noopener noreferrer"
+              aria-label="เว็บไซต์ มทร.อีสาน วิทยาเขตขอนแก่น (เปิดแท็บใหม่)">
+              <Globe size={16} aria-hidden="true" /> เว็บไซต์ มทร.ขอนแก่น <ExternalLink size={13} aria-hidden="true" />
+            </a>
+            <a className="footer-official-link" href="https://www.facebook.com/hr.rmutikkc"
+              target="_blank" rel="noopener noreferrer"
+              aria-label="Facebook งานบริหารงานบุคคล มทร.อีสาน วิทยาเขตขอนแก่น (เปิดแท็บใหม่)">
+              <Facebook size={16} aria-hidden="true" /> Facebook งานบุคคล <ExternalLink size={13} aria-hidden="true" />
+            </a>
             <Link className="footer-admin-link" to="/admin/login">เข้าสู่ระบบ Admin</Link>
           </span>
         </div>

@@ -5,6 +5,7 @@ import {
   CheckCircle2, ChevronRight, CircleHelp, CreditCard, FileCheck2, FileText,
   FolderOpen, HelpCircle, LockKeyhole, Mail, MapPin, Phone, Printer,
   Search, ShieldCheck, Smartphone, UploadCloud, UserRound,
+  Globe, Facebook, ExternalLink,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { rows } from "../services/api";
@@ -139,6 +140,20 @@ export default function ApplicantGuide() {
             {contact?.email && <div><Mail size={19}/><span>{contact.email}</span></div>}
             {settings.error && <small>ไม่สามารถโหลดช่องทางติดต่อได้ในขณะนี้</small>}
             {!settings.isPending && !contact?.phone && !contact?.email && <small>โทรศัพท์และอีเมลจะแสดงเมื่อผู้ดูแลกำหนด</small>}
+          </div>
+          <div className="manual-contact-official-links" aria-label="ช่องทางออนไลน์ของหน่วยงาน">
+            <a href="https://www.kkc.rmuti.ac.th/" target="_blank" rel="noopener noreferrer"
+              aria-label="เปิดเว็บไซต์ มทร.อีสาน วิทยาเขตขอนแก่น ในแท็บใหม่">
+              <Globe size={22} aria-hidden="true" />
+              <span><strong>เว็บไซต์ มทร.อีสาน วิทยาเขตขอนแก่น</strong><small>www.kkc.rmuti.ac.th</small></span>
+              <ExternalLink size={17} aria-hidden="true" />
+            </a>
+            <a href="https://www.facebook.com/hr.rmutikkc" target="_blank" rel="noopener noreferrer"
+              aria-label="เปิด Facebook งานบริหารงานบุคคล มทร.อีสาน วิทยาเขตขอนแก่น ในแท็บใหม่">
+              <Facebook size={22} aria-hidden="true" />
+              <span><strong>Facebook งานบริหารงานบุคคล</strong><small>facebook.com/hr.rmutikkc</small></span>
+              <ExternalLink size={17} aria-hidden="true" />
+            </a>
           </div>
           <LineOAButton variant="guide" />
           <small className="muted">LINE OA สำหรับสอบถามข่าวสาร ไม่ควรส่งเอกสารส่วนบุคคลหรือข้อมูลสำคัญผ่านแชต</small>
