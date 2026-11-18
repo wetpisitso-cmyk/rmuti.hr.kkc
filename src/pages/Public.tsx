@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../announcements-page.css";
 import { getHomeStatDestination, type HomeStatAction } from "../lib/home-stat-navigation";
 import { Link, useParams } from "react-router-dom";
 import { LineOAButton } from "../components/LineOAButton";
@@ -19,6 +20,10 @@ import {
   Mail,
   Phone,
   MapPin,
+  Megaphone,
+  Download,
+  Search,
+  X,
 } from "lucide-react";
 import { rows } from "../services/api";
 import { useCatalog } from "../hooks/useCatalog";
@@ -403,40 +408,126 @@ export function JobDetail() {
   );
 }
 export function Announcements() {
+  const [keyword, setKeyword] = useState("");
+  const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const q = useQuery({
     queryKey: ["announcements"],
     queryFn: () => rows<Announcement>("announcements"),
   });
+  const published = (q.data || []).filter((a) => a.published);
+  const term = keyword.trim().toLocaleLowerCase("th");
+  const visible = published
+    .filter((a) => !term || (a.title + " " + (a.content || "")).toLocaleLowerCase("th").includes(term))
+    .sort((a, b) => sort === "newest"
+      ? new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      : new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
   return (
-    <div className="container section">
-      <Title eyebrow="ANNOUNCEMENTS" title="ข่าวและประกาศ" />
-      <State loading={q.isPending} error={q.error} empty={!q.data?.length}>
-        <div className="stack">
-          {q.data
-            ?.filter((a) => a.published)
-            .map((a) => (
-              <article className="panel announcement-full-card" key={a.id}>
-                {bannerUrl(a.banner_path) && <img className="announcement-full-banner" src={bannerUrl(a.banner_path)} alt={`แบนเนอร์ ${a.title}`} loading="lazy" />}
-                <small className="muted">{dateTH(a.created_at)}</small>
-                <h2><Link to={`/announcements/${a.id}`}>{a.title}</Link></h2>
-                <p className="pre-wrap">{a.content}</p>
-                {safeUrl(a.attachment_url) && (
-                  <a
-                    className="btn outline small"
-                    target="_blank"
-                    rel="noreferrer"
-                    href={safeUrl(a.attachment_url)!}
-                  >
-                    ดาวน์โหลดเอกสาร
-                  </a>
-                )}
-              </article>
-            ))}
+    <div className="ann-page">
+      <header className="ann-hero">
+        <div className="ann-container">
+          <nav className="ann-crumb" aria-label="เส้นทางนำทาง">
+            <Link to="/">หน้าแรก</Link>
+            <ChevronRight size={14} aria-hidden="true" />
+            <span aria-current="page">ข่าวและประกาศ</span>
+          </nav>
+          <div className="ann-hero-grid">
+            <div>
+              <span className="ann-kicker"><Megaphone size={16} aria-hidden="true" /> RMUTI KHON KAEN · ANNOUNCEMENTS</span>
+              <h1>ข่าวและประกาศ</h1>
+              <p>ติดตามข่าวสารการรับสมัครบุคลากร กำหนดการสอบ และประกาศผลการคัดเลือกจากมหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น</p>
+            </div>
+            <div className="ann-hero-stat" aria-label="จำนวนประกาศที่เผยแพร่">
+              <small>ประกาศที่เผยแพร่</small>
+              <strong>{q.isPending ? "–" : numberTH(published.length)} <em>รายการ</em></strong>
+            </div>
+          </div>
         </div>
-      </State>
+      </header>
+
+      <main className="ann-container ann-main">
+        <div className="ann-toolbar">
+          <div className="ann-toolbar-title">
+            <h2>ประกาศทั้งหมด</h2>
+            <p>เลือกอ่านรายละเอียดหรือดาวน์โหลดเอกสารประกาศได้ทันที</p>
+          </div>
+          <div className="ann-controls">
+            <label className="ann-search">
+              <Search size={18} aria-hidden="true" />
+              <input
+                type="search"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="ค้นหาหัวข้อประกาศ..."
+                aria-label="ค้นหาหัวข้อหรือเนื้อหาประกาศ"
+              />
+              {keyword && <button className="ann-clear" type="button" aria-label="ล้างคำค้นหา" onClick={() => setKeyword("")}><X size={15} /></button>}
+            </label>
+            <select
+              className="ann-sort"
+              value={sort}
+              onChange={(e) => setSort(e.target.value as "newest" | "oldest")}
+              aria-label="เรียงลำดับประกาศ"
+            >
+              <option value="newest">ใหม่ล่าสุด</option>
+              <option value="oldest">เก่าสุด</option>
+            </select>
+          </div>
+        </div>
+        <State loading={q.isPending} error={q.error} empty={!published.length}>
+          <div className="ann-results-note" role="status">
+            แสดง {numberTH(visible.length)} จาก {numberTH(published.length)} ประกาศ
+          </div>
+          {visible.length ? (
+            <div className="ann-grid">
+              {visible.map((a, index) => {
+                const image = bannerUrl(a.banner_path);
+                const attachment = safeUrl(a.attachment_url);
+                return (
+                  <article className={"ann-card" + (index === 0 ? " ann-card-featured" : "")} key={a.id}>
+                    <Link className="ann-card-cover" to={"/announcements/" + a.id} aria-label={"อ่านประกาศ " + a.title}>
+                      {image ? (
+                        <img src={image} alt={"แบนเนอร์ประกาศ " + a.title} loading={index === 0 ? "eager" : "lazy"} />
+                      ) : (
+                        <div className="ann-art-fallback"><Megaphone size={44} aria-hidden="true" /><span>RMUTI KHON KAEN</span></div>
+                      )}
+                    </Link>
+                    <div className="ann-card-body">
+                      <div className="ann-meta">
+                        <span className="ann-category">ข่าวและประกาศ</span>
+                        <span className="ann-date"><CalendarDays size={14} aria-hidden="true" /> {dateTH(a.created_at)}</span>
+                      </div>
+                      <h2><Link to={"/announcements/" + a.id}>{a.title}</Link></h2>
+                      <p className="ann-excerpt">{a.content}</p>
+                      <div className="ann-card-actions">
+                        <Link className="ann-view" to={"/announcements/" + a.id}>
+                          อ่านรายละเอียด <ArrowRight size={16} aria-hidden="true" />
+                        </Link>
+                        {attachment && (
+                          <a className="ann-download" href={attachment} target="_blank" rel="noreferrer">
+                            <Download size={16} aria-hidden="true" /> ดาวน์โหลดเอกสาร
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="ann-empty" role="status">
+              <Search size={35} aria-hidden="true" />
+              <h3>ไม่พบประกาศที่ตรงกับคำค้นหา</h3>
+              <p>ลองใช้คำค้นอื่น หรือกดล้างคำค้นหาเพื่อดูประกาศทั้งหมด</p>
+              <button className="ann-view" type="button" onClick={() => setKeyword("")}>แสดงประกาศทั้งหมด</button>
+            </div>
+          )}
+        </State>
+      </main>
     </div>
   );
 }
+
 export function AnnouncementDetail() {
   const { id } = useParams();
   const q = useQuery({
@@ -448,19 +539,48 @@ export function AnnouncementDetail() {
       return data as Announcement|null;
     },
   });
-  const a=q.data;
-  return <div className="container section">
-    <Link className="breadcrumb" to="/announcements">ข่าวและประกาศ <ChevronRight size={16}/> รายละเอียด</Link>
-    <State loading={q.isPending} error={q.error}>
-      {!a ? <Notice>ไม่พบประกาศหรือยังไม่เผยแพร่</Notice> : <article className="panel announcement-full-card">
-        {bannerUrl(a.banner_path) && <img className="announcement-full-banner" src={bannerUrl(a.banner_path)} alt={`แบนเนอร์ ${a.title}`} />}
-        <small className="muted">{dateTH(a.created_at)}</small>
-        <h1>{a.title}</h1>
-        <p className="pre-wrap">{a.content}</p>
-        {safeUrl(a.attachment_url) && <a className="btn outline small mt-3" href={safeUrl(a.attachment_url)!} target="_blank" rel="noreferrer">ดาวน์โหลดเอกสาร <ArrowRight size={17}/></a>}
-      </article>}
-    </State>
-  </div>;
+  const a = q.data;
+  return (
+    <div className="ann-page ann-detail">
+      <header className="ann-hero">
+        <div className="ann-container">
+          <nav className="ann-crumb" aria-label="เส้นทางนำทาง">
+            <Link to="/">หน้าแรก</Link>
+            <ChevronRight size={14} aria-hidden="true" />
+            <Link to="/announcements">ข่าวและประกาศ</Link>
+            <ChevronRight size={14} aria-hidden="true" />
+            <span aria-current="page">รายละเอียดประกาศ</span>
+          </nav>
+          <span className="ann-kicker"><Megaphone size={16} aria-hidden="true" /> RMUTI KHON KAEN · ANNOUNCEMENT</span>
+          <h1>{a?.title || "รายละเอียดประกาศ"}</h1>
+          {a && <p><CalendarDays size={17} aria-hidden="true" /> เผยแพร่เมื่อ {dateTH(a.created_at)}</p>}
+        </div>
+      </header>
+      <main className="ann-container ann-detail-main">
+        <State loading={q.isPending} error={q.error}>
+          {!a ? (
+            <div className="ann-detail-sheet"><Notice>ไม่พบประกาศหรือยังไม่เผยแพร่</Notice></div>
+          ) : (
+            <article className="ann-detail-sheet">
+              {bannerUrl(a.banner_path) && (
+                <img className="ann-detail-image" src={bannerUrl(a.banner_path)} alt={"แบนเนอร์ประกาศ " + a.title} />
+              )}
+              <h2 className="ann-detail-heading"><FileText size={19} aria-hidden="true" /> รายละเอียดประกาศ</h2>
+              <p className="ann-detail-copy">{a.content}</p>
+              <div className="ann-detail-actions">
+                {safeUrl(a.attachment_url) && (
+                  <a className="ann-view" href={safeUrl(a.attachment_url)!} target="_blank" rel="noreferrer">
+                    <Download size={17} aria-hidden="true" /> ดาวน์โหลดเอกสารประกาศ
+                  </a>
+                )}
+                <Link className="ann-detail-back" to="/announcements">กลับไปหน้าประกาศ <ArrowRight size={16} aria-hidden="true" /></Link>
+              </div>
+            </article>
+          )}
+        </State>
+      </main>
+    </div>
+  );
 }
 export function Results() {
   const q = useQuery({
