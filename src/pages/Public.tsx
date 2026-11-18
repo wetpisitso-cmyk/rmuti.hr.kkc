@@ -28,6 +28,7 @@ import type { Announcement, Job, PublishedResult } from "../types/models";
 import { outcomeLabels } from "../types/models";
 import { bannerUrl } from "../lib/announcementBanner";
 import RecruitmentCalendar from "../components/RecruitmentCalendar";
+import CampusMap from "../components/CampusMap";
 import { supabase } from "../lib/supabase";
 export function jobState(j: Job) {
   if (
@@ -293,6 +294,7 @@ export function Home() {
           })}
         </div>
       </section>
+      <CampusMap />
     </div>
   );
 }
