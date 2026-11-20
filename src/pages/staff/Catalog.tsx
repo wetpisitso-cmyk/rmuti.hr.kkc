@@ -18,6 +18,7 @@ import type { DocRequirement } from "../../types/models";
 import { ThaiDateField } from "../../components/ThaiDateField";
 import { useAuth } from "../../hooks/useAuth";
 import { bannerUrl, uploadBanner, setBanner, deleteBanner } from "../../lib/announcementBanner";
+import { documentConfigurationError, nextUnusedDocumentOption } from "../../lib/job-document-config";
 type Table =
   | "departments"
   | "recruitment_rounds"
@@ -74,6 +75,7 @@ export default function Catalog({ table }: { table: Table }) {
     [bannerPreview, setBannerPreview] = useState(""),
     [removeBanner, setRemoveBanner] = useState(false);
   useEffect(() => () => { if (bannerPreview) URL.revokeObjectURL(bannerPreview); }, [bannerPreview]);
+  const nextDocumentOption = nextUnusedDocumentOption(docs, documentOptions);
   const defaults = {
     year_be: new Date().getFullYear() + 543,
     max_per_user: 1,
@@ -311,7 +313,11 @@ export default function Catalog({ table }: { table: Table }) {
         if (f.type === "url" && data[f.key] && !safeUrl(data[f.key]))
           throw new Error("กรุณาใช้ลิงก์ HTTPS ที่ถูกต้อง");
       }
-      if (table === "job_positions") payload.required_documents = docs;
+      if (table === "job_positions") {
+        const documentError = documentConfigurationError(docs);
+        if (documentError) throw new Error(documentError);
+        payload.required_documents = docs;
+      }
       const savedId = await rpc<string>("admin_save", { p_table: table, p_data: payload });
       if (table === "announcements" && (bannerFile || removeBanner)) {
         const oldPath = String(data.banner_path || "");
@@ -391,6 +397,14 @@ export default function Catalog({ table }: { table: Table }) {
                     required={f.required}
                     maxLength={f.key === "description" ? 4000 : undefined}
                   />
+                  {table === "job_positions" && f.key === "qualifications" && (
+                    <p className="muted" role="note">
+                      ตำแหน่งเดียวรับได้หลายวุฒิ ให้ระบุทุกวุฒิพร้อมสาขาที่รับในช่องนี้ตามประกาศจริง ไม่ต้องเพิ่มประเภทเอกสารซ้ำ
+                      {/ปริญญาตรี/.test(String(data.qualifications || "")) && /ปวส\.?|ประกาศนียบัตรวิชาชีพชั้นสูง/.test(String(data.qualifications || ""))
+                        ? " · ตรวจพบทั้งปริญญาตรีและ ปวส. แล้ว"
+                        : ""}
+                    </p>
+                  )}
                 </div>
               ) : f.options || f.key.endsWith("_id") ? (
                 <Select
@@ -443,6 +457,7 @@ export default function Catalog({ table }: { table: Table }) {
           {table === "job_positions" && (
             <div className="subpanel">
               <h3>เอกสารที่ต้องแนบ</h3>
+              <p className="muted">ช่องนี้กำหนดชนิดไฟล์ที่ผู้สมัครต้องแนบ ไม่ใช่จำนวนวุฒิที่รับสมัคร ผู้สมัครวุฒิ ปวส. และปริญญาตรี ใช้ประเภท “หนังสือรับรองคุณวุฒิ / ปริญญาบัตร” เดียวกันได้</p>
               {docs.map((d, i) => (
                 <div key={i} className="document-config">
                   <Select
@@ -456,8 +471,9 @@ export default function Catalog({ table }: { table: Table }) {
                       )
                     }
                   >
+                    {!documentOptions.some(([v]) => v === d.key) && <option value={d.key}>{d.label || d.key}</option>}
                     {documentOptions.map(([v, l]) => (
-                      <option key={v} value={v}>
+                      <option key={v} value={v} disabled={docs.some((other, x) => x !== i && other.key === v)}>
                         {l}
                       </option>
                     ))}
@@ -500,14 +516,13 @@ export default function Catalog({ table }: { table: Table }) {
               <button
                 type="button"
                 className="btn small outline mt-3"
-                onClick={() =>
-                  setDocs([
-                    ...docs,
-                    { key: "other", label: "เอกสารอื่น", required: false },
-                  ])
-                }
+                disabled={!nextDocumentOption}
+                onClick={() => {
+                  if (!nextDocumentOption) return;
+                  setDocs([...docs, { key: nextDocumentOption[0], label: nextDocumentOption[1], required: false }]);
+                }}
               >
-                <Plus size={15} /> เพิ่มประเภทเอกสาร
+                <Plus size={15} /> {nextDocumentOption ? "เพิ่มประเภทเอกสาร" : "เพิ่มประเภทเอกสารครบแล้ว"}
               </button>
             </div>
           )}
