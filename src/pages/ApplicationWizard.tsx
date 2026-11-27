@@ -473,7 +473,7 @@ export default function ApplicationWizard() {
                             <Field
                               key={k}
                               label={l}
-                              value={ed[k as keyof Education]}
+                              value={ed[k as keyof Education] ?? ""}
                               type={
                                 k === "gpa" || k === "graduation_year"
                                   ? "number"
