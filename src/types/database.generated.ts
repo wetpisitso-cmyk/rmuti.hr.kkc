@@ -139,6 +139,7 @@ export type Database = {
         Row: {
           application_id: string;
           degree: string;
+          education_level: string | null;
           gpa: number | null;
           graduation_year: number | null;
           id: string;
@@ -148,6 +149,7 @@ export type Database = {
         Insert: {
           application_id: string;
           degree: string;
+          education_level?: string | null;
           gpa?: number | null;
           graduation_year?: number | null;
           id?: string;
@@ -157,6 +159,7 @@ export type Database = {
         Update: {
           application_id?: string;
           degree?: string;
+          education_level?: string | null;
           gpa?: number | null;
           graduation_year?: number | null;
           id?: string;
@@ -494,6 +497,7 @@ export type Database = {
           payment_instructions: string;
           published: boolean;
           qualifications: string;
+          required_education_levels: string[];
           require_national_id: boolean;
           required_documents: Json;
           round_id: string;
@@ -512,6 +516,7 @@ export type Database = {
           payment_instructions?: string;
           published?: boolean;
           qualifications?: string;
+          required_education_levels?: string[];
           require_national_id?: boolean;
           required_documents?: Json;
           round_id: string;
@@ -530,6 +535,7 @@ export type Database = {
           payment_instructions?: string;
           published?: boolean;
           qualifications?: string;
+          required_education_levels?: string[];
           require_national_id?: boolean;
           required_documents?: Json;
           round_id?: string;

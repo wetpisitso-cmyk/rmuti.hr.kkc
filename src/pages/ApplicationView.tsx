@@ -205,7 +205,7 @@ export default function ApplicationView() {
                   <h3 className="mt-5">การศึกษา</h3>
                   {d.education.map((e, i) => (
                     <p key={i}>
-                      {e.degree} {e.major} · {e.institution} · ปี{" "}
+                      {e.education_level ? e.education_level + " — " : ""}{e.degree} {e.major} · {e.institution} · ปี{" "}
                       {e.graduation_year || "—"} · GPA {e.gpa ?? "—"}
                     </p>
                   ))}
@@ -537,7 +537,7 @@ export function PrintApplication({ exam = false }: { exam?: boolean }) {
                     {s.education.map((e, i) => (
                       <tr key={i}>
                         <td>
-                          {e.degree} / {e.major}
+                          {e.education_level ? e.education_level + " — " : ""}{e.degree} / {e.major}
                         </td>
                         <td>{e.institution}</td>
                         <td>{e.graduation_year}</td>
