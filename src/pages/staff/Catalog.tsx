@@ -56,7 +56,7 @@ const documentOptions: [string,string][] = [
 const defaultDocs: DocRequirement[] = documentOptions.slice(0,9).map(([key,label],i)=>({
   key,label,required:i<=4,
 }));
-import { EDUCATION_LEVELS, educationDocuments } from "../../lib/required-education";
+import { EDUCATION_LEVELS, educationDocuments, educationLevelLabel } from "../../lib/required-education";
 
 export default function Catalog({ table }: { table: Table }) {
   const auth = useAuth();
@@ -474,7 +474,7 @@ export default function Catalog({ table }: { table: Table }) {
                 <Select key={i} label={"คุณวุฒิที่ " + (i + 1)} required value={level}
                   onChange={e => setData({ ...data, required_education_levels: all.map((x, j) => j === i ? e.target.value : x) })}>
                   <option value="">เลือกระดับคุณวุฒิ</option>
-                  {EDUCATION_LEVELS.map(v => <option key={v} value={v} disabled={all.some((x, j) => j !== i && x === v)}>{v}</option>)}
+                  {EDUCATION_LEVELS.map(v => <option key={v} value={v} disabled={all.some((x, j) => j !== i && x === v)}>{educationLevelLabel(v)}</option>)}
                 </Select>
               ))}
               {(data.required_education_levels || []).length > 0 && <Notice>ระบบจะบังคับกรอกข้อมูลและแนบหลักฐานคุณวุฒิพร้อม Transcript แยกทุกระดับ</Notice>}

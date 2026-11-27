@@ -1,3 +1,4 @@
+import { educationDocumentLabel } from "../lib/required-education";
 import { useState } from "react";
 import { Upload, ExternalLink, RotateCw, PenLine, AlertTriangle, FileCheck2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -115,7 +116,7 @@ export function DocumentUpload({
       </div>
       <div className="flex-1">
         <strong>
-          {requirement.label}
+          {educationDocumentLabel(requirement.label)}
           {requirement.required && <b className="text-orange-500"> *</b>}
         </strong>
         <small>

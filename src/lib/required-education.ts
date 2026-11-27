@@ -3,12 +3,23 @@ import type { DocRequirement } from "../types/models";
 
 export const EDUCATION_LEVELS = ["มัธยมศึกษาตอนปลาย","ปวช.","ปวส.","ปริญญาตรี","ปริญญาโท","ปริญญาเอก"] as const;
 
+// Display names are separate from the stable database values.
+export function educationLevelLabel(level: string): string {
+  if (level === "ปวช.") return "ประกาศนียบัตรวิชาชีพ";
+  if (level === "ปวส.") return "ประกาศนียบัตรวิชาชีพชั้นสูง";
+  return level;
+}
+
+export function educationDocumentLabel(label: string): string {
+  return label.replace(/ — (ปวช\.|ปวส\.)$/, (_, level: string) => " — " + educationLevelLabel(level));
+}
+
 export function requiredEducationIssue(rows: Education[], levels: string[]): string | null {
   if (!levels.length) return null;
   if (rows.length !== levels.length || levels.some(level => !rows.some(row =>
     row.education_level === level && row.degree.trim() && row.major.trim() && row.institution.trim()
     && String(row.graduation_year ?? "").trim() && String(row.gpa ?? "").trim()
-  ))) return "กรุณากรอกข้อมูลการศึกษาให้ครบทุกคุณวุฒิที่กำหนด: " + levels.join(" / ");
+  ))) return "กรุณากรอกข้อมูลการศึกษาให้ครบทุกคุณวุฒิที่กำหนด: " + levels.map(educationLevelLabel).join(" / ");
   return null;
 }
 
@@ -27,7 +38,7 @@ export function educationDocuments(docs: DocRequirement[], levels: string[]): Do
   if (!levels.length) return docs;
   const other = docs.filter(d => !/^(degree|transcript)_[123]$/.test(d.key)).map(d => /^(degree|transcript)$/.test(d.key) ? { ...d, required: false } : d);
   return [...other, ...levels.flatMap((level, i) => [
-    { key: "degree_" + (i + 1), label: "หลักฐานคุณวุฒิ — " + level, required: true },
-    { key: "transcript_" + (i + 1), label: "ใบรายงานผลการศึกษา — " + level, required: true },
+    { key: "degree_" + (i + 1), label: "หลักฐานคุณวุฒิ — " + educationLevelLabel(level), required: true },
+    { key: "transcript_" + (i + 1), label: "ใบรายงานผลการศึกษา — " + educationLevelLabel(level), required: true },
   ])];
 }

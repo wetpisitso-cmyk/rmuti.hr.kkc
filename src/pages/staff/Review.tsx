@@ -1,3 +1,4 @@
+import { educationLevelLabel } from "../../lib/required-education";
 import { useState, type FormEvent } from "react";
 import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
@@ -340,7 +341,7 @@ export default function Review() {
               <h3 className="mt-4">การศึกษาและประสบการณ์</h3>
               {d.education.map((e, i) => (
                 <p key={i}>
-                  {e.education_level ? e.education_level + " — " : ""}{e.degree} {e.major} · {e.institution} · ปี{" "}
+                  {e.education_level ? educationLevelLabel(e.education_level) + " — " : ""}{e.degree} {e.major} · {e.institution} · ปี{" "}
                   {e.graduation_year} · GPA {e.gpa}
                 </p>
               ))}

@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { alignEducation, requiredEducationIssue, educationDocuments } from "../src/lib/required-education";
+import { alignEducation, requiredEducationIssue, educationDocuments, educationLevelLabel, educationDocumentLabel } from "../src/lib/required-education";
 const row = { degree: "วุฒิตัวอย่าง", major: "สาขา", institution: "มหาวิทยาลัย", graduation_year: "2569", gpa: "0" };
 const levels = ["ปริญญาตรี", "ปริญญาโท", "ปริญญาเอก"];
 describe("required education", () => {
+  it("shows full vocational names without changing stored values", () => {
+    expect(educationLevelLabel("ปวช.")).toBe("ประกาศนียบัตรวิชาชีพ");
+    expect(educationLevelLabel("ปวส.")).toBe("ประกาศนียบัตรวิชาชีพชั้นสูง");
+    expect(educationLevelLabel("ปริญญาตรี")).toBe("ปริญญาตรี");
+    expect(educationDocumentLabel("หลักฐานคุณวุฒิ — ปวส.")).toBe("หลักฐานคุณวุฒิ — ประกาศนียบัตรวิชาชีพชั้นสูง");
+    expect(alignEducation([row], ["ปวส."])[0].education_level).toBe("ปวส.");
+  });
   it("leaves legacy jobs unchanged", () => {
     expect(alignEducation([row], [])).toEqual([row]);
     expect(requiredEducationIssue([row], [])).toBeNull();

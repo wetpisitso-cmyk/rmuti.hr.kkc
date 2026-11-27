@@ -22,7 +22,7 @@ import { ThaiDateField } from "../components/ThaiDateField";
 import { personalSchema, militaryStatusIssue, validThaiID, educationIssue } from "../validation/forms";
 import { MilitaryStatusQuestion } from "../components/MilitaryStatusQuestion";
 import type { Personal, Education, Experience } from "../types/models";
-import { alignEducation, requiredEducationIssue } from "../lib/required-education";
+import { alignEducation, requiredEducationIssue, educationLevelLabel, educationDocumentLabel } from "../lib/required-education";
 const emptyEducation = (): Education => ({
   degree: "",
   major: "",
@@ -263,7 +263,7 @@ export default function ApplicationWizard() {
         const missing = job.required_documents.filter((r) =>
           r.required && !documents.some((d) => d.document_type === r.key));
         if (missing.length)
-          throw new Error("กรุณาแนบเอกสารให้ครบ: " + missing.map((r) => r.label).join(", "));
+          throw new Error("กรุณาแนบเอกสารให้ครบ: " + missing.map((r) => educationDocumentLabel(r.label)).join(", "));
       }
       if (step === 4 && paymentRequired && !slipSubmitted)
         throw new Error("กรุณาแนบสลิปและกดส่งหลักฐานชำระเงินก่อนดำเนินการต่อ");
@@ -451,12 +451,12 @@ export default function ApplicationWizard() {
               )}
               {step === 1 && (
                 <>
-                  {requiredLevels.length > 0 && <Notice kind="error">ตำแหน่งนี้บังคับกรอกครบ {requiredLevels.length} คุณวุฒิ: {requiredLevels.join(" / ")}</Notice>}
+                  {requiredLevels.length > 0 && <Notice kind="error">ตำแหน่งนี้บังคับกรอกครบ {requiredLevels.length} คุณวุฒิ: {requiredLevels.map(educationLevelLabel).join(" / ")}</Notice>}
                   <div className="stack">
                     {education.map((ed, i) => (
                       <div className="subpanel" key={i}>
                         <div className="flex justify-between">
-                          <h3>การศึกษา {i + 1}{ed.education_level ? " — " + ed.education_level + " (บังคับ)" : ""}</h3>
+                          <h3>การศึกษา {i + 1}{ed.education_level ? " — " + educationLevelLabel(ed.education_level) + " (บังคับ)" : ""}</h3>
                           {!requiredLevels.length && education.length > 1 && (
                             <button
                               className="icon-btn"
@@ -621,7 +621,7 @@ export default function ApplicationWizard() {
                     <Notice kind="error">
                       ยังขาดเอกสารบังคับ: {job.required_documents
                         .filter((r) => r.required && !documents.some((d) => d.document_type === r.key))
-                        .map((r) => r.label).join(", ")}
+                        .map((r) => educationDocumentLabel(r.label)).join(", ")}
                     </Notice>
                   )}
                   {job.required_documents.map((r) => (
@@ -660,7 +660,7 @@ export default function ApplicationWizard() {
                         (job?.require_national_id && !validThaiID(personal.national_id || ""))
                         ? ["ข้อมูลส่วนตัวยังไม่ครบหรือไม่ถูกต้อง"] : []),
                       ...(validateEducation() ? [validateEducation()!] : []),
-                      ...(missing.length ? ["เอกสารที่ขาด: " + missing.map((r) => r.label).join(", ")] : []),
+                      ...(missing.length ? ["เอกสารที่ขาด: " + missing.map((r) => educationDocumentLabel(r.label)).join(", ")] : []),
                       ...(paymentRequired && !slipSubmitted ? ["ยังไม่ได้ส่งหลักฐานชำระเงิน"] : []),
                     ];
                     return issues.length ? (
@@ -688,7 +688,7 @@ export default function ApplicationWizard() {
                     <p>
                       การศึกษา:{" "}
                       {education
-                        .map((e) => `${e.education_level ? e.education_level + " — " : ""}${e.degree} ${e.major} (${e.institution})`)
+                        .map((e) => `${e.education_level ? educationLevelLabel(e.education_level) + " — " : ""}${e.degree} ${e.major} (${e.institution})`)
                         .join(" / ")}
                     </p>
                     <p>
