@@ -56,6 +56,8 @@ const documentOptions: [string,string][] = [
 const defaultDocs: DocRequirement[] = documentOptions.slice(0,9).map(([key,label],i)=>({
   key,label,required:i<=4,
 }));
+import { EDUCATION_LEVELS, educationDocuments } from "../../lib/required-education";
+
 export default function Catalog({ table }: { table: Table }) {
   const auth = useAuth();
   const qc = useQueryClient(),
@@ -86,6 +88,7 @@ export default function Catalog({ table }: { table: Table }) {
     published: false,
     archived: false,
     require_national_id: false,
+    required_education_levels: [] as string[],
   };
   const fields: Record<Table, FormField[]> = {
     departments: [
@@ -295,7 +298,7 @@ export default function Catalog({ table }: { table: Table }) {
     setBannerFile(null);
     setBannerPreview("");
     setRemoveBanner(false);
-    setDocs(row?.required_documents || defaultDocs);
+    setDocs((row?.required_documents || defaultDocs).filter((d: DocRequirement) => !/^(degree|transcript)_[123]$/.test(d.key)));
     setEditing(true);
     setError("");
     setSuccess("");
@@ -316,7 +319,11 @@ export default function Catalog({ table }: { table: Table }) {
       if (table === "job_positions") {
         const documentError = documentConfigurationError(docs);
         if (documentError) throw new Error(documentError);
-        payload.required_documents = docs;
+        const levels: string[] = data.required_education_levels || [];
+        if (levels.some(level => !level) || new Set(levels).size !== levels.length)
+          throw new Error("กรุณาเลือกระดับคุณวุฒิให้ครบและไม่ซ้ำกัน");
+        payload.required_education_levels = levels;
+        payload.required_documents = educationDocuments(docs, levels);
       }
       const savedId = await rpc<string>("admin_save", { p_table: table, p_data: payload });
       if (table === "announcements" && (bannerFile || removeBanner)) {
@@ -452,6 +459,25 @@ export default function Catalog({ table }: { table: Table }) {
               </label>
               {data.banner_path && <label className="checkbox"><input type="checkbox" checked={removeBanner}
                 onChange={e=>{setRemoveBanner(e.target.checked);if(e.target.checked){setBannerFile(null);setBannerPreview("");}}} />นำรูปแบนเนอร์ออก</label>}
+            </section>
+          )}
+          {table === "job_positions" && (
+            <section className="subpanel stack">
+              <h3>กำหนดคุณวุฒิที่บังคับกรอก</h3>
+              <p className="muted">เลือก 1–3 ระดับที่ต้องมีครบทุกวุฒิ หรือใช้แบบเดิมหากรับวุฒิทางเลือก เมื่อมีใบสมัครแล้วจะไม่สามารถเปลี่ยนเงื่อนไขนี้ได้</p>
+              <Select label="จำนวนคุณวุฒิที่บังคับ" value={String((data.required_education_levels || []).length)}
+                onChange={e => setData({ ...data, required_education_levels: Array.from({ length: Number(e.target.value) }, (_, i) => data.required_education_levels?.[i] || "") })}>
+                <option value="0">ไม่ล็อกระดับ — ใช้เงื่อนไขเดิม</option>
+                {[1, 2, 3].map(n => <option key={n} value={n}>{n} คุณวุฒิ</option>)}
+              </Select>
+              {((data.required_education_levels || []) as string[]).map((level, i, all) => (
+                <Select key={i} label={"คุณวุฒิที่ " + (i + 1)} required value={level}
+                  onChange={e => setData({ ...data, required_education_levels: all.map((x, j) => j === i ? e.target.value : x) })}>
+                  <option value="">เลือกระดับคุณวุฒิ</option>
+                  {EDUCATION_LEVELS.map(v => <option key={v} value={v} disabled={all.some((x, j) => j !== i && x === v)}>{v}</option>)}
+                </Select>
+              ))}
+              {(data.required_education_levels || []).length > 0 && <Notice>ระบบจะบังคับกรอกข้อมูลและแนบหลักฐานคุณวุฒิพร้อม Transcript แยกทุกระดับ</Notice>}
             </section>
           )}
           {table === "job_positions" && (

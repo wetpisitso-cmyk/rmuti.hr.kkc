@@ -22,6 +22,7 @@ import { ThaiDateField } from "../components/ThaiDateField";
 import { personalSchema, militaryStatusIssue, validThaiID, educationIssue } from "../validation/forms";
 import { MilitaryStatusQuestion } from "../components/MilitaryStatusQuestion";
 import type { Personal, Education, Experience } from "../types/models";
+import { alignEducation, requiredEducationIssue } from "../lib/required-education";
 const emptyEducation = (): Education => ({
   degree: "",
   major: "",
@@ -79,7 +80,7 @@ export default function ApplicationWizard() {
     military_status: "",
     skills: "",
   });
-  const [education, setEducation] = useState<Education[]>([emptyEducation()]),
+  const [educationInput, setEducation] = useState<Education[]>([emptyEducation()]),
     [experience, setExperience] = useState<Experience[]>([]);
   const hydrated = useRef("");
   const q = useQuery({
@@ -148,6 +149,9 @@ export default function ApplicationWizard() {
   const job =
     catalog.jobs.data?.find((j) => j.id === selected) ||
     q.data?.application.job_positions;
+  const requiredLevels = job?.required_education_levels || [];
+  const education = alignEducation(educationInput, requiredLevels);
+  const validateEducation = () => educationIssue(education) || requiredEducationIssue(education, requiredLevels);
   const locked = !!q.data && (
     !!q.data.application.archived_at ||
     !["draft", "needs_correction"].includes(q.data.application.status)
@@ -238,10 +242,14 @@ export default function ApplicationWizard() {
           throw new Error("กรุณาตรวจสอบเลขประจำตัวประชาชนให้ถูกต้อง");
       }
       if (step === 1) {
-        const issue = educationIssue(education);
+        const issue = validateEducation();
         if (issue) throw new Error(issue);
       }
-      if (step === 2) await save();
+      if (step === 2) {
+        const issue = validateEducation();
+        if (issue) { setStep(1); throw new Error(issue); }
+        await save();
+      }
       if (step === 3 && job) {
         const missing = job.required_documents.filter((r) =>
           r.required && !documents.some((d) => d.document_type === r.key));
@@ -262,7 +270,7 @@ export default function ApplicationWizard() {
         throw new Error(personalResult.error.issues[0]?.message || "กรุณากรอกข้อมูลส่วนตัวให้ครบและถูกต้อง");
       if (job?.require_national_id && !validThaiID(personal.national_id || ""))
         throw new Error("กรุณาตรวจสอบเลขประจำตัวประชาชนให้ถูกต้อง");
-      const educationError = educationIssue(education);
+      const educationError = validateEducation();
       if (educationError) throw new Error(educationError);
       if (job?.required_documents.some((r) =>
         r.required && !documents.some((d) => d.document_type === r.key)))
@@ -434,12 +442,13 @@ export default function ApplicationWizard() {
               )}
               {step === 1 && (
                 <>
+                  {requiredLevels.length > 0 && <Notice kind="error">ตำแหน่งนี้บังคับกรอกครบ {requiredLevels.length} คุณวุฒิ: {requiredLevels.join(" / ")}</Notice>}
                   <div className="stack">
                     {education.map((ed, i) => (
                       <div className="subpanel" key={i}>
                         <div className="flex justify-between">
-                          <h3>การศึกษา {i + 1}</h3>
-                          {education.length > 1 && (
+                          <h3>การศึกษา {i + 1}{ed.education_level ? " — " + ed.education_level + " (บังคับ)" : ""}</h3>
+                          {!requiredLevels.length && education.length > 1 && (
                             <button
                               className="icon-btn"
                               aria-label="ลบการศึกษา"
@@ -455,7 +464,7 @@ export default function ApplicationWizard() {
                         </div>
                         <div className="form-grid">
                           {[
-                            ["degree", "วุฒิการศึกษา"],
+                            ["degree", "ชื่อวุฒิการศึกษา"],
                             ["major", "สาขาวิชา"],
                             ["institution", "สถานศึกษา"],
                             ["graduation_year", "ปีสำเร็จ (พ.ศ.)"],
@@ -496,21 +505,19 @@ export default function ApplicationWizard() {
                                 "degree",
                                 "major",
                                 "institution",
-                              ].includes(k)}
+                              ].includes(k) || requiredLevels.length > 0}
                             />
                           ))}
                         </div>
                       </div>
                     ))}
                   </div>
-                  <button
+                  {!requiredLevels.length && <button
                     className="btn small outline mt-3"
-                    onClick={() =>
-                      setEducation([...education, emptyEducation()])
-                    }
+                    onClick={() => setEducation([...education, emptyEducation()])}
                   >
                     <Plus size={16} /> เพิ่มการศึกษา
-                  </button>
+                  </button>}
                   <h3 className="section-heading">ประสบการณ์ทำงาน (ถ้ามี)</h3>
                   {experience.map((ex, i) => (
                     <div className="subpanel" key={i}>
@@ -567,7 +574,14 @@ export default function ApplicationWizard() {
                   <Select
                     label="ตำแหน่งที่สมัคร"
                     value={selected}
-                    onChange={(e) => setSelected(e.target.value)}
+                    onChange={(e) => {
+                      const next = catalog.jobs.data?.find(j => j.id === e.target.value);
+                      const levels = next?.required_education_levels || [];
+                      if (levels.length && education.length > levels.length && !window.confirm("ตำแหน่งนี้กำหนด " + levels.length + " คุณวุฒิ ข้อมูลการศึกษาส่วนเกินจะไม่ถูกบันทึก ต้องการเลือกตำแหน่งนี้หรือไม่?")) return;
+                      setSelected(e.target.value);
+                      setEducation(alignEducation(education.map(row => ({ ...row, education_level: null })), levels));
+                      if (levels.length) setStep(1);
+                    }}
                     disabled={!!appId}
                   >
                     <option value="">เลือกตำแหน่ง</option>
@@ -636,7 +650,7 @@ export default function ApplicationWizard() {
                       ...(!personalSchema.safeParse(personal).success ||
                         (job?.require_national_id && !validThaiID(personal.national_id || ""))
                         ? ["ข้อมูลส่วนตัวยังไม่ครบหรือไม่ถูกต้อง"] : []),
-                      ...(educationIssue(education) ? [educationIssue(education)!] : []),
+                      ...(validateEducation() ? [validateEducation()!] : []),
                       ...(missing.length ? ["เอกสารที่ขาด: " + missing.map((r) => r.label).join(", ")] : []),
                       ...(paymentRequired && !slipSubmitted ? ["ยังไม่ได้ส่งหลักฐานชำระเงิน"] : []),
                     ];
@@ -665,7 +679,7 @@ export default function ApplicationWizard() {
                     <p>
                       การศึกษา:{" "}
                       {education
-                        .map((e) => `${e.degree} ${e.major} (${e.institution})`)
+                        .map((e) => `${e.education_level ? e.education_level + " — " : ""}${e.degree} ${e.major} (${e.institution})`)
                         .join(" / ")}
                     </p>
                     <p>

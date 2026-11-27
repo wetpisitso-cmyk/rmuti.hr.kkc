@@ -68,6 +68,7 @@ export interface Job {
   employment_type: string;
   vacancies: number;
   qualifications: string;
+  required_education_levels?: string[];
   required_documents: DocRequirement[];
   require_national_id: boolean;
   fee_amount: number;
@@ -100,6 +101,7 @@ export interface Personal {
   skills?: string;
 }
 export interface Education {
+  education_level?: string | null;
   degree: string;
   major: string;
   institution: string;
