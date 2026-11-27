@@ -32,7 +32,7 @@ const errors: Record<string, string> = {
   INCOMPLETE_APPLICATION: "กรุณากรอกข้อมูลส่วนตัวให้ครบ",
   MILITARY_STATUS_REQUIRED: "ผู้สมัครชายต้องเลือกสถานะการเกณฑ์ทหารให้ครบก่อนส่งใบสมัคร",
   EDUCATION_LEVELS_REQUIRED: "กรุณากรอกข้อมูลการศึกษาให้ครบทุกระดับที่ตำแหน่งกำหนด",
-  EDUCATION_CONFIG_LOCKED: "มีใบสมัครในตำแหน่งนี้แล้ว ไม่สามารถเปลี่ยนคุณวุฒิที่บังคับได้",
+  EDUCATION_CONFIG_LOCKED: "ตำแหน่งนี้เปิดใช้การล็อกคุณวุฒิแล้วและมีใบสมัคร จึงไม่สามารถเปลี่ยนระดับที่กำหนดได้",
   INVALID_EDUCATION_CONFIG: "กรุณาเลือกระดับคุณวุฒิ 1–3 ระดับโดยไม่ซ้ำกัน",
   EDUCATION_REQUIRED: "กรุณากรอกข้อมูลการศึกษาให้ครบ",
   DOCUMENTS_REQUIRED: "กรุณาแนบเอกสารบังคับให้ครบ",

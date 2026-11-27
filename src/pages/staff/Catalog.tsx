@@ -464,7 +464,7 @@ export default function Catalog({ table }: { table: Table }) {
           {table === "job_positions" && (
             <section className="subpanel stack">
               <h3>กำหนดคุณวุฒิที่บังคับกรอก</h3>
-              <p className="muted">เลือก 1–3 ระดับที่ต้องมีครบทุกวุฒิ หรือใช้แบบเดิมหากรับวุฒิทางเลือก เมื่อมีใบสมัครแล้วจะไม่สามารถเปลี่ยนเงื่อนไขนี้ได้</p>
+              <p className="muted">เลือก 1–3 ระดับที่ต้องมีครบทุกวุฒิ หรือใช้แบบเดิมหากรับวุฒิทางเลือก เปิดใช้ครั้งแรกได้แม้มีใบสมัครแล้ว โดยผู้ที่ส่งแล้วจะใช้เงื่อนไขเดิม หลังเปิดใช้จะล็อกการเปลี่ยนระดับหากมีใบสมัคร</p>
               <Select label="จำนวนคุณวุฒิที่บังคับ" value={String((data.required_education_levels || []).length)}
                 onChange={e => setData({ ...data, required_education_levels: Array.from({ length: Number(e.target.value) }, (_, i) => data.required_education_levels?.[i] || "") })}>
                 <option value="0">ไม่ล็อกระดับ — ใช้เงื่อนไขเดิม</option>

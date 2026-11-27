@@ -22,7 +22,8 @@ describe("required education", () => {
   });
   it("requires separate documents without duplicate keys", () => {
     const docs = educationDocuments([{key:"photo",label:"รูป",required:true},{key:"degree",label:"เดิม",required:false}], levels);
-    expect(docs.map(d => d.key)).toEqual(["photo","degree","transcript","degree_2","transcript_2","degree_3","transcript_3"]);
-    expect(docs.every(d=>d.required)).toBe(true);
+    expect(docs.map(d => d.key)).toEqual(["photo","degree","degree_1","transcript_1","degree_2","transcript_2","degree_3","transcript_3"]);
+    expect(docs.find(d => d.key === "degree")?.required).toBe(false);
+    expect(docs.filter(d => d.key !== "degree").every(d=>d.required)).toBe(true);
   });
 });

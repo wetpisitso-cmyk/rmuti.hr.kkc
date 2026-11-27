@@ -25,9 +25,9 @@ export function alignEducation(rows: Education[], levels: string[]): Education[]
 
 export function educationDocuments(docs: DocRequirement[], levels: string[]): DocRequirement[] {
   if (!levels.length) return docs;
-  const other = docs.filter(d => !/^(degree|transcript)(_[123])?$/.test(d.key));
+  const other = docs.filter(d => !/^(degree|transcript)_[123]$/.test(d.key)).map(d => /^(degree|transcript)$/.test(d.key) ? { ...d, required: false } : d);
   return [...other, ...levels.flatMap((level, i) => [
-    { key: i === 0 ? "degree" : "degree_" + (i + 1), label: "หลักฐานคุณวุฒิ — " + level, required: true },
-    { key: i === 0 ? "transcript" : "transcript_" + (i + 1), label: "ใบรายงานผลการศึกษา — " + level, required: true },
+    { key: "degree_" + (i + 1), label: "หลักฐานคุณวุฒิ — " + level, required: true },
+    { key: "transcript_" + (i + 1), label: "ใบรายงานผลการศึกษา — " + level, required: true },
   ])];
 }

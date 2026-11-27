@@ -146,9 +146,18 @@ export default function ApplicationWizard() {
       hydrated.current = q.data.application.id;
     }
   }, [q.data]);
-  const job =
+  const liveJob =
     catalog.jobs.data?.find((j) => j.id === selected) ||
     q.data?.application.job_positions;
+  const priorJob = q.data?.application.snapshot?.job;
+  const grandfathered = !!q.data?.application.submitted_at && !!priorJob
+    && !(priorJob.required_education_levels || []).length
+    && !!liveJob?.required_education_levels?.length;
+  const job = liveJob && (grandfathered
+    ? { ...liveJob, required_education_levels: [], required_documents: priorJob!.required_documents }
+    : liveJob.required_education_levels?.length
+      ? { ...liveJob, required_documents: liveJob.required_documents.filter(d => !/^(degree|transcript)$/.test(d.key)) }
+      : liveJob);
   const requiredLevels = job?.required_education_levels || [];
   const education = alignEducation(educationInput, requiredLevels);
   const validateEducation = () => educationIssue(education) || requiredEducationIssue(education, requiredLevels);
